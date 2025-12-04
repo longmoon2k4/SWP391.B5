@@ -12,6 +12,18 @@ public class Reviews {
     @Column(name = "review_id")
     private int reviewId;
 
+    @Column(name = "rating")
+    private byte rating;
+
+    @Lob
+    @Column(name = "comment")
+    private String comment;
+
+    @Column(name = "created_at", updatable = false, insertable = false)
+    private LocalDateTime createdAt;
+
+    // --- Relationships ---
+
     @ManyToOne
     @JoinColumn(name = "product_id", nullable = false)
     private Products product;
@@ -20,17 +32,7 @@ public class Reviews {
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
-    @Column(name = "rating")
-    private byte rating;
-
-    @Lob
-    @Column(name = "comment")
-    private String comment;
-
-    @Column(name = "created_at", updatable = false)
-    private LocalDateTime createdAt;
-
-    // Getters and setters
+    // --- Getters and Setters ---
 
     public int getReviewId() {
         return reviewId;
@@ -38,22 +40,6 @@ public class Reviews {
 
     public void setReviewId(int reviewId) {
         this.reviewId = reviewId;
-    }
-
-    public Products getProduct() {
-        return product;
-    }
-
-    public void setProduct(Products product) {
-        this.product = product;
-    }
-
-    public Users getUser() {
-        return user;
-    }
-
-    public void setUser(Users user) {
-        this.user = user;
     }
 
     public byte getRating() {
@@ -78,5 +64,21 @@ public class Reviews {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Products getProduct() {
+        return product;
+    }
+
+    public void setProduct(Products product) {
+        this.product = product;
+    }
+
+    public Users getUser() {
+        return user;
+    }
+
+    public void setUser(Users user) {
+        this.user = user;
     }
 }

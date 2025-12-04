@@ -12,10 +12,6 @@ public class ActivityLogs {
     @Column(name = "log_id")
     private int logId;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private Users user;
-
     @Column(name = "action_type", nullable = false, length = 50)
     private String actionType;
 
@@ -32,10 +28,16 @@ public class ActivityLogs {
     @Column(name = "ip_address", length = 45)
     private String ipAddress;
 
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at", updatable = false, insertable = false)
     private LocalDateTime createdAt;
 
-    // Getters and setters
+    // --- Relationships ---
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private Users user;
+
+    // --- Getters and Setters ---
 
     public int getLogId() {
         return logId;
@@ -43,14 +45,6 @@ public class ActivityLogs {
 
     public void setLogId(int logId) {
         this.logId = logId;
-    }
-
-    public Users getUser() {
-        return user;
-    }
-
-    public void setUser(Users user) {
-        this.user = user;
     }
 
     public String getActionType() {
@@ -99,5 +93,13 @@ public class ActivityLogs {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Users getUser() {
+        return user;
+    }
+
+    public void setUser(Users user) {
+        this.user = user;
     }
 }

@@ -1,8 +1,8 @@
 package com.smiledev.bum.entity;
 
 import jakarta.persistence.*;
-
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @Table(name = "Products")
@@ -12,14 +12,6 @@ public class Products {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_id")
     private int productId;
-
-    @ManyToOne
-    @JoinColumn(name = "developer_id")
-    private Users developer;
-
-    @ManyToOne
-    @JoinColumn(name = "category_id")
-    private Categories category;
 
     @Column(name = "name", nullable = false, length = 150)
     private String name;
@@ -48,20 +40,39 @@ public class Products {
     @Column(name = "view_count")
     private int viewCount;
 
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at", updatable = false, insertable = false)
     private LocalDateTime createdAt;
 
-    @Column(name = "updated_at")
+    @Column(name = "updated_at", updatable = false, insertable = false)
     private LocalDateTime updatedAt;
+
+    // --- Relationships ---
+
+    @ManyToOne
+    @JoinColumn(name = "developer_id", nullable = false)
+    private Users developer;
+
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Categories category;
+
+    @OneToMany(mappedBy = "product")
+    private Set<ProductVersions> versions;
+
+    @OneToMany(mappedBy = "product")
+    private Set<ProductPackages> packages;
+
+    @OneToMany(mappedBy = "product")
+    private Set<Licenses> licenses;
+
+    @OneToMany(mappedBy = "product")
+    private Set<Reviews> reviews;
 
     public enum Status {
         pending, approved, rejected, hidden
     }
 
-    public Products() {
-    }
-
-    // Getters and setters
+    // --- Getters and Setters ---
 
     public int getProductId() {
         return productId;
@@ -69,22 +80,6 @@ public class Products {
 
     public void setProductId(int productId) {
         this.productId = productId;
-    }
-
-    public Users getDeveloper() {
-        return developer;
-    }
-
-    public void setDeveloper(Users developer) {
-        this.developer = developer;
-    }
-
-    public Categories getCategory() {
-        return category;
-    }
-
-    public void setCategory(Categories category) {
-        this.category = category;
     }
 
     public String getName() {
@@ -165,5 +160,53 @@ public class Products {
 
     public void setUpdatedAt(LocalDateTime updatedAt) {
         this.updatedAt = updatedAt;
+    }
+
+    public Users getDeveloper() {
+        return developer;
+    }
+
+    public void setDeveloper(Users developer) {
+        this.developer = developer;
+    }
+
+    public Categories getCategory() {
+        return category;
+    }
+
+    public void setCategory(Categories category) {
+        this.category = category;
+    }
+
+    public Set<ProductVersions> getVersions() {
+        return versions;
+    }
+
+    public void setVersions(Set<ProductVersions> versions) {
+        this.versions = versions;
+    }
+
+    public Set<ProductPackages> getPackages() {
+        return packages;
+    }
+
+    public void setPackages(Set<ProductPackages> packages) {
+        this.packages = packages;
+    }
+
+    public Set<Licenses> getLicenses() {
+        return licenses;
+    }
+
+    public void setLicenses(Set<Licenses> licenses) {
+        this.licenses = licenses;
+    }
+
+    public Set<Reviews> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(Set<Reviews> reviews) {
+        this.reviews = reviews;
     }
 }

@@ -1,18 +1,8 @@
 package com.smiledev.bum.entity;
 
+import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "Transactions")
@@ -22,10 +12,6 @@ public class Transactions {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "transaction_id")
     private int transactionId;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private Users user;
 
     @Column(name = "amount", nullable = false, precision = 15, scale = 2)
     private BigDecimal amount;
@@ -37,14 +23,20 @@ public class Transactions {
     @Column(name = "description", length = 255)
     private String description;
 
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at", updatable = false, insertable = false)
     private LocalDateTime createdAt;
+
+    // --- Relationships ---
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private Users user;
 
     public enum Type {
         deposit, purchase, sale_revenue, withdrawal, refund
     }
 
-    // Getters and setters
+    // --- Getters and Setters ---
 
     public int getTransactionId() {
         return transactionId;
@@ -52,14 +44,6 @@ public class Transactions {
 
     public void setTransactionId(int transactionId) {
         this.transactionId = transactionId;
-    }
-
-    public Users getUser() {
-        return user;
-    }
-
-    public void setUser(Users user) {
-        this.user = user;
     }
 
     public BigDecimal getAmount() {
@@ -92,5 +76,13 @@ public class Transactions {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Users getUser() {
+        return user;
+    }
+
+    public void setUser(Users user) {
+        this.user = user;
     }
 }

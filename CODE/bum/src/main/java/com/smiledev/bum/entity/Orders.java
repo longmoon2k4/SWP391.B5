@@ -1,18 +1,9 @@
 package com.smiledev.bum.entity;
 
+import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
+import java.util.Set;
 
 @Entity
 @Table(name = "Orders")
@@ -22,10 +13,6 @@ public class Orders {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "order_id")
     private int orderId;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private Users user;
 
     @Column(name = "total_amount", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalAmount;
@@ -37,14 +24,23 @@ public class Orders {
     @Column(name = "payment_method", length = 50)
     private String paymentMethod;
 
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at", updatable = false, insertable = false)
     private LocalDateTime createdAt;
+
+    // --- Relationships ---
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private Users user;
+
+    @OneToMany(mappedBy = "order")
+    private Set<Licenses> licenses;
 
     public enum Status {
         pending, completed, failed, refunded
     }
 
-    // Getters and setters
+    // --- Getters and Setters ---
 
     public int getOrderId() {
         return orderId;
@@ -52,14 +48,6 @@ public class Orders {
 
     public void setOrderId(int orderId) {
         this.orderId = orderId;
-    }
-
-    public Users getUser() {
-        return user;
-    }
-
-    public void setUser(Users user) {
-        this.user = user;
     }
 
     public BigDecimal getTotalAmount() {
@@ -92,5 +80,21 @@ public class Orders {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Users getUser() {
+        return user;
+    }
+
+    public void setUser(Users user) {
+        this.user = user;
+    }
+
+    public Set<Licenses> getLicenses() {
+        return licenses;
+    }
+
+    public void setLicenses(Set<Licenses> licenses) {
+        this.licenses = licenses;
     }
 }

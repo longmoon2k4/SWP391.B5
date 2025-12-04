@@ -12,22 +12,6 @@ public class Licenses {
     @Column(name = "license_id")
     private int licenseId;
 
-    @ManyToOne
-    @JoinColumn(name = "order_id", nullable = false)
-    private Orders order;
-
-    @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
-    private Products product;
-
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
-    private Users user;
-
-    @ManyToOne
-    @JoinColumn(name = "package_id", nullable = false)
-    private ProductPackages productPackage;
-
     @Column(name = "license_key", nullable = false, unique = true, length = 100)
     private String licenseKey;
 
@@ -44,14 +28,32 @@ public class Licenses {
     @Column(name = "status", columnDefinition = "ENUM('active', 'expired', 'banned', 'unused')")
     private Status status;
 
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at", updatable = false, insertable = false)
     private LocalDateTime createdAt;
+
+    // --- Relationships ---
+
+    @ManyToOne
+    @JoinColumn(name = "order_id", nullable = false)
+    private Orders order;
+
+    @ManyToOne
+    @JoinColumn(name = "product_id", nullable = false)
+    private Products product;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private Users user;
+
+    @ManyToOne
+    @JoinColumn(name = "package_id", nullable = false)
+    private ProductPackages productPackage;
 
     public enum Status {
         active, expired, banned, unused
     }
 
-    // Getters and setters
+    // --- Getters and Setters ---
 
     public int getLicenseId() {
         return licenseId;
@@ -59,38 +61,6 @@ public class Licenses {
 
     public void setLicenseId(int licenseId) {
         this.licenseId = licenseId;
-    }
-
-    public Orders getOrder() {
-        return order;
-    }
-
-    public void setOrder(Orders order) {
-        this.order = order;
-    }
-
-    public Products getProduct() {
-        return product;
-    }
-
-    public void setProduct(Products product) {
-        this.product = product;
-    }
-
-    public Users getUser() {
-        return user;
-    }
-
-    public void setUser(Users user) {
-        this.user = user;
-    }
-
-    public ProductPackages getProductPackage() {
-        return productPackage;
-    }
-
-    public void setProductPackage(ProductPackages productPackage) {
-        this.productPackage = productPackage;
     }
 
     public String getLicenseKey() {
@@ -139,5 +109,37 @@ public class Licenses {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Orders getOrder() {
+        return order;
+    }
+
+    public void setOrder(Orders order) {
+        this.order = order;
+    }
+
+    public Products getProduct() {
+        return product;
+    }
+
+    public void setProduct(Products product) {
+        this.product = product;
+    }
+
+    public Users getUser() {
+        return user;
+    }
+
+    public void setUser(Users user) {
+        this.user = user;
+    }
+
+    public ProductPackages getProductPackage() {
+        return productPackage;
+    }
+
+    public void setProductPackage(ProductPackages productPackage) {
+        this.productPackage = productPackage;
     }
 }

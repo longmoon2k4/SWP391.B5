@@ -12,10 +12,6 @@ public class ProductVersions {
     @Column(name = "version_id")
     private int versionId;
 
-    @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
-    private Products product;
-
     @Column(name = "version_number", nullable = false, length = 20)
     private String versionNumber;
 
@@ -35,14 +31,20 @@ public class ProductVersions {
     @Column(name = "is_current_version")
     private boolean isCurrentVersion;
 
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at", updatable = false, insertable = false)
     private LocalDateTime createdAt;
+
+    // --- Relationships ---
+
+    @ManyToOne
+    @JoinColumn(name = "product_id", nullable = false)
+    private Products product;
 
     public enum VirusScanStatus {
         pending, clean, infected
     }
 
-    // Getters and setters
+    // --- Getters and Setters ---
 
     public int getVersionId() {
         return versionId;
@@ -50,14 +52,6 @@ public class ProductVersions {
 
     public void setVersionId(int versionId) {
         this.versionId = versionId;
-    }
-
-    public Products getProduct() {
-        return product;
-    }
-
-    public void setProduct(Products product) {
-        this.product = product;
     }
 
     public String getVersionNumber() {
@@ -114,5 +108,13 @@ public class ProductVersions {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Products getProduct() {
+        return product;
+    }
+
+    public void setProduct(Products product) {
+        this.product = product;
     }
 }

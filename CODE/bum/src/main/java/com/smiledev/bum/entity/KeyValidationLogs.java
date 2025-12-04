@@ -28,14 +28,14 @@ public class KeyValidationLogs {
     @Column(name = "fail_reason", length = 255)
     private String failReason;
 
-    @Column(name = "request_time", updatable = false)
+    @Column(name = "request_time", updatable = false, insertable = false)
     private LocalDateTime requestTime;
 
     public enum Status {
         success, failed
     }
 
-    // Getters and setters
+    // --- Getters and Setters ---
 
     public long getLogId() {
         return logId;

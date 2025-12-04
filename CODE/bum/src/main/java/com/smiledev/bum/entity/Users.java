@@ -1,9 +1,9 @@
 package com.smiledev.bum.entity;
 
 import jakarta.persistence.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Entity
 @Table(name = "Users")
@@ -12,7 +12,7 @@ public class Users {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "user_id")
-    private Long userId;
+    private int userId;
 
     @Column(name = "username", nullable = false, unique = true, length = 50)
     private String username;
@@ -36,46 +36,40 @@ public class Users {
     @Column(name = "is_active")
     private boolean isActive;
 
-    @Column(name = "created_at", updatable = false)
+    @Column(name = "created_at", updatable = false, insertable = false)
     private LocalDateTime createdAt;
 
-    // Các mối quan hệ
-    @ManyToOne
-    @JoinColumn(name = "ProId") //Cột fk trỏ sang table Products
-    private Products pro;
+    // --- Relationships ---
 
-    public Products getPro() {
-        return pro;
-    }
+    @OneToMany(mappedBy = "developer")
+    private Set<Products> developedProducts;
 
-    public void setPro(Products pro) {
-        this.pro = pro;
-    }
+    @OneToMany(mappedBy = "user")
+    private Set<Orders> orders;
 
-    public Users() {
-    }
+    @OneToMany(mappedBy = "user")
+    private Set<Licenses> licenses;
 
-    // Key tự tăng nên không có userID
-    public Users(String username, String email, String passwordHash, String fullName, Role role, BigDecimal walletBalance, boolean isActive, LocalDateTime createdAt) {
-        this.username = username;
-        this.email = email;
-        this.passwordHash = passwordHash;
-        this.fullName = fullName;
-        this.role = role;
-        this.walletBalance = walletBalance;
-        this.isActive = isActive;
-        this.createdAt = createdAt;
-    }
+    @OneToMany(mappedBy = "user")
+    private Set<Transactions> transactions;
+
+    @OneToMany(mappedBy = "user")
+    private Set<Reviews> reviews;
+
+    @OneToMany(mappedBy = "user")
+    private Set<ActivityLogs> activityLogs;
 
     public enum Role {
         admin, developer, user
     }
 
-    public Long getUserId() {
+    // --- Getters and Setters ---
+
+    public int getUserId() {
         return userId;
     }
 
-    public void setUserId(Long userId) {
+    public void setUserId(int userId) {
         this.userId = userId;
     }
 
@@ -141,5 +135,53 @@ public class Users {
 
     public void setCreatedAt(LocalDateTime createdAt) {
         this.createdAt = createdAt;
+    }
+
+    public Set<Products> getDevelopedProducts() {
+        return developedProducts;
+    }
+
+    public void setDevelopedProducts(Set<Products> developedProducts) {
+        this.developedProducts = developedProducts;
+    }
+
+    public Set<Orders> getOrders() {
+        return orders;
+    }
+
+    public void setOrders(Set<Orders> orders) {
+        this.orders = orders;
+    }
+
+    public Set<Licenses> getLicenses() {
+        return licenses;
+    }
+
+    public void setLicenses(Set<Licenses> licenses) {
+        this.licenses = licenses;
+    }
+
+    public Set<Transactions> getTransactions() {
+        return transactions;
+    }
+
+    public void setTransactions(Set<Transactions> transactions) {
+        this.transactions = transactions;
+    }
+
+    public Set<Reviews> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(Set<Reviews> reviews) {
+        this.reviews = reviews;
+    }
+
+    public Set<ActivityLogs> getActivityLogs() {
+        return activityLogs;
+    }
+
+    public void setActivityLogs(Set<ActivityLogs> activityLogs) {
+        this.activityLogs = activityLogs;
     }
 }
