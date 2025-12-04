@@ -1,0 +1,73 @@
+/* Reset CSS cơ bản */
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background-color: #f4f5f7;
+    color: #172b4d;
+}
+
+/* --- Bố cục Flexbox cho Sticky Footer --- */
+body {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Chiều cao tối thiểu bằng chiều cao màn hình */
+}
+
+.main-content {
+    flex-grow: 1; /* Phần nội dung chính sẽ giãn nở để chiếm hết không gian */
+    padding: 20px;
+}
+/* -------------------------------------- */
+
+
+/* --- Header dính ở trên cùng --- */
+header {
+    position: sticky; /* Dính lại khi cuộn */
+    top: 0; /* Dính ở vị trí trên cùng */
+    background-color: #fff;
+    padding: 15px 30px;
+    border-bottom: 1px solid #dfe1e6;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    z-index: 1000; /* Đảm bảo header luôn nằm trên */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+header h1 {
+    color: #0052cc;
+    margin: 0;
+    font-size: 1.5em;
+}
+/* --------------------------------- */
+
+
+/* --- Footer dính ở dưới cùng --- */
+footer {
+    background-color: #343a40;
+    color: white;
+    text-align: center;
+    padding: 20px;
+    flex-shrink: 0; /* Ngăn footer bị co lại */
+}
+/* --------------------------------- */
+
+/* CSS cho nội dung demo */
+.main-content h2 {
+    color: #0052cc;
+}
+.main-content p {
+    line-height: 1.6;
+}
+.placeholder {
+    height: 1500px; /* Tạo chiều cao ảo để có thể cuộn trang */
+    border: 2px dashed #ccc;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #aaa;
+    font-size: 2em;
+    margin-top: 20px;
+}
