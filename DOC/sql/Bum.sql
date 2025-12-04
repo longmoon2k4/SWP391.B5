@@ -34,7 +34,7 @@ CREATE TABLE Products (
     
     -- Trạng thái duyệt của Admin
     status ENUM('pending', 'approved', 'rejected', 'hidden') DEFAULT 'pending',
-    rejection_reason TEXT NULL, 
+    rejection_reason TEXT NULL,
     
     total_sales INT DEFAULT 0, -- Tăng lên khi có người mua
     view_count INT DEFAULT 0,
