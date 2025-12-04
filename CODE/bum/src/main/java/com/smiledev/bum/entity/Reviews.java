@@ -16,7 +16,7 @@ public class Reviews {
     private byte rating;
 
     @Lob
-    @Column(name = "comment")
+    @Column(name = "comment", columnDefinition = "MEDIUMTEXT")
     private String comment;
 
     @Column(name = "created_at", updatable = false, insertable = false)

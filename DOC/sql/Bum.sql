@@ -172,35 +172,116 @@ CREATE TABLE KeyValidationLogs (
 -- =============================================
 -- PHẦN III: DỮ LIỆU MẪU (SEED DATA) - CHẠY TEST
 -- =============================================
+-- ==========================================================
+-- BƯỚC 1: CẤU HÌNH & SỬA LỖI FONT TIẾNG VIỆT CHO TOÀN BỘ BẢNG
+-- ==========================================================
+SET NAMES utf8mb4;
+SET FOREIGN_KEY_CHECKS = 0;
 
--- Thêm User (Pass: 123456 - demo hash)
-INSERT INTO Users (username, email, password_hash, role, wallet_balance) VALUES 
-('admin_main', 'admin@devstore.com', 'hash_string_here', 'admin', 0),
-('dev_tuan', 'tuan@dev.com', 'hash_string_here', 'developer', 500.00),
-('user_hieu', 'hieu@gmail.com', 'hash_string_here', 'user', 100.00);
+-- Sửa lỗi #1366 cho TẤT CẢ các bảng có thể chứa tiếng Việt
+ALTER TABLE Users CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE Products CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE Categories CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE ProductPackages CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE Transactions CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE Reviews CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+-- Bổ sung 2 bảng này (lần trước bị thiếu gây lỗi):
+ALTER TABLE KeyValidationLogs CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE ActivityLogs CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
--- Thêm Category
-INSERT INTO Categories (name, description) VALUES 
-('System Tools', 'Phần mềm hệ thống, tối ưu máy tính'),
-('Game Assets', 'Tài nguyên làm game');
+-- ==========================================================
+-- BƯỚC 2: RESET DỮ LIỆU CŨ (TRÁNH TRÙNG LẶP ID)
+-- ==========================================================
+TRUNCATE TABLE KeyValidationLogs;
+TRUNCATE TABLE ActivityLogs;
+TRUNCATE TABLE Reviews;
+TRUNCATE TABLE Transactions;
+TRUNCATE TABLE Licenses;
+TRUNCATE TABLE Orders;
+TRUNCATE TABLE ProductPackages;
+TRUNCATE TABLE ProductVersions;
+TRUNCATE TABLE Products;
+TRUNCATE TABLE Categories;
+TRUNCATE TABLE Users;
 
--- Thêm Product
-INSERT INTO Products (developer_id, category_id, name, description, status) VALUES 
-(2, 1, 'Super Cleaner Pro', 'Phần mềm dọn rác máy tính siêu tốc', 'approved');
+SET FOREIGN_KEY_CHECKS = 1;
 
--- Thêm Product Version
+-- ==========================================================
+-- BƯỚC 3: NẠP DỮ LIỆU MẪU (SEED DATA)
+-- ==========================================================
+
+-- 1. USERS
+INSERT INTO Users (user_id, username, email, password_hash, full_name, role, wallet_balance, is_active) VALUES 
+(1, 'admin_root', 'admin@software-store.com', '$2a$10$DUMMY...', 'Quản Trị Viên Hệ Thống', 'admin', 0.00, 1),
+(2, 'marketing_master', 'dev.mkt@agency.vn', '$2a$10$DUMMY...', 'Marketing Tools Studio', 'developer', 1500000.00, 1),
+(3, 'dark_coder_9x', 'hacker@underground.net', '$2a$10$DUMMY...', 'Dark Coder Team', 'developer', 500000.00, 1),
+(4, 'vip_buyer_hanoi', 'hung.bds@gmail.com', '$2a$10$DUMMY...', 'Nguyễn Văn Hùng (BĐS)', 'user', 250000.00, 1),
+(5, 'student_it', 'nam.sv@uni.edu.vn', '$2a$10$DUMMY...', 'Trần Nam', 'user', 20000.00, 1),
+(6, 'scammer_pro', 'scam@fake.com', '$2a$10$DUMMY...', 'Phạm Lừa Đảo', 'user', 0.00, 0);
+
+-- 2. CATEGORIES
+INSERT INTO Categories (category_id, name, description) VALUES 
+(1, 'Marketing & SEO', 'Các công cụ tự động hóa Zalo, Facebook, Shopee...'),
+(2, 'MMO & Game Tools', 'Auto game, Tool nuôi nick, Fake IP...'),
+(3, 'Design & Graphics', 'Plugin, Action, Preset cho Designer'),
+(4, 'System Utilities', 'Phần mềm dọn dẹp, tối ưu máy tính');
+
+-- 3. PRODUCTS
+INSERT INTO Products (product_id, developer_id, category_id, name, description, short_description, status, total_sales, view_count, rejection_reason) VALUES 
+(1, 2, 1, 'Zalo Auto Sender Pro', '<h1>Zalo Auto Sender Pro</h1><p>Tính năng: Tự động kết bạn...</p>', 'Phần mềm Spam Zalo số 1 Việt Nam', 'approved', 150, 5000, NULL),
+(2, 3, 2, 'Auto Vo Lam Mobile', '<h1>Auto Vo Lam Mobile</h1><p>Tự động làm nhiệm vụ dã tẩu...</p>', 'Auto VLTK Mobile mượt mà nhẹ máy', 'approved', 89, 2300, NULL),
+(3, 3, 4, 'Super Cleaner 2025', '<h1>Super Cleaner 2025</h1><p>Dọn rác máy tính siêu tốc...</p>', 'Dọn dẹp PC chỉ 1 click', 'rejected', 0, 50, 'Phát hiện mã độc đào coin trong file cài đặt.'),
+(4, 2, 1, 'Shopee Seo Top 1', '<h1>Shopee Seo Top 1</h1><p>Buff đơn ảo, tăng đánh giá...</p>', 'Tool SEO Shopee mới nhất', 'pending', 0, 10, NULL);
+
+-- 4. VERSIONS & PACKAGES
 INSERT INTO ProductVersions (product_id, version_number, source_code_path, build_file_path, virus_scan_status, is_current_version) VALUES 
-(1, '1.0.0', '/uploads/src/v1.zip', '/uploads/build/cleaner_setup.exe', 'clean', TRUE);
+(1, '2.1.0', 's3://src/zalo_v2.zip', 's3://build/ZaloPro_Setup.exe', 'clean', 1),
+(2, '1.5.Beta', 's3://src/vltkm_v15.rar', 's3://build/AutoVL.exe', 'clean', 1),
+(3, '1.0.0', 's3://src/cleaner.zip', 's3://build/virus.exe', 'infected', 1);
 
--- Thêm Gói giá
-INSERT INTO ProductPackages (product_id, name, duration_days, price) VALUES 
-(1, 'Monthly Pass', 30, 5.00),
-(1, 'Lifetime License', NULL, 50.00);
+INSERT INTO ProductPackages (package_id, product_id, name, duration_days, price) VALUES 
+(1, 1, '1 Tháng Trải Nghiệm', 30, 50000.00),
+(2, 1, '1 Năm Tiết Kiệm', 365, 450000.00),
+(3, 1, 'Vĩnh Viễn (Lifetime)', NULL, 1200000.00),
+(4, 2, 'Thuê theo giờ (24h)', 1, 5000.00),
+(5, 2, 'Gói Tháng', 30, 100000.00);
 
--- Thêm Đơn hàng mẫu
-INSERT INTO Orders (user_id, total_amount, status, payment_method) VALUES 
-(3, 50.00, 'completed', 'VNPAY');
+-- 5. TRANSACTIONS & ORDERS
+-- Kịch bản 1: User 4
+INSERT INTO Transactions (transaction_id, user_id, amount, type, description, created_at) VALUES 
+(1, 4, 2000000.00, 'deposit', 'Nạp tiền qua Vietcombank - GD: VCB123456', NOW() - INTERVAL 5 DAY);
 
--- Thêm License mẫu
-INSERT INTO Licenses (order_id, product_id, user_id, package_id, license_key, status) VALUES 
-(1, 1, 3, 2, 'XXXX-YYYY-ZZZZ-AAAA', 'unused');
+INSERT INTO Orders (order_id, user_id, total_amount, status, payment_method, created_at) VALUES 
+(1, 4, 1200000.00, 'completed', 'WALLET', NOW() - INTERVAL 5 DAY);
+
+INSERT INTO Transactions (transaction_id, user_id, amount, type, description, created_at) VALUES 
+(2, 4, -1200000.00, 'purchase', 'Thanh toán đơn hàng #1', NOW() - INTERVAL 5 DAY),
+(3, 2, 1200000.00, 'sale_revenue', 'Doanh thu bán hàng từ đơn #1 (Cộng tiền cho Dev)', NOW() - INTERVAL 5 DAY);
+
+-- Kịch bản 2: User 5
+INSERT INTO Transactions (transaction_id, user_id, amount, type, description, created_at) VALUES 
+(4, 5, 50000.00, 'deposit', 'Nạp tiền Momo', NOW() - INTERVAL 2 DAY);
+
+INSERT INTO Orders (order_id, user_id, total_amount, status, payment_method, created_at) VALUES 
+(2, 5, 10000.00, 'completed', 'WALLET', NOW() - INTERVAL 2 DAY);
+
+INSERT INTO Transactions (transaction_id, user_id, amount, type, description, created_at) VALUES 
+(5, 5, -10000.00, 'purchase', 'Thanh toán đơn hàng #2', NOW() - INTERVAL 2 DAY),
+(6, 3, 10000.00, 'sale_revenue', 'Doanh thu bán hàng từ đơn #2', NOW() - INTERVAL 2 DAY);
+
+-- 6. LICENSES
+INSERT INTO Licenses (license_id, order_id, product_id, user_id, package_id, license_key, start_date, expire_date, hardware_id, status) VALUES 
+(1, 1, 1, 4, 3, 'ZALO-LIFE-8888-9999-AAAA', NOW() - INTERVAL 4 DAY, NULL, 'HWID-PC-GAMING-INTEL-I9', 'active'),
+(2, 2, 2, 5, 4, 'AUTO-GAME-1111-2222-BBBB', NOW() - INTERVAL 2 DAY, NOW() - INTERVAL 1 DAY, 'HWID-LAPTOP-DELL-OLD', 'expired'),
+(3, 1, 1, 4, 1, 'ZALO-GIFT-5555-6666-CCCC', NULL, NULL, NULL, 'unused'),
+(4, 2, 2, 6, 5, 'AUTO-SCAM-0000-XXXX-YYYY', NOW() - INTERVAL 10 DAY, NOW() + INTERVAL 20 DAY, 'HWID-NET-QUAN-A', 'banned');
+
+-- 7. REVIEWS & LOGS
+INSERT INTO Reviews (product_id, user_id, rating, comment, created_at) VALUES 
+(1, 4, 5, 'Tool chạy rất mượt, support nhiệt tình. Đáng tiền!', NOW() - INTERVAL 3 DAY),
+(2, 5, 4, 'Tool ngon nhưng thi thoảng bị văng game.', NOW() - INTERVAL 1 DAY);
+
+-- Insert Log kiểm tra key (Sẽ không còn lỗi font chữ)
+INSERT INTO KeyValidationLogs (license_key, hardware_id, ip_address, status, fail_reason, request_time) VALUES 
+('ZALO-LIFE-8888-9999-AAAA', 'HWID-PC-GAMING-INTEL-I9', '113.190.20.1', 'success', NULL, NOW() - INTERVAL 1 HOUR),
+('AUTO-GAME-1111-2222-BBBB', 'HWID-LAPTOP-DELL-OLD', '14.162.10.5', 'failed', 'Expired (Key đã hết hạn)', NOW() - INTERVAL 5 MINUTE);

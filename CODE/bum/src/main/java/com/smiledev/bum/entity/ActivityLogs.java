@@ -22,7 +22,7 @@ public class ActivityLogs {
     private Integer targetId;
 
     @Lob
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "MEDIUMTEXT")
     private String description;
 
     @Column(name = "ip_address", length = 45)

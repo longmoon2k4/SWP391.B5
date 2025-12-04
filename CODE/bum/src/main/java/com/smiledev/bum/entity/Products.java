@@ -17,7 +17,7 @@ public class Products {
     private String name;
 
     @Lob
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "MEDIUMTEXT")
     private String description;
 
     @Column(name = "short_description", length = 255)
@@ -31,7 +31,7 @@ public class Products {
     private Status status;
 
     @Lob
-    @Column(name = "rejection_reason")
+    @Column(name = "rejection_reason", columnDefinition = "MEDIUMTEXT")
     private String rejectionReason;
 
     @Column(name = "total_sales")

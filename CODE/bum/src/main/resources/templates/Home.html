@@ -1,56 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Home</title>
+    <title>HOME PAGE</title>
 </head>
 <body>
-    <h1>Users</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Username</th>
-                <th>Email</th>
-                <th>Full Name</th>
-                <th>Role</th>
-                <th>Wallet Balance</th>
-                <th>Is Active</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="user : ${users}">
-                <td th:text="${user.userId}"></td>
-                <td th:text="${user.username}"></td>
-                <td th:text="${user.email}"></td>
-                <td th:text="${user.fullName}"></td>
-                <td th:text="${user.role}"></td>
-                <td th:text="${user.walletBalance}"></td>
-                <td th:text="${user.active}"></td>
-            </tr>
-        </tbody>
-    </table>
-
-    <h1>Products</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Name</th>
-                <th>Developer</th>
-                <th>Category</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="product : ${products}">
-                <td th:text="${product.productId}"></td>
-                <td th:text="${product.name}"></td>
-                <td th:text="${product.developer.username}"></td>
-                <td th:text="${product.category.name}"></td>
-                <td th:text="${product.status}"></td>
-            </tr>
-        </tbody>
-    </table>
-
 </body>
 </html>
