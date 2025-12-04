@@ -1,6 +1,7 @@
 package com.smiledev.bum.entity;
 
 import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -50,7 +51,6 @@ public class Users {
     public void setPro(Products pro) {
         this.pro = pro;
     }
-
 
     public Users() {
     }
