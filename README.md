@@ -3,6 +3,7 @@
     2. Tiến độ dự án
         - Xây dựng ý tưởng và nghiệp vụ liên quan [To do]
         - Cấu hình kết nối đến database online[Done 1:14AM  4/12/2025]
+        - Hoàn thành các entity[Done 1:08PM 4/12/2025]
         ...
 # Thông tin sinh viên 
     1. MSSV: HE186065
