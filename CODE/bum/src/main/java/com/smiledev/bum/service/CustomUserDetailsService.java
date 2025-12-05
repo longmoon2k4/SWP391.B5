@@ -32,17 +32,18 @@ public class CustomUserDetailsService implements UserDetailsService {
                         new UsernameNotFoundException("User not found with username: " + username));
 
         // 2. Chuyển đổi vai trò (role) từ enum của chúng ta thành một GrantedAuthority
-        // Spring Security yêu cầu vai trò phải có tiền tố "ROLE_"
         Set<GrantedAuthority> authorities = Collections.singleton(
                 new SimpleGrantedAuthority("ROLE_" + userEntity.getRole().name().toUpperCase())
         );
 
-        // 3. Trả về một đối tượng UserDetails mà Spring Security có thể sử dụng
-        // Đối tượng này chứa username, password đã được mã hóa, và danh sách quyền
-        // Độ chế để lấy fullname thay vì lấy username
+        // 3. Trả về một đối tượng UserDetails với đầy đủ thông tin trạng thái tài khoản
         return new User(
-                userEntity.getFullName(),
+                userEntity.getUsername(), // Phải là username để xác thực
                 userEntity.getPasswordHash(),
+                userEntity.isActive(), // enabled: true nếu active, false nếu không
+                true, // accountNonExpired
+                true, // credentialsNonExpired
+                true, // accountNonLocked
                 authorities
         );
     }

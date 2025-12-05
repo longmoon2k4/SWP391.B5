@@ -53,6 +53,9 @@ header h1 {
 
 .dropdown {
     position: relative;
+    /* Thêm padding-bottom để tạo vùng đệm khi hover */
+    padding-bottom: 10px;
+    margin-bottom: -10px; /* Bù lại cho padding-bottom để không làm thay đổi bố cục */
 }
 
 .user-toggle {
@@ -93,7 +96,8 @@ header h1 {
     display: none;
     position: absolute;
     right: 0;
-    top: calc(100% + 8px);
+    /* Đặt menu ngay sát dưới cùng của vùng .dropdown (bao gồm cả padding) */
+    top: 100%;
     min-width: 220px;
     background: #fff;
     border: 1px solid #e6e8eb;
@@ -105,6 +109,7 @@ header h1 {
     z-index: 1100;
 }
 
+/* Khi hover vào .dropdown (vùng đã có padding), hiển thị menu */
 .dropdown:hover .dropdown-menu {
     display: block;
 }

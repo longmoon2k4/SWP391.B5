@@ -220,9 +220,14 @@
     <!-- Form Đăng nhập -->
     <div class="form-content" id="login-form">
         <form method="post" th:action="@{/login}">
-            <!-- Hiển thị lỗi đăng nhập sai -->
-            <div class="alert alert-danger" th:if="${param.error}">
-                Tên đăng nhập hoặc mật khẩu không chính xác.
+            <!-- Hiển thị lỗi đăng nhập -->
+            <div th:if="${param.error}">
+                <div class="alert alert-danger" th:if="${session['SPRING_SECURITY_LAST_EXCEPTION'] != null and session['SPRING_SECURITY_LAST_EXCEPTION'].message.contains('User is disabled')}">
+                    Tài khoản của bạn đã bị khóa. Vui lòng liên hệ quản trị viên.
+                </div>
+                <div class="alert alert-danger" th:unless="${session['SPRING_SECURITY_LAST_EXCEPTION'] != null and session['SPRING_SECURITY_LAST_EXCEPTION'].message.contains('User is disabled')}">
+                    Tên đăng nhập hoặc mật khẩu không chính xác.
+                </div>
             </div>
 
             <!-- Hiển thị thông báo đăng xuất thành công -->
