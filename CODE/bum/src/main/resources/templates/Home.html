@@ -46,9 +46,18 @@
 </header>
 
 <div class="main-content">
-    <h2>Nội dung chính của trang</h2>
-    <p>Đây là nơi chứa nội dung của bạn. Header sẽ luôn dính ở trên và Footer sẽ luôn dính ở dưới.</p>
-    <p>Hãy thử cuộn trang xuống để xem hiệu ứng.</p>
+    <h2>Sản phẩm nổi bật</h2>
+    <table>
+        <tr th:each="product : ${mostPurchasedProduct}">
+            <td>
+                <div class="product-card">
+                    <h3 th:text="${product.name}">Tên sản phẩm</h3>
+                    <p class="totalView" th:text="${product.viewCount} + ' lượt xem'">Số lượt xem</p>
+                    <a th:href="@{'/products/' + ${product.productId}}" class="details-link">Xem chi tiết</a>
+                </div>
+            </td>
+        </tr>
+    </table>
     <div class="placeholder">
         Cuộn xuống nữa...
     </div>
