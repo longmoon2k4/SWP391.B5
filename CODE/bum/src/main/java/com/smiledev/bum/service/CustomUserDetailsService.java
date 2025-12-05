@@ -39,8 +39,9 @@ public class CustomUserDetailsService implements UserDetailsService {
 
         // 3. Trả về một đối tượng UserDetails mà Spring Security có thể sử dụng
         // Đối tượng này chứa username, password đã được mã hóa, và danh sách quyền
+        // Độ chế để lấy fullname thay vì lấy username
         return new User(
-                userEntity.getUsername(),
+                userEntity.getFullName(),
                 userEntity.getPasswordHash(),
                 authorities
         );

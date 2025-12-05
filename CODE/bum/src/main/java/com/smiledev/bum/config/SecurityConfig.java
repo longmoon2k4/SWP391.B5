@@ -23,7 +23,7 @@ public class SecurityConfig {
                 // 1. Cấu hình quyền truy cập cho các request
                 .authorizeHttpRequests(authorize -> authorize
                         // Cho phép tất cả mọi người truy cập các đường dẫn này
-                        .requestMatchers("/login", "/register", "/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**").permitAll()
                         // Tất cả các request khác đều cần phải được xác thực (đăng nhập)
                         .anyRequest().authenticated()
                 )

@@ -44,6 +44,98 @@ header h1 {
 
 /* --------------------------------- */
 
+/* --- User menu & Dropdown --- */
+.user-menu {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.dropdown {
+    position: relative;
+}
+
+.user-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    padding: 8px 12px;
+    cursor: pointer;
+    color: #172b4d;
+}
+
+.user-toggle:hover {
+    background: #f4f5f7;
+    border-color: #e6e8eb;
+}
+
+.avatar {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: #e9eefb;
+    color: #0052cc;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+}
+
+.chevron {
+    font-size: 12px;
+    color: #6b778c;
+}
+
+.dropdown-menu {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    min-width: 220px;
+    background: #fff;
+    border: 1px solid #e6e8eb;
+    border-radius: 8px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    padding: 8px 0;
+    list-style: none;
+    margin: 0;
+    z-index: 1100;
+}
+
+.dropdown:hover .dropdown-menu {
+    display: block;
+}
+
+.dropdown-menu a,
+.dropdown-menu .logout-btn {
+    display: block;
+    width: 100%;
+    padding: 10px 14px;
+    text-decoration: none;
+    color: #172b4d;
+    background: transparent;
+    border: none;
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+}
+
+.dropdown-menu a:hover,
+.dropdown-menu .logout-btn:hover {
+    background: #f4f5f7;
+}
+
+.menu-divider {
+    height: 1px;
+    background: #eef0f3;
+    margin: 6px 0;
+}
+
+/* --------------------------------- */
+
 
 /* --- Footer dính ở dưới cùng --- */
 footer {

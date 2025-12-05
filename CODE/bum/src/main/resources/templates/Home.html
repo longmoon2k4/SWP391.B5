@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security"
+      xsi:schemaLocation="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <title>License Marketplace System</title>
     <meta charset="UTF-8">
@@ -9,7 +10,41 @@
 
 <header>
     <h1>License Marketplace System</h1>
+    <nav class="user-menu">
+        <!-- Khi đã đăng nhập: hiển thị tên người dùng + menu -->
+        <div class="dropdown" sec:authorize="isAuthenticated()">
+            <button class="user-toggle" aria-haspopup="true" aria-expanded="false">
+                <span class="avatar" aria-hidden="true">👤</span>
+                <span class="user-name" sec:authentication="name">Người dùng</span>
+                <span class="chevron" aria-hidden="true">▾</span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li role="none"><a role="menuitem" th:href="@{/profile}">Hồ sơ</a></li>
+                <li role="none"><a role="menuitem" th:href="@{/orders}">Lịch sử mua hàng</a></li>
+                <li role="none"><a role="menuitem" th:href="@{/dashboard}">Dashboard</a></li>
+                <li class="menu-divider" role="separator"></li>
+                <li role="none">
+                    <form th:action="@{/logout}" method="post">
+                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                        <button class="logout-btn" type="submit">Đăng xuất</button>
+                    </form>
+                </li>
+            </ul>
+        </div>
 
+        <!-- Khi chưa đăng nhập: hiển thị Đăng ký/Đăng nhập -->
+        <div class="dropdown" sec:authorize="isAnonymous()">
+            <button class="user-toggle" aria-haspopup="true" aria-expanded="false">
+                <span class="avatar" aria-hidden="true">👤</span>
+                <span class="user-name">Tài khoản</span>
+                <span class="chevron" aria-hidden="true">▾</span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li role="none"><a role="menuitem" th:href="@{/login}">Đăng nhập</a></li>
+                <li role="none"><a role="menuitem" th:href="@{/register}">Đăng ký</a></li>
+            </ul>
+        </div>
+    </nav>
 </header>
 
 <div class="main-content">
