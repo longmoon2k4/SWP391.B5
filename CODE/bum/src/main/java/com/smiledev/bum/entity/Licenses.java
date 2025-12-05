@@ -1,6 +1,7 @@
 package com.smiledev.bum.entity;
 
 import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -49,15 +50,11 @@ public class Licenses {
     @JoinColumn(name = "package_id", nullable = false)
     private ProductPackages productPackage;
 
-    public enum Status {
-        active, expired, banned, unused
-    }
-
-    // --- Getters and Setters ---
-
     public int getLicenseId() {
         return licenseId;
     }
+
+    // --- Getters and Setters ---
 
     public void setLicenseId(int licenseId) {
         this.licenseId = licenseId;
@@ -141,5 +138,9 @@ public class Licenses {
 
     public void setProductPackage(ProductPackages productPackage) {
         this.productPackage = productPackage;
+    }
+
+    public enum Status {
+        active, expired, banned, unused
     }
 }

@@ -2,6 +2,7 @@ package com.smiledev.bum.validation;
 
 import jakarta.validation.Constraint;
 import jakarta.validation.Payload;
+
 import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
@@ -15,6 +16,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Documented
 public @interface PasswordMatches {
     String message() default "Mật khẩu xác nhận không khớp";
+
     Class<?>[] groups() default {};
+
     Class<? extends Payload>[] payload() default {};
 }

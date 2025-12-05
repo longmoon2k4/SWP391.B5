@@ -1,6 +1,7 @@
 package com.smiledev.bum.entity;
 
 import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
@@ -32,15 +33,11 @@ public class Transactions {
     @JoinColumn(name = "user_id", nullable = false)
     private Users user;
 
-    public enum Type {
-        deposit, purchase, sale_revenue, withdrawal, refund
-    }
-
-    // --- Getters and Setters ---
-
     public int getTransactionId() {
         return transactionId;
     }
+
+    // --- Getters and Setters ---
 
     public void setTransactionId(int transactionId) {
         this.transactionId = transactionId;
@@ -84,5 +81,9 @@ public class Transactions {
 
     public void setUser(Users user) {
         this.user = user;
+    }
+
+    public enum Type {
+        deposit, purchase, sale_revenue, withdrawal, refund
     }
 }

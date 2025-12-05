@@ -1,6 +1,7 @@
 package com.smiledev.bum.entity;
 
 import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -31,15 +32,11 @@ public class KeyValidationLogs {
     @Column(name = "request_time", updatable = false, insertable = false)
     private LocalDateTime requestTime;
 
-    public enum Status {
-        success, failed
-    }
-
-    // --- Getters and Setters ---
-
     public long getLogId() {
         return logId;
     }
+
+    // --- Getters and Setters ---
 
     public void setLogId(long logId) {
         this.logId = logId;
@@ -91,5 +88,9 @@ public class KeyValidationLogs {
 
     public void setRequestTime(LocalDateTime requestTime) {
         this.requestTime = requestTime;
+    }
+
+    public enum Status {
+        success, failed
     }
 }

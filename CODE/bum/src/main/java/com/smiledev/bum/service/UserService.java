@@ -49,7 +49,7 @@ public class UserService {
             // Mặc định là 'user' nếu giá trị role không hợp lệ
             newUser.setRole(Users.Role.user);
         }
-        
+
         // 5. Mặc định các giá trị khác
         // Sử dụng BigDecimal.ZERO cho kiểu BigDecimal
         newUser.setWalletBalance(BigDecimal.ZERO);

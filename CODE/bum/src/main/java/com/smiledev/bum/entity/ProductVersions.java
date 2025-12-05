@@ -1,6 +1,7 @@
 package com.smiledev.bum.entity;
 
 import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 
 @Entity
@@ -40,15 +41,11 @@ public class ProductVersions {
     @JoinColumn(name = "product_id", nullable = false)
     private Products product;
 
-    public enum VirusScanStatus {
-        pending, clean, infected
-    }
-
-    // --- Getters and Setters ---
-
     public int getVersionId() {
         return versionId;
     }
+
+    // --- Getters and Setters ---
 
     public void setVersionId(int versionId) {
         this.versionId = versionId;
@@ -116,5 +113,9 @@ public class ProductVersions {
 
     public void setProduct(Products product) {
         this.product = product;
+    }
+
+    public enum VirusScanStatus {
+        pending, clean, infected
     }
 }

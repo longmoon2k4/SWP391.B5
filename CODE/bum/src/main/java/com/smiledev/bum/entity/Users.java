@@ -1,6 +1,7 @@
 package com.smiledev.bum.entity;
 
 import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -59,15 +60,11 @@ public class Users {
     @OneToMany(mappedBy = "user")
     private Set<ActivityLogs> activityLogs;
 
-    public enum Role {
-        admin, developer, user
-    }
-
-    // --- Getters and Setters ---
-
     public int getUserId() {
         return userId;
     }
+
+    // --- Getters and Setters ---
 
     public void setUserId(int userId) {
         this.userId = userId;
@@ -183,5 +180,9 @@ public class Users {
 
     public void setActivityLogs(Set<ActivityLogs> activityLogs) {
         this.activityLogs = activityLogs;
+    }
+
+    public enum Role {
+        admin, developer, user
     }
 }

@@ -1,6 +1,5 @@
 package com.smiledev.bum.service;
 
-import com.smiledev.bum.entity.ProductVersions;
 import org.springframework.stereotype.Service;
 
 @Service

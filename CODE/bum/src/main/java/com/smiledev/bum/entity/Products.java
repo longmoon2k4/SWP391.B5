@@ -1,6 +1,7 @@
 package com.smiledev.bum.entity;
 
 import jakarta.persistence.*;
+
 import java.time.LocalDateTime;
 import java.util.Set;
 
@@ -68,15 +69,11 @@ public class Products {
     @OneToMany(mappedBy = "product")
     private Set<Reviews> reviews;
 
-    public enum Status {
-        pending, approved, rejected, hidden
-    }
-
-    // --- Getters and Setters ---
-
     public int getProductId() {
         return productId;
     }
+
+    // --- Getters and Setters ---
 
     public void setProductId(int productId) {
         this.productId = productId;
@@ -208,5 +205,9 @@ public class Products {
 
     public void setReviews(Set<Reviews> reviews) {
         this.reviews = reviews;
+    }
+
+    public enum Status {
+        pending, approved, rejected, hidden
     }
 }

@@ -1,6 +1,7 @@
 package com.smiledev.bum.entity;
 
 import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Set;
@@ -36,15 +37,11 @@ public class Orders {
     @OneToMany(mappedBy = "order")
     private Set<Licenses> licenses;
 
-    public enum Status {
-        pending, completed, failed, refunded
-    }
-
-    // --- Getters and Setters ---
-
     public int getOrderId() {
         return orderId;
     }
+
+    // --- Getters and Setters ---
 
     public void setOrderId(int orderId) {
         this.orderId = orderId;
@@ -96,5 +93,9 @@ public class Orders {
 
     public void setLicenses(Set<Licenses> licenses) {
         this.licenses = licenses;
+    }
+
+    public enum Status {
+        pending, completed, failed, refunded
     }
 }

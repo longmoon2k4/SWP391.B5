@@ -5,88 +5,240 @@
     <title>Đăng nhập & Đăng ký</title>
     <style>
         /* ... (giữ nguyên CSS) ... */
-        body { font-family: Arial, sans-serif; background-color: #f0f2f5; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .auth-container { background-color: #fff; padding: 2rem; border-radius: 8px; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); width: 400px; max-width: 100%; }
-        .main-tabs { display: flex; border-bottom: 1px solid #ddd; margin-bottom: 1.5rem; }
-        .main-tab-button { flex: 1; padding: 1rem; border: none; background: none; cursor: pointer; font-size: 1.1rem; font-weight: bold; color: #666; transition: color 0.3s, border-bottom 0.3s; border-bottom: 3px solid transparent; }
-        .main-tab-button.active { color: #007bff; border-bottom-color: #007bff; }
-        .form-content { display: none; }
-        .form-content.active { display: block; }
-        .role-tabs { display: flex; justify-content: center; margin-bottom: 1rem; border-radius: 20px; background-color: #e9ecef; padding: 4px; }
-        .role-tab-button { flex: 1; padding: 0.5rem; border: none; background: none; cursor: pointer; font-weight: 600; color: #495057; border-radius: 20px; transition: background-color 0.3s, color 0.3s; }
-        .role-tab-button.active { background-color: #fff; color: #007bff; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        .form-group { margin-bottom: 1rem; }
-        .form-group label { display: block; margin-bottom: 0.5rem; font-weight: 600; color: #333; }
-        .form-group input { width: 100%; padding: 0.75rem; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        .submit-button { width: 100%; padding: 0.75rem; border: none; border-radius: 4px; background-color: #007bff; color: white; font-size: 1rem; font-weight: bold; cursor: pointer; transition: background-color 0.3s; }
-        .submit-button:hover { background-color: #0056b3; }
-        .alert { padding: 1rem; margin-bottom: 1rem; border-radius: 4px; text-align: center; }
-        .alert-success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-        .alert-danger { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-        .error-message { color: #721c24; font-size: 0.875em; margin-top: 0.25rem; }
-        input.error { border-color: #dc3545; }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .auth-container {
+            background-color: #fff;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            width: 400px;
+            max-width: 100%;
+        }
+
+        .main-tabs {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 1.5rem;
+        }
+
+        .main-tab-button {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #666;
+            transition: color 0.3s, border-bottom 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .main-tab-button.active {
+            color: #007bff;
+            border-bottom-color: #007bff;
+        }
+
+        .form-content {
+            display: none;
+        }
+
+        .form-content.active {
+            display: block;
+        }
+
+        .role-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1rem;
+            border-radius: 20px;
+            background-color: #e9ecef;
+            padding: 4px;
+        }
+
+        .role-tab-button {
+            flex: 1;
+            padding: 0.5rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #495057;
+            border-radius: 20px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        .role-tab-button.active {
+            background-color: #fff;
+            color: #007bff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        .submit-button {
+            width: 100%;
+            padding: 0.75rem;
+            border: none;
+            border-radius: 4px;
+            background-color: #007bff;
+            color: white;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .submit-button:hover {
+            background-color: #0056b3;
+        }
+
+        .alert {
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border-radius: 4px;
+            text-align: center;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-danger {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .error-message {
+            color: #721c24;
+            font-size: 0.875em;
+            margin-top: 0.25rem;
+        }
+
+        input.error {
+            border-color: #dc3545;
+        }
     </style>
 </head>
 <body>
 
 <div class="auth-container">
     <!-- Vùng hiển thị thông báo thành công (Flash Attribute) -->
-    <div th:if="${successMessage}" class="alert alert-success" th:text="${successMessage}"></div>
+    <div class="alert alert-success" th:if="${successMessage}" th:text="${successMessage}"></div>
     <!-- Vùng hiển thị lỗi nghiệp vụ (từ Model) -->
-    <div th:if="${errorMessage}" class="alert alert-danger" th:text="${errorMessage}"></div>
+    <div class="alert alert-danger" th:if="${errorMessage}" th:text="${errorMessage}"></div>
 
 
     <!-- Tab chính: Đăng ký và Đăng nhập -->
     <div class="main-tabs">
-        <button class="main-tab-button" th:classappend="${#fields.hasErrors('registrationRequest.*') or errorMessage != null} ? 'active' : ''" onclick="showForm('register')">Đăng ký</button>
-        <button class="main-tab-button" th:classappend="${!#fields.hasErrors('registrationRequest.*') and errorMessage == null} ? 'active' : ''" onclick="showForm('login')">Đăng nhập</button>
+        <button class="main-tab-button" onclick="showForm('register')">Đăng ký</button>
+        <button class="main-tab-button" onclick="showForm('login')">Đăng nhập</button>
     </div>
 
     <!-- Form Đăng ký -->
-    <div id="register-form" class="form-content" th:classappend="${#fields.hasErrors('registrationRequest.*') or errorMessage != null} ? 'active' : ''">
-        <form th:action="@{/register}" th:object="${registrationRequest}" method="post">
+    <div class="form-content" id="register-form">
+        <form method="post" th:action="@{/register}" th:object="${registrationRequest}">
             <div class="role-tabs">
-                <button type="button" class="role-tab-button" th:classappend="*{role == 'user' || role == null} ? 'active'" onclick="selectRole('user', this)">Khách hàng</button>
-                <button type="button" class="role-tab-button" th:classappend="*{role == 'developer'} ? 'active'" onclick="selectRole('developer', this)">Nhà phát triển</button>
+                <button class="role-tab-button" onclick="selectRole('user', this)"
+                        th:classappend="*{role == 'user' || role == null} ? 'active'"
+                        type="button">Khách hàng
+                </button>
+                <button class="role-tab-button" onclick="selectRole('developer', this)" th:classappend="*{role == 'developer'} ? 'active'"
+                        type="button">Nhà phát triển
+                </button>
             </div>
-            <input type="hidden" id="role-input" th:field="*{role}" />
+            <input id="role-input" th:field="*{role}" type="hidden"/>
 
             <div class="form-group">
                 <label for="reg-username">Tên đăng nhập</label>
-                <input type="text" id="reg-username" th:field="*{username}" th:classappend="${#fields.hasErrors('username')} ? 'error' : ''">
-                <div th:if="${#fields.hasErrors('username')}" th:errors="*{username}" class="error-message"></div>
+                <input id="reg-username" th:classappend="${#fields.hasErrors('username')} ? 'error' : ''" th:field="*{username}"
+                       type="text">
+                <div class="error-message" th:errors="*{username}" th:if="${#fields.hasErrors('username')}"></div>
             </div>
             <div class="form-group">
                 <label for="reg-fullname">Họ và tên</label>
-                <input type="text" id="reg-fullname" th:field="*{fullName}" th:classappend="${#fields.hasErrors('fullName')} ? 'error' : ''">
-                <div th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}" class="error-message"></div>
+                <input id="reg-fullname" th:classappend="${#fields.hasErrors('fullName')} ? 'error' : ''" th:field="*{fullName}"
+                       type="text">
+                <div class="error-message" th:errors="*{fullName}" th:if="${#fields.hasErrors('fullName')}"></div>
             </div>
             <div class="form-group">
                 <label for="reg-email">Email</label>
-                <input type="email" id="reg-email" th:field="*{email}" th:classappend="${#fields.hasErrors('email')} ? 'error' : ''">
-                <div th:if="${#fields.hasErrors('email')}" th:errors="*{email}" class="error-message"></div>
+                <input id="reg-email" th:classappend="${#fields.hasErrors('email')} ? 'error' : ''" th:field="*{email}"
+                       type="email">
+                <div class="error-message" th:errors="*{email}" th:if="${#fields.hasErrors('email')}"></div>
             </div>
             <div class="form-group">
                 <label for="reg-password">Mật khẩu</label>
-                <input type="password" id="reg-password" th:field="*{password}" th:classappend="${#fields.hasErrors('password')} ? 'error' : ''">
-                <div th:if="${#fields.hasErrors('password')}" th:errors="*{password}" class="error-message"></div>
+                <input id="reg-password" th:classappend="${#fields.hasErrors('password')} ? 'error' : ''" th:field="*{password}"
+                       type="password">
+                <div class="error-message" th:errors="*{password}" th:if="${#fields.hasErrors('password')}"></div>
             </div>
-            <button type="submit" class="submit-button">Đăng ký</button>
+            <div class="form-group">
+                <label for="reg-confirm-password">Xác nhận mật khẩu</label>
+                <input id="reg-confirm-password" th:classappend="${#fields.hasErrors('confirmPassword')} ? 'error' : ''" th:field="*{confirmPassword}"
+                       type="password">
+                <div class="error-message" th:errors="*{confirmPassword}"
+                     th:if="${#fields.hasErrors('confirmPassword')}"></div>
+                <!-- Hiển thị lỗi khớp mật khẩu (global error) -->
+                <div class="error-message" th:if="${#fields.hasGlobalErrors()}">
+                    <p th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+                </div>
+            </div>
+            <button class="submit-button" type="submit">Đăng ký</button>
         </form>
     </div>
 
     <!-- Form Đăng nhập -->
-    <div id="login-form" class="form-content" th:classappend="${!#fields.hasErrors('registrationRequest.*') and errorMessage == null} ? 'active' : ''">
-        <form th:action="@{/login}" method="post">
+    <div class="form-content" id="login-form">
+        <form method="post" th:action="@{/login}">
+            <!-- Hiển thị lỗi đăng nhập sai -->
+            <div class="alert alert-danger" th:if="${param.error}">
+                Tên đăng nhập hoặc mật khẩu không chính xác.
+            </div>
+
+            <!-- Hiển thị thông báo đăng xuất thành công -->
+            <div class="alert alert-success" th:if="${param.logout}">
+                Bạn đã đăng xuất thành công.
+            </div>
+
             <div class="form-group">
                 <label for="login-username">Tên đăng nhập</label>
-                <input type="text" id="login-username" name="username" required>
+                <input id="login-username" name="username" required type="text">
             </div>
             <div class="form-group">
                 <label for="login-password">Mật khẩu</label>
-                <input type="password" id="login-password" name="password" required>
+                <input id="login-password" name="password" required type="password">
             </div>
-            <button type="submit" class="submit-button">Đăng nhập</button>
+            <button class="submit-button" type="submit">Đăng nhập</button>
         </form>
     </div>
 </div>
@@ -104,32 +256,32 @@
 
         // Hiển thị form và tab được chọn
         document.getElementById(formName + '-form').classList.add('active');
-        // Tìm button tương ứng và thêm class 'active'
-        document.querySelector(`.main-tab-button[onclick*="${formName}"]`).classList.add('active');
+        document.querySelector(`.main-tab-button[onclick*="'${formName}'"]`).classList.add('active');
     }
 
     // Hàm xử lý chuyển tab con (Khách hàng / Nhà phát triển)
     function selectRole(role, element) {
-        // Cập nhật giá trị của trường ẩn
         document.getElementById('role-input').value = role;
-
-        // Xóa trạng thái active của tất cả các tab vai trò
         const roleTabs = document.querySelectorAll('.role-tab-button');
         roleTabs.forEach(tab => tab.classList.remove('active'));
-
-        // Thêm trạng thái active cho tab được click
         element.classList.add('active');
     }
 
-    // Khi trang tải, kiểm tra nếu có lỗi validation hoặc lỗi nghiệp vụ thì tự động chuyển sang tab Đăng ký
-    document.addEventListener('DOMContentLoaded', function() {
-        const hasFieldErrors = document.querySelector('.error-message'); // Kiểm tra lỗi trường
-        const hasGlobalError = document.querySelector('.alert-danger'); // Kiểm tra lỗi nghiệp vụ
+    // Logic quyết định tab nào sẽ hiển thị khi tải trang
+    document.addEventListener('DOMContentLoaded', function () {
+        const params = new URLSearchParams(window.location.search);
+        const loginError = params.has('error');
+        const loggedOut = params.has('logout');
 
-        if (hasFieldErrors || hasGlobalError) {
+        const hasRegistrationFieldErrors = document.querySelector('.error-message');
+        const hasRegistrationGlobalError = document.querySelector('.alert-danger') && !loginError;
+
+        if (loginError || loggedOut) {
+            showForm('login');
+        } else if (hasRegistrationFieldErrors || hasRegistrationGlobalError) {
             showForm('register');
         } else {
-            showForm('login'); // Mặc định hiển thị tab login nếu không có lỗi
+            showForm('login'); // Mặc định là tab đăng nhập
         }
     });
 </script>

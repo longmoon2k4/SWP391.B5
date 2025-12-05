@@ -18,6 +18,7 @@ body {
     flex-grow: 1; /* Phần nội dung chính sẽ giãn nở để chiếm hết không gian */
     padding: 20px;
 }
+
 /* -------------------------------------- */
 
 
@@ -28,7 +29,7 @@ header {
     background-color: #fff;
     padding: 15px 30px;
     border-bottom: 1px solid #dfe1e6;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     z-index: 1000; /* Đảm bảo header luôn nằm trên */
     display: flex;
     justify-content: space-between;
@@ -40,6 +41,7 @@ header h1 {
     margin: 0;
     font-size: 1.5em;
 }
+
 /* --------------------------------- */
 
 
@@ -51,15 +53,18 @@ footer {
     padding: 20px;
     flex-shrink: 0; /* Ngăn footer bị co lại */
 }
+
 /* --------------------------------- */
 
 /* CSS cho nội dung demo */
 .main-content h2 {
     color: #0052cc;
 }
+
 .main-content p {
     line-height: 1.6;
 }
+
 .placeholder {
     height: 1500px; /* Tạo chiều cao ảo để có thể cuộn trang */
     border: 2px dashed #ccc;
