@@ -1,70 +1,42 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>License Marketplace System</title>
     <meta charset="UTF-8">
+    <title>License Marketplace System</title>
     <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css"/>
 </head>
 <body>
 
-<header>
-    <h1>License Marketplace System</h1>
-    <nav class="user-menu">
-        <!-- Khi đã đăng nhập: hiển thị tên người dùng + menu -->
-        <div class="dropdown" th:if="${loggedInUser != null}">
-            <button class="user-toggle" aria-haspopup="true" aria-expanded="false">
-                <span class="avatar" aria-hidden="true">👤</span>
-                <span class="user-name" th:text="${loggedInUser.fullName}">Họ và tên</span>
-                <span class="chevron" aria-hidden="true">▾</span>
-            </button>
-            <ul class="dropdown-menu" role="menu">
-                <li role="none"><a role="menuitem" th:href="@{/profile}">Hồ sơ</a></li>
-                <li role="none"><a role="menuitem" th:href="@{/orders}">Lịch sử mua hàng</a></li>
-                <li role="none"><a role="menuitem" th:href="@{/dashboard}">Dashboard</a></li>
-                <li class="menu-divider" role="separator"></li>
-                <li role="none">
-                    <form th:action="@{/logout}" method="post">
-                        <button class="logout-btn" type="submit">Đăng xuất</button>
-                    </form>
-                </li>
-            </ul>
-        </div>
+<!-- 1. Thay thế header bằng fragment -->
+<div th:replace="~{layout :: header}"></div>
 
-        <!-- Khi chưa đăng nhập: hiển thị Đăng ký/Đăng nhập -->
-        <div class="dropdown" th:if="${loggedInUser == null}">
-            <button class="user-toggle" aria-haspopup="true" aria-expanded="false">
-                <span class="avatar" aria-hidden="true">👤</span>
-                <span class="user-name">Tài khoản</span>
-                <span class="chevron" aria-hidden="true">▾</span>
-            </button>
-            <ul class="dropdown-menu" role="menu">
-                <li role="none"><a role="menuitem" th:href="@{/login}">Đăng nhập</a></li>
-                <li role="none"><a role="menuitem" th:href="@{/register}">Đăng ký</a></li>
-            </ul>
-        </div>
-    </nav>
-</header>
-
+<!-- 2. Nội dung chính của trang chủ -->
 <div class="main-content">
-    <h2>Sản phẩm nổi bật</h2>
-    <table>
-        <tr th:each="product : ${mostPurchasedProduct}">
-            <td>
-                <div class="product-card">
-                    <h3 th:text="${product.name}">Tên sản phẩm</h3>
-                    <p class="totalView" th:text="${product.viewCount} + ' lượt xem'">Số lượt xem</p>
-                    <a th:href="@{'/products/' + ${product.productId}}" class="details-link">Xem chi tiết</a>
-                </div>
-            </td>
-        </tr>
-    </table>
+    <h2>Sản phẩm bán chạy nhất</h2>
+    <div>
+        <!-- Nội dung sản phẩm bán chạy nhất sẽ được hiển thị ở đây -->
+        <!-- Tên và giá sản phẩm -->
+        <table style="width: 100%">
+            <tr>
+                <th style="text-align: left;">Tên sản phẩm</th>
+                <th style="text-align: right;">Lượt xem</th>
+            </tr>
+            <tr th:each="product : ${mostPurchasedProduct}">
+                <td th:text="${product.name}">Tên sản phẩm</td>
+                <td style="text-align: right;" th:text="${#numbers.formatDecimal(product.viewCount, 0, 'COMMA', 0, 'POINT')} + ' Lượt xem'">Giá sản phẩm</td>
+            </tr>
+        </table>
+        <p th:text="'Chào mừng ' + ${loggedInUser != null ? loggedInUser.fullName : 'Khách'} + ' đến với License Marketplace System!'">
+            Chào mừng quý khách đến với License Marketplace System!
+        </p>
+    </div>
     <div class="placeholder">
         Cuộn xuống nữa...
     </div>
 </div>
 
-<footer>
-    <p>&copy; 2025 Smile Dev. All rights reserved.</p>
-</footer>
+<!-- 3. Thay thế footer bằng fragment -->
+<div th:replace="~{layout :: footer}"></div>
+
 </body>
 </html>

@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<body>
+
+<!-- ============================================================================ -->
+<!-- HEADER FRAGMENT                                                              -->
+<!-- ============================================================================ -->
+<header th:fragment="header">
+    <!-- Thẻ h1 và nav là con trực tiếp của header để flexbox hoạt động -->
+    <h1>
+        <a th:href="@{/}" style="text-decoration: none; color: inherit;">License Marketplace System</a>
+    </h1>
+    <nav class="user-menu">
+        <!-- Khi đã đăng nhập: hiển thị tên người dùng + menu -->
+        <div class="dropdown" th:if="${loggedInUser != null}">
+            <button class="user-toggle" aria-haspopup="true" aria-expanded="false">
+                <span class="avatar" aria-hidden="true">👤</span>
+                <span class="user-name" th:text="${loggedInUser.fullName}">Họ và tên</span>
+                <span class="chevron" aria-hidden="true">▾</span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li role="none"><a role="menuitem" th:href="@{/profile}">Hồ sơ</a></li>
+                <li role="none"><a role="menuitem" th:href="@{/orders}">Lịch sử mua hàng</a></li>
+                <li role="none"><a role="menuitem" th:href="@{/dashboard}">Dashboard</a></li>
+                <li class="menu-divider" role="separator"></li>
+                <li role="none">
+                    <form th:action="@{/logout}" method="post">
+                        <button class="logout-btn" type="submit">Đăng xuất</button>
+                    </form>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Khi chưa đăng nhập: hiển thị Đăng ký/Đăng nhập -->
+        <div class="dropdown" th:if="${loggedInUser == null}">
+            <button class="user-toggle" aria-haspopup="true" aria-expanded="false">
+                <span class="avatar" aria-hidden="true">👤</span>
+                <span class="user-name">Tài khoản</span>
+                <span class="chevron" aria-hidden="true">▾</span>
+            </button>
+            <ul class="dropdown-menu" role="menu">
+                <li role="none"><a role="menuitem" th:href="@{/login}">Đăng nhập</a></li>
+                <li role="none"><a role="menuitem" th:href="@{/register}">Đăng ký</a></li>
+            </ul>
+        </div>
+    </nav>
+</header>
+
+
+<!-- ============================================================================ -->
+<!-- FOOTER FRAGMENT                                                              -->
+<!-- ============================================================================ -->
+<footer th:fragment="footer">
+    <p>&copy; 2025 Smile Dev. All rights reserved.</p>
+</footer>
+
+</body>
+</html>

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Hồ Sơ Người Dùng</title>
+    <!-- Chỉ giữ lại link CSS chung cho header/footer -->
+    <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css"/>
+</head>
+<body>
+
+<div th:replace="~{layout :: header}"></div>
+
+<div class="main-content">
+    <h1>Hồ Sơ Của Bạn</h1>
+
+    <!-- Vùng hiển thị thông báo -->
+    <div th:if="${successMessage != null or errorMessage != null}">
+        <p style="color: green;" th:if="${successMessage}" th:text="${successMessage}"></p>
+        <p style="color: red;" th:if="${errorMessage}" th:text="${errorMessage}"></p>
+    </div>
+
+    <!-- Phần hiển thị thông tin -->
+    <div id="profile-card">
+        <form id="profile-form" th:action="@{/profile/update}" th:object="${updateProfileRequest}" method="post">
+            <div>
+                <strong>Họ và tên:</strong>
+                <span class="view-mode" th:text="${loggedInUser.fullName}"></span>
+                <div class="edit-mode" style="display: none;">
+                    <input type="text" th:field="*{fullName}">
+                    <div style="color: red; font-size: small;" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></div>
+                </div>
+            </div>
+            <div>
+                <strong>Email:</strong>
+                <span class="view-mode" th:text="${loggedInUser.email}"></span>
+                <div class="edit-mode" style="display: none;">
+                    <input type="email" th:field="*{email}">
+                    <div style="color: red; font-size: small;" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                </div>
+            </div>
+            <div><strong>Tên đăng nhập:</strong> <span th:text="${loggedInUser.username}"></span></div>
+            <div><strong>Vai trò:</strong> <span th:text="${#strings.capitalize(loggedInUser.role.name())}"></span></div>
+            <div><strong>Ngày tham gia:</strong> <span th:text="${#temporals.format(loggedInUser.createdAt, 'dd-MM-yyyy HH:mm')}"></span></div>
+        </form>
+
+        <div id="profile-view-actions">
+            <button onclick="toggleEditMode(true)">Chỉnh sửa thông tin</button>
+        </div>
+        <div id="profile-edit-actions" style="display: none;">
+            <button type="submit" form="profile-form">Lưu thay đổi</button>
+            <button type="button" onclick="toggleEditMode(false)">Hủy</button>
+        </div>
+    </div>
+
+    <hr>
+
+    <!-- Phần ví tiền -->
+    <div>
+        <h2>Ví của bạn</h2>
+        <p><strong>Số dư:</strong> <span th:text="${#numbers.formatDecimal(loggedInUser.walletBalance, 0, 'COMMA', 2, 'POINT')} + ' ₫'"></span></p>
+        <button onclick="openDepositModal()">Nạp tiền</button>
+    </div>
+</div>
+
+<!-- Modal Nạp tiền (giao diện cơ bản) -->
+<div id="deposit-modal" style="display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4);">
+    <div style="background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 400px;">
+        <span onclick="closeDepositModal()" style="float: right; font-size: 28px; cursor: pointer;">&times;</span>
+        <h2>Nạp tiền vào ví</h2>
+        <form th:action="@{/profile/deposit}" th:object="${depositRequest}" method="post">
+            <div>
+                <label for="amount">Số tiền muốn nạp:</label>
+                <input type="number" id="amount" th:field="*{amount}" min="10000" step="1000" required>
+                <div style="color: red; font-size: small;" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></div>
+            </div>
+            <br>
+            <button type="submit">Xác nhận</button>
+        </form>
+    </div>
+</div>
+
+<div th:replace="~{layout :: footer}"></div>
+
+<script th:inline="javascript">
+    const modal = document.getElementById('deposit-modal');
+
+    function toggleEditMode(isEditing) {
+        const card = document.getElementById('profile-card');
+        const viewModes = card.querySelectorAll('.view-mode');
+        const editModes = card.querySelectorAll('.edit-mode');
+        
+        document.getElementById('profile-view-actions').style.display = isEditing ? 'none' : 'block';
+        document.getElementById('profile-edit-actions').style.display = isEditing ? 'block' : 'none';
+
+        viewModes.forEach(el => el.style.display = isEditing ? 'none' : 'block');
+        editModes.forEach(el => el.style.display = isEditing ? 'block' : 'none');
+    }
+
+    function openDepositModal() {
+        modal.style.display = 'block';
+    }
+
+    function closeDepositModal() {
+        modal.style.display = 'none';
+    }
+
+    window.onclick = function(event) {
+        if (event.target == modal) {
+            closeDepositModal();
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const errorTab = /*[[${errorTab}]]*/ null;
+        if (errorTab === 'profile') {
+            toggleEditMode(true);
+        } else if (errorTab === 'deposit') {
+            openDepositModal();
+        }
+    });
+</script>
+
+</body>
+</html>

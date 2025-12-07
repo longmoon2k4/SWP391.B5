@@ -34,7 +34,7 @@ public class ActivityLogService {
             String ip = request.getHeader("X-Forwarded-For");
             if (ip == null || ip.isEmpty() || "unknown".equalsIgnoreCase(ip)) {
                 ip = request.getRemoteAddr();
-            }
+            }   
             return ip;
         }
         return "Unknown";
