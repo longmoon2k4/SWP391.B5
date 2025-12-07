@@ -169,6 +169,7 @@ button:active { transform: translateY(0); }
     width: 92%;
     max-width: 440px;
     border-radius: 16px;
+    overflow: hidden; /* prevent inner inputs/focus ring from spilling outside rounded corners */
 }
 
 #deposit-modal .modal-card h2 {
@@ -186,7 +187,9 @@ button:active { transform: translateY(0); }
 #deposit-modal form label { font-weight: 600; }
 
 #deposit-modal form input[type="number"] {
+    box-sizing: border-box;
     width: 100%;
+    max-width: 100%;
     padding: 10px 12px;
     border: 1px solid rgba(0,0,0,0.14);
     border-radius: 10px;
