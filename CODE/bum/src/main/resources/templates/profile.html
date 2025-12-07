@@ -44,28 +44,30 @@
         </form>
 
         <div id="profile-view-actions">
-            <button onclick="toggleEditMode(true)">Chỉnh sửa thông tin</button>
+            <button class="secondary" onclick="toggleEditMode(true)">Chỉnh sửa thông tin</button>
         </div>
         <div id="profile-edit-actions" style="display: none;">
-            <button type="submit" form="profile-form">Lưu thay đổi</button>
-            <button type="button" onclick="toggleEditMode(false)">Hủy</button>
+            <button class="primary" type="submit" form="profile-form">Lưu thay đổi</button>
+            <button class="secondary" type="button" onclick="toggleEditMode(false)">Hủy</button>
         </div>
     </div>
 
     <hr>
 
     <!-- Phần ví tiền -->
-    <div>
+    <div class="wallet">
         <h2>Ví của bạn</h2>
-        <p><strong>Số dư:</strong> <span th:text="${#numbers.formatDecimal(loggedInUser.walletBalance, 0, 'COMMA', 2, 'POINT')} + ' ₫'"></span></p>
-        <button onclick="openDepositModal()">Nạp tiền</button>
+        <p><strong>Số dư:</strong> <span class="balance" th:text="${(loggedInUser.walletBalance != null ? #numbers.formatDecimal(loggedInUser.walletBalance, 1, 'COMMA', 2, 'POINT') : '0,00') + ' ₫'}"></span></p>
+        <div class="wallet-actions">
+            <button class="primary" onclick="openDepositModal()">Nạp tiền</button>
+        </div>
     </div>
 </div>
 
 <!-- Modal Nạp tiền (giao diện cơ bản) -->
 <div id="deposit-modal" style="display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4);">
-    <div style="background-color: #fefefe; margin: 15% auto; padding: 20px; border: 1px solid #888; width: 80%; max-width: 400px;">
-        <span onclick="closeDepositModal()" style="float: right; font-size: 28px; cursor: pointer;">&times;</span>
+    <div class="modal-card">
+        <span class="modal-close" onclick="closeDepositModal()">&times;</span>
         <h2>Nạp tiền vào ví</h2>
         <form th:action="@{/profile/deposit}" th:object="${depositRequest}" method="post">
             <div>

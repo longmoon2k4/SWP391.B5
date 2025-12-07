@@ -1,3 +1,242 @@
+/* ========== Profile Page ========== */
+/* Layout */
+.main-content {
+    max-width: 1000px;
+    margin: 32px auto 48px;
+    padding: 0 24px;
+}
+
+.main-content h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+    margin: 0 0 24px;
+}
+
+/* Card */
+#profile-card {
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,0.08);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+    border-radius: 16px;
+    padding: 20px 20px 16px;
+    overflow: hidden; /* prevent inner elements from visually overflowing rounded corners */
+}
+
+#profile-card form > div {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    align-items: start;
+    gap: 12px;
+    padding: 12px 0;
+    border-bottom: 1px dashed rgba(0,0,0,0.08);
+}
+
+#profile-card form > div:last-child {
+    border-bottom: none;
+}
+
+#profile-card strong {
+    font-weight: 600;
+    color: #3a3a3a;
+}
+
+#profile-card .view-mode { color: #1f2937; }
+
+#profile-card span[th\:text] {
+    display: inline-block;
+    padding: 6px 10px;
+    border-radius: 8px;
+}
+
+#profile-card .edit-mode input[type="text"],
+#profile-card .edit-mode input[type="email"],
+#profile-card .edit-mode input[type="number"] {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    padding: 10px 12px;
+    border: 1px solid rgba(0,0,0,0.14);
+    border-radius: 10px;
+    background: #f9fafb;
+    font-size: 14px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#profile-card .edit-mode { display: block; }
+
+#profile-card .edit-mode input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37,99,235,0.15);
+    background: #fff;
+}
+
+/* Actions */
+#profile-view-actions,
+#profile-edit-actions {
+    display: flex;
+    width: 100%;
+    gap: 12px;
+    justify-content: flex-end; /* keep actions at right edge consistently */
+    text-align: right; /* fallback alignment in case flex is overridden */
+    padding-top: 16px;
+}
+
+button {
+    appearance: none;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 16px;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition: transform 0.06s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+button:hover { transform: translateY(-1px); }
+button:active { transform: translateY(0); }
+
+/* Primary & Secondary buttons */
+#profile-view-actions button.secondary,
+#profile-edit-actions button.primary,
+.wallet-actions button.primary {
+    background: #2563eb;
+    color: #ffffff;
+    box-shadow: 0 6px 14px rgba(37,99,235,0.25);
+}
+
+#profile-edit-actions button.secondary,
+.wallet-actions button.secondary,
+#profile-view-actions button.secondary {
+    background: #f3f4f6;
+    color: #111827;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    border: 1px solid rgba(0,0,0,0.08);
+}
+
+/* Ensure inputs and spans align vertically */
+#profile-card form > div .edit-mode,
+#profile-card form > div .view-mode,
+#profile-card form > div span[th\:text] { align-self: center; }
+
+/* Reduce visual jump when toggling edit */
+#profile-card .edit-mode { margin-top: -2px; }
+
+/* Divider */
+.main-content hr {
+    border: none;
+    height: 1px;
+    background: linear-gradient(to right, rgba(0,0,0,0), rgba(0,0,0,0.15), rgba(0,0,0,0));
+    margin: 28px 0;
+}
+
+/* Wallet section */
+.wallet {
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,0.08);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+    border-radius: 16px;
+    padding: 18px 20px;
+}
+
+.wallet h2 {
+    font-size: 20px;
+    margin: 0 0 10px;
+}
+
+.wallet .balance {
+    display: inline-block;
+    margin: 8px 0 16px;
+    padding: 6px 10px;
+    background: #f1f5ff;
+    color: #1e40af;
+    border-radius: 8px;
+    font-weight: 700;
+}
+
+.wallet-actions { display: flex; gap: 12px; }
+
+/* Deposit Modal */
+#deposit-modal { backdrop-filter: blur(2px); }
+
+#deposit-modal .modal-card {
+    background-color: #ffffff;
+    margin: 10% auto;
+    padding: 20px;
+    border: 1px solid rgba(0,0,0,0.08);
+    box-shadow: 0 14px 40px rgba(0,0,0,0.16);
+    width: 92%;
+    max-width: 440px;
+    border-radius: 16px;
+}
+
+#deposit-modal .modal-card h2 {
+    margin: 0 0 12px;
+    font-size: 18px;
+}
+
+#deposit-modal .modal-close {
+    float: right;
+    font-size: 26px;
+    cursor: pointer;
+    color: #6b7280;
+}
+
+#deposit-modal form label { font-weight: 600; }
+
+#deposit-modal form input[type="number"] {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid rgba(0,0,0,0.14);
+    border-radius: 10px;
+    background: #f9fafb;
+    font-size: 14px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+#deposit-modal form input[type="number"]:focus {
+    outline: none;
+    border-color: #10b981;
+    box-shadow: 0 0 0 3px rgba(16,185,129,0.15);
+    background: #fff;
+}
+
+#deposit-modal form button[type="submit"] {
+    margin-top: 8px;
+    background: #10b981;
+    color: #ffffff;
+    box-shadow: 0 6px 14px rgba(16,185,129,0.25);
+}
+
+/* Messages */
+.main-content p[style*="color: green"] {
+    background: #ecfdf5;
+    color: #065f46 !important;
+    padding: 8px 12px;
+    border-radius: 8px;
+}
+
+.main-content p[style*="color: red"] {
+    background: #fef2f2;
+    color: #7f1d1d !important;
+    padding: 8px 12px;
+    border-radius: 8px;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    #profile-card form > div {
+        grid-template-columns: 1fr;
+    }
+
+    #deposit-modal .modal-card {
+        margin: 18% auto;
+        width: 94%;
+    }
+
+    .main-content h1 { font-size: 24px; }
+}
 body, html {
     margin: 0;
     padding: 0;
