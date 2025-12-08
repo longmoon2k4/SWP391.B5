@@ -108,7 +108,7 @@
                     <div id="sidebarPriceDisplay" class="price-display">
                         <span></span>
                     </div>
-                    <button class="btn-buy">Thanh toán</button>
+                    <button id="buy-now-btn" class="btn-buy" th:data-product-name="${product.name}">Thanh toán</button>
                 </div>
                 <div th:if="${product.packages.isEmpty()}">
                     <p>Sản phẩm này hiện chưa có gói giá nào.</p>
@@ -162,6 +162,11 @@
 <div th:replace="~{layout :: footer}"></div>
 
 <script>
+    function buyNow(price, productName) {
+        const integerPrice = parseInt(price, 10);
+        window.location.href = '/api/v1/transactions/create-payment?amount=' + integerPrice + '&orderInfo=' + encodeURIComponent('Thanh toan don hang ' + productName);
+    }
+
     function formatVND(value) {
         const num = Number(value || 0);
         return new Intl.NumberFormat('vi-VN', {
@@ -246,6 +251,17 @@
                 overlay.style.background = 'transparent';
                 iframe.parentElement.appendChild(overlay);
             }
+        }
+
+        // Add click listener for the buy now button
+        const buyNowBtn = document.getElementById('buy-now-btn');
+        if (buyNowBtn) {
+            buyNowBtn.addEventListener('click', function() {
+                const selectElement = document.getElementById('packageSelect');
+                const selectedPrice = selectElement.value;
+                const productName = this.getAttribute('data-product-name');
+                buyNow(selectedPrice, productName);
+            });
         }
     });
 </script>

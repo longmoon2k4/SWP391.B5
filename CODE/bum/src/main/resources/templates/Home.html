@@ -44,43 +44,44 @@
     <!-- Product Grid -->
     <div class="product-grid" th:if="${productPage != null && !productPage.isEmpty()}">
         <!-- Bọc mỗi thẻ sản phẩm bằng một thẻ a -->
-        <a th:each="product : ${productPage.content}"
-           th:href="@{/product/{id}(id=${product.id})}" class="product-card-link">
-            <div class="product-card">
-                <div>
-                    <h3 th:text="${product.name}">Tên sản phẩm</h3>
-                    <div class="product-meta">
-                        <span><i class="fas fa-eye"></i> <span th:text="${product.viewCount}">0</span> Lượt xem</span>
-                        <span><i class="fas fa-star"></i> <span th:text="${#numbers.formatDecimal(product.averageRating, 1, 1)}">0.0</span>/5.0</span>
+        <div th:each="product : ${productPage.content}" class="product-card-container">
+            <a th:href="@{/product/{id}(id=${product.id})}" class="product-card-link">
+                <div class="product-card">
+                    <div>
+                        <h3 th:text="${product.name}">Tên sản phẩm</h3>
+                        <div class="product-meta">
+                            <span><i class="fas fa-eye"></i> <span th:text="${product.viewCount}">0</span> Lượt xem</span>
+                            <span><i class="fas fa-star"></i> <span th:text="${#numbers.formatDecimal(product.averageRating, 1, 1)}">0.0</span>/5.0</span>
+                        </div>
+                        <p th:text="${product.shortDescription}">Mô tả ngắn.</p>
                     </div>
-                    <p th:text="${product.shortDescription}">Mô tả ngắn.</p>
-                </div>
-                <div>
-                    <!-- Package Selector -->
-                    <div class="package-selector" th:if="${!product.packages.isEmpty()}" onclick="event.preventDefault(); event.stopPropagation();">
-                        <select class="package-select-dropdown" onchange="updatePrice(this)">
-                            <option th:each="pkg : ${product.packages}"
-                                    th:value="${pkg.price}"
-                                    th:text="${pkg.name}">
-                            </option>
-                        </select>
-                        <div class="price-display">
-                            <span th:text="${#numbers.formatCurrency(product.packages[0].price)}"></span>
+                    <div>
+                        <!-- Package Selector -->
+                        <div class="package-selector" th:if="${!product.packages.isEmpty()}" onclick="event.preventDefault(); event.stopPropagation();">
+                            <select class="package-select-dropdown" onchange="updatePrice(this)">
+                                <option th:each="pkg : ${product.packages}"
+                                        th:value="${pkg.price}"
+                                        th:text="${pkg.name}">
+                                </option>
+                            </select>
+                            <div class="price-display">
+                                <span th:text="${#numbers.formatCurrency(product.packages[0].price)}"></span>
+                            </div>
+                        </div>
+
+                        <!-- Product Actions -->
+                        <div class="product-actions" onclick="event.preventDefault(); event.stopPropagation();">
+                            <button class="btn btn-secondary view-demo-btn"
+                                    th:attr="data-video-url=${product.demoVideoUrl}"
+                                    th:disabled="${product.demoVideoUrl == null}">
+                                Xem Demo
+                            </button>
+                            <button class="btn btn-primary buy-now-btn" th:data-product-name="${product.name}">Mua Ngay</button>
                         </div>
                     </div>
-
-                    <!-- Product Actions -->
-                    <div class="product-actions" onclick="event.preventDefault(); event.stopPropagation();">
-                        <button class="btn btn-secondary view-demo-btn"
-                                th:attr="data-video-url=${product.demoVideoUrl}"
-                                th:disabled="${product.demoVideoUrl == null}">
-                            Xem Demo
-                        </button>
-                        <button class="btn btn-primary">Mua Ngay</button>
-                    </div>
                 </div>
-            </div>
-        </a>
+            </a>
+        </div>
     </div>
     <div th:if="${productPage == null || productPage.isEmpty()}">
         <p>Không có sản phẩm nào để hiển thị.</p>
@@ -117,6 +118,11 @@
 <div th:replace="~{layout :: footer}"></div>
 
 <script>
+    function buyNow(price, productName) {
+        const integerPrice = parseInt(price, 10);
+        window.location.href = '/api/v1/transactions/create-payment?amount=' + integerPrice + '&orderInfo=' + encodeURIComponent('Thanh toan don hang ' + productName);
+    }
+
     // Function to update price display when a package is selected
     function updatePrice(selectElement) {
         const selectedPrice = Number(selectElement.value || 0);
@@ -238,6 +244,17 @@
             if (e.key === 'Escape' && videoPopup.style.display === 'flex') {
                 closePopup();
             }
+        });
+
+        // Add click listener for all buy now buttons
+        document.querySelectorAll('.buy-now-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const productCard = this.closest('.product-card-container');
+                const selectElement = productCard.querySelector('.package-select-dropdown');
+                const selectedPrice = selectElement.value;
+                const productName = this.getAttribute('data-product-name');
+                buyNow(selectedPrice, productName);
+            });
         });
     });
 </script>
