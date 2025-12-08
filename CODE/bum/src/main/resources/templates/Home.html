@@ -4,127 +4,8 @@
     <meta charset="UTF-8">
     <title>License Marketplace System</title>
     <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css"/>
-    <style>
-        .product-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-            padding: 20px;
-        }
-        .product-card {
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            justify-content: space-between;
-        }
-        .product-card h3 {
-            margin-top: 0;
-        }
-        .product-meta {
-            display: flex;
-            justify-content: space-between;
-            font-size: 0.9em;
-            color: #555;
-            margin-bottom: 10px;
-        }
-        .package-selector {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        .package-select-dropdown {
-            width: 100%;
-            padding: 8px;
-            border-radius: 5px;
-            border: 1px solid #ccc;
-            background-color: white;
-        }
-        .price-display {
-            font-size: 1.4em;
-            font-weight: bold;
-            color: #28a745;
-            text-align: center;
-        }
-        .product-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: auto; /* Push actions to the bottom */
-        }
-        .btn {
-            padding: 10px 15px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            width: 100%;
-        }
-        .btn-primary {
-            background-color: #007bff;
-            color: white;
-        }
-        .btn-secondary {
-            background-color: #6c757d;
-            color: white;
-        }
-        .video-popup {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.7);
-            justify-content: center;
-            align-items: center;
-        }
-        .video-popup-content {
-            background: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            position: relative;
-        }
-        .close-popup {
-            position: absolute;
-            top: -10px;
-            right: -10px;
-            background: red;
-            color: white;
-            border-radius: 50%;
-            width: 30px;
-            height: 30px;
-            border: none;
-            cursor: pointer;
-        }
-        .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 20px 0;
-        }
-        .pagination a, .pagination span {
-            margin: 0 5px;
-            padding: 8px 12px;
-            text-decoration: none;
-            border: 1px solid #ddd;
-            color: #007bff;
-        }
-        .pagination .current {
-            font-weight: bold;
-            background-color: #007bff;
-            color: white;
-            border-color: #007bff;
-        }
-        .pagination .disabled {
-            color: #ccc;
-            pointer-events: none;
-            border-color: #ddd;
-        }
-    </style>
 </head>
-<body>
+<body class="home-page">
 
 <div th:replace="~{layout :: header}"></div>
 
@@ -133,7 +14,7 @@
 
     <!-- Product Grid -->
     <div class="product-grid" th:if="${productPage != null && !productPage.isEmpty()}">
-        <div class="product-card" th:each="product : ${productPage.content}">
+        <div class="product-card" th:each="product, iter : ${productPage.content}" th:if="${iter.index < 8}">
             <div>
                 <h3 th:text="${product.name}">Tên sản phẩm</h3>
                 <div class="product-meta">
@@ -194,7 +75,7 @@
 <div id="videoPopup" class="video-popup">
     <div class="video-popup-content">
         <button id="closePopupBtn" class="close-popup">&times;</button>
-        <iframe id="videoFrame" width="800" height="450" src="" frameborder="0" allowfullscreen></iframe>
+        <iframe id="videoFrame" src="" frameborder="0" allowfullscreen></iframe>
     </div>
 </div>
 
@@ -203,12 +84,17 @@
 <script>
     // Function to update price display when a package is selected
     function updatePrice(selectElement) {
-        const selectedPrice = selectElement.value;
+        const selectedPrice = Number(selectElement.value || 0);
         // Find the price display span within the same parent container
         const priceDisplaySpan = selectElement.parentElement.querySelector('.price-display span');
         if (priceDisplaySpan) {
-            // Format the number as Vietnamese currency
-            priceDisplaySpan.textContent = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(selectedPrice);
+            // Format as Vietnamese currency (no decimals for VND)
+            priceDisplaySpan.textContent = new Intl.NumberFormat('vi-VN', {
+                style: 'currency',
+                currency: 'VND',
+                maximumFractionDigits: 0,
+                minimumFractionDigits: 0
+            }).format(selectedPrice);
         }
     }
 
@@ -216,6 +102,21 @@
         const videoPopup = document.getElementById('videoPopup');
         const videoFrame = document.getElementById('videoFrame');
         const closePopupBtn = document.getElementById('closePopupBtn');
+
+            // Initialize price display for each product on first load
+            document.querySelectorAll('.package-selector').forEach(container => {
+                const select = container.querySelector('.package-select-dropdown');
+                const priceSpan = container.querySelector('.price-display span');
+                if (select && priceSpan) {
+                    const initPrice = Number(select.value || 0);
+                    priceSpan.textContent = new Intl.NumberFormat('vi-VN', {
+                        style: 'currency',
+                        currency: 'VND',
+                        maximumFractionDigits: 0,
+                        minimumFractionDigits: 0
+                    }).format(initPrice);
+                }
+            });
 
         // Video popup logic
         document.querySelectorAll('.view-demo-btn').forEach(button => {
