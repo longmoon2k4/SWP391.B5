@@ -398,6 +398,101 @@ footer {
     font-weight: 700;
 }
 
+/* ========== Profile Page (scoped, clean + simple) ========== */
+.profile-page .main-content { max-width: 900px; margin: 24px auto; padding: 0 16px; }
+
+.profile-page h1 { margin: 0 0 16px; font-size: 24px; }
+.profile-page h2 { margin: 24px 0 12px; font-size: 20px; }
+
+/* Messages */
+.profile-page .message-success,
+.profile-page .message-error {
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin: 8px 0 16px;
+    font-size: 14px;
+}
+.profile-page .message-success { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+.profile-page .message-error { background: #fef2f2; color: #7f1d1d; border: 1px solid #fecaca; }
+
+/* Card */
+.profile-page #profile-card {
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,0.08);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+    border-radius: 12px;
+    padding: 16px;
+}
+.profile-page #profile-card > form { max-width: 100%; }
+.profile-page #profile-card > form > div { display: grid; grid-template-columns: 180px minmax(0,1fr); gap: 8px 16px; align-items: center; padding: 8px 0; }
+.profile-page #profile-card strong { color: #374151; font-weight: 600; }
+.profile-page #profile-card .view-mode { color: #111827; }
+.profile-page #profile-card .edit-mode { width: 100%; }
+.profile-page #profile-card .edit-mode input { width: 100%; max-width: 100%; box-sizing: border-box; padding: 8px 10px; border: 1px solid #d1d5db; border-radius: 8px; background: #fff; font-size: 14px; }
+.profile-page #profile-card .edit-mode input:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+.profile-page #profile-card .field-error { color: #b91c1c; font-size: 12px; margin-top: 6px; }
+
+/* Actions */
+.profile-page #profile-view-actions,
+.profile-page #profile-edit-actions { display: flex; gap: 8px; margin-top: 12px; }
+
+/* Buttons */
+.profile-page .primary,
+.profile-page .secondary {
+    appearance: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+}
+.profile-page .primary { background: #2563eb; color: #fff; border: 1px solid #1e55d3; }
+.profile-page .primary:hover { background: #1e55d3; }
+.profile-page .secondary { background: #fff; color: #1f2937; border: 1px solid #d1d5db; }
+.profile-page .secondary:hover { background: #f9fafb; }
+
+/* Divider */
+.profile-page hr { border: none; border-top: 1px solid #eef0f3; margin: 20px 0; }
+
+/* Wallet */
+.profile-page .wallet { background: #fff; border: 1px solid rgba(0,0,0,0.08); box-shadow: 0 6px 16px rgba(0,0,0,0.06); border-radius: 12px; padding: 16px; }
+.profile-page .wallet .balance { font-weight: 800; color: #16a34a; }
+.profile-page .wallet .wallet-actions { margin-top: 12px; display: flex; gap: 8px; }
+
+/* Modal */
+.profile-page #deposit-modal { backdrop-filter: blur(2px); }
+.profile-page #deposit-modal .modal-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 16px;
+    width: 92%;
+    max-width: 420px;
+    margin: 8% auto;
+    border: 1px solid rgba(0,0,0,0.08);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.12);
+    position: relative;
+    overflow: visible; /* avoid clipping rounded inputs/shadows */
+}
+.profile-page .modal-close { position: absolute; right: 12px; top: 10px; font-size: 20px; color: #6b7280; cursor: pointer; }
+.profile-page .modal-close:hover { color: #374151; }
+.profile-page .modal-card form label { display: block; font-size: 14px; color: #374151; margin-bottom: 6px; }
+.profile-page .modal-card form input[type="number"] {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 8px 10px;
+    border: 1px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 14px;
+}
+.profile-page .modal-card form input[type="number"]:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+.profile-page .modal-card .field-error { color: #b91c1c; font-size: 12px; margin-top: 6px; }
+
+/* Responsive */
+@media (max-width: 700px) {
+    .profile-page #profile-card > form > div { grid-template-columns: 1fr; }
+}
+
 .home-page .product-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);

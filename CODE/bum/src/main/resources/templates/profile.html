@@ -6,18 +6,18 @@
     <!-- Chỉ giữ lại link CSS chung cho header/footer -->
     <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css"/>
 </head>
-<body>
+<body class="profile-page">
 
 <div th:replace="~{layout :: header}"></div>
 
-<div class="main-content">
-    <h1>Hồ Sơ Của Bạn</h1>
+<main class="main-content" role="main" aria-labelledby="profile-title">
+    <h1 id="profile-title">Hồ Sơ Của Bạn</h1>
 
     <!-- Vùng hiển thị thông báo -->
-    <div th:if="${successMessage != null or errorMessage != null}">
-        <p style="color: green;" th:if="${successMessage}" th:text="${successMessage}"></p>
-        <p style="color: red;" th:if="${errorMessage}" th:text="${errorMessage}"></p>
-    </div>
+    <section aria-live="polite" th:if="${successMessage != null or errorMessage != null}">
+        <p class="message-success" th:if="${successMessage}" th:text="${successMessage}"></p>
+        <p class="message-error" th:if="${errorMessage}" th:text="${errorMessage}"></p>
+    </section>
 
     <!-- Phần hiển thị thông tin -->
     <div id="profile-card">
@@ -27,7 +27,7 @@
                 <span class="view-mode" th:text="${loggedInUser.fullName}"></span>
                 <div class="edit-mode" style="display: none;">
                     <input type="text" th:field="*{fullName}">
-                    <div style="color: red; font-size: small;" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></div>
+                    <div class="field-error" th:if="${#fields.hasErrors('fullName')}" th:errors="*{fullName}"></div>
                 </div>
             </div>
             <div>
@@ -35,7 +35,7 @@
                 <span class="view-mode" th:text="${loggedInUser.email}"></span>
                 <div class="edit-mode" style="display: none;">
                     <input type="email" th:field="*{email}">
-                    <div style="color: red; font-size: small;" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+                    <div class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
                 </div>
             </div>
             <div><strong>Tên đăng nhập:</strong> <span th:text="${loggedInUser.username}"></span></div>
@@ -55,28 +55,27 @@
     <hr>
 
     <!-- Phần ví tiền -->
-    <div class="wallet">
+    <section class="wallet" aria-label="Ví người dùng">
         <h2>Ví của bạn</h2>
         <p><strong>Số dư:</strong> <span class="balance" th:text="${(loggedInUser.walletBalance != null ? #numbers.formatDecimal(loggedInUser.walletBalance, 1, 'COMMA', 0, 'POINT') : '0,00') + ' ₫'}"></span></p>
         <div class="wallet-actions">
             <button class="primary" onclick="openDepositModal()">Nạp tiền</button>
         </div>
-    </div>
-</div>
+    </section>
+</main>
 
 <!-- Modal Nạp tiền (giao diện cơ bản) -->
-<div id="deposit-modal" style="display: none; position: fixed; z-index: 1; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4);">
-    <div class="modal-card">
-        <span class="modal-close" onclick="closeDepositModal()">&times;</span>
-        <h2>Nạp tiền vào ví</h2>
+<div id="deposit-modal" aria-hidden="true" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.4);">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="deposit-title">
+        <span class="modal-close" onclick="closeDepositModal()" aria-label="Đóng">&times;</span>
+        <h2 id="deposit-title">Nạp tiền vào ví</h2>
         <form th:action="@{/profile/deposit}" th:object="${depositRequest}" method="post">
             <div>
                 <label for="amount">Số tiền muốn nạp:</label>
                 <input type="number" id="amount" th:field="*{amount}" min="10000" step="1000" required>
-                <div style="color: red; font-size: small;" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></div>
+                <div class="field-error" th:if="${#fields.hasErrors('amount')}" th:errors="*{amount}"></div>
             </div>
-            <br>
-            <button type="submit">Xác nhận</button>
+            <button class="primary" type="submit">Xác nhận</button>
         </form>
     </div>
 </div>
