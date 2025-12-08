@@ -10,7 +10,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional; // Import a
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -27,10 +28,16 @@ public class ProductService {
         return productsRepository.findTopByOrderByTotalSalesDesc();
     }
 
-    @Transactional(readOnly = true) // <--- THÊM DÒNG NÀY
+    @Transactional(readOnly = true)
     public Page<ProductCardDTO> getApprovedProducts(Pageable pageable) {
         Page<Products> productPage = productsRepository.findAllApproved(pageable);
         return productPage.map(this::convertToProductCardDTO);
+    }
+
+    @Transactional(readOnly = true)
+    public Optional<Products> findProductById(int id) {
+        // Sử dụng phương thức mới để tải tất cả dữ liệu cần thiết
+        return productsRepository.findByIdWithDetails(id);
     }
 
     private ProductCardDTO convertToProductCardDTO(Products product) {
@@ -44,7 +51,6 @@ public class ProductService {
         Double avgRating = reviewsRepository.findAverageRatingByProductId(product.getProductId());
         dto.setAverageRating(avgRating != null ? avgRating : 0.0);
 
-        // Dòng này sẽ không còn gây lỗi vì session vẫn mở
         dto.setPackages(product.getPackages().stream()
                 .map(this::convertToProductPackageDTO)
                 .collect(Collectors.toList()));

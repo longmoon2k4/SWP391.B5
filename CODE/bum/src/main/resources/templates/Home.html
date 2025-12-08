@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <title>License Marketplace System</title>
     <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css"/>
+    <style>
+        /* Thêm style cho thẻ a để nó không có gạch chân và có màu mặc định */
+        .product-card-link {
+            text-decoration: none;
+            color: inherit;
+            display: block; /* Để thẻ a chiếm toàn bộ không gian của thẻ con */
+        }
+    </style>
 </head>
 <body class="home-page">
 
@@ -14,40 +22,44 @@
 
     <!-- Product Grid -->
     <div class="product-grid" th:if="${productPage != null && !productPage.isEmpty()}">
-        <div class="product-card" th:each="product, iter : ${productPage.content}" th:if="${iter.index < 8}">
-            <div>
-                <h3 th:text="${product.name}">Tên sản phẩm</h3>
-                <div class="product-meta">
-                    <span><i class="fas fa-eye"></i> <span th:text="${product.viewCount}">0</span> Lượt xem</span>
-                    <span><i class="fas fa-star"></i> <span th:text="${#numbers.formatDecimal(product.averageRating, 1, 1)}">0.0</span>/5.0</span>
+        <!-- Bọc mỗi thẻ sản phẩm bằng một thẻ a -->
+        <a th:each="product, iter : ${productPage.content}" th:if="${iter.index < 8}"
+           th:href="@{/product/{id}(id=${product.id})}" class="product-card-link">
+            <div class="product-card">
+                <div>
+                    <h3 th:text="${product.name}">Tên sản phẩm</h3>
+                    <div class="product-meta">
+                        <span><i class="fas fa-eye"></i> <span th:text="${product.viewCount}">0</span> Lượt xem</span>
+                        <span><i class="fas fa-star"></i> <span th:text="${#numbers.formatDecimal(product.averageRating, 1, 1)}">0.0</span>/5.0</span>
+                    </div>
+                    <p th:text="${product.shortDescription}">Mô tả ngắn.</p>
                 </div>
-                <p th:text="${product.shortDescription}">Mô tả ngắn.</p>
-            </div>
-            <div>
-                <!-- Package Selector -->
-                <div class="package-selector" th:if="${!product.packages.isEmpty()}">
-                    <select class="package-select-dropdown" onchange="updatePrice(this)">
-                        <option th:each="pkg : ${product.packages}"
-                                th:value="${pkg.price}"
-                                th:text="${pkg.name}">
-                        </option>
-                    </select>
-                    <div class="price-display">
-                        <span th:text="${#numbers.formatCurrency(product.packages[0].price)}"></span>
+                <div>
+                    <!-- Package Selector -->
+                    <div class="package-selector" th:if="${!product.packages.isEmpty()}" onclick="event.preventDefault(); event.stopPropagation();">
+                        <select class="package-select-dropdown" onchange="updatePrice(this)">
+                            <option th:each="pkg : ${product.packages}"
+                                    th:value="${pkg.price}"
+                                    th:text="${pkg.name}">
+                            </option>
+                        </select>
+                        <div class="price-display">
+                            <span th:text="${#numbers.formatCurrency(product.packages[0].price)}"></span>
+                        </div>
+                    </div>
+
+                    <!-- Product Actions -->
+                    <div class="product-actions" onclick="event.preventDefault(); event.stopPropagation();">
+                        <button class="btn btn-secondary view-demo-btn"
+                                th:attr="data-video-url=${product.demoVideoUrl}"
+                                th:disabled="${product.demoVideoUrl == null}">
+                            Xem Demo
+                        </button>
+                        <button class="btn btn-primary">Mua Ngay</button>
                     </div>
                 </div>
-
-                <!-- Product Actions -->
-                <div class="product-actions">
-                    <button class="btn btn-secondary view-demo-btn"
-                            th:attr="data-video-url=${product.demoVideoUrl}"
-                            th:disabled="${product.demoVideoUrl == null}">
-                        Xem Demo
-                    </button>
-                    <button class="btn btn-primary">Mua Ngay</button>
-                </div>
             </div>
-        </div>
+        </a>
     </div>
     <div th:if="${productPage == null || productPage.isEmpty()}">
         <p>Không có sản phẩm nào để hiển thị.</p>
