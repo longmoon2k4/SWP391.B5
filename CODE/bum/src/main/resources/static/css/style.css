@@ -398,6 +398,46 @@ footer {
     font-weight: 700;
 }
 
+/* Home: Filter/Search form */
+.home-page .filter-form {
+    background: #ffffff;
+    border: 1px solid rgba(0,0,0,0.08);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.06);
+    border-radius: 12px;
+    padding: 16px;
+    margin-bottom: 20px;
+}
+.home-page .filter-form .form-row { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 12px 16px; }
+.home-page .filter-form .form-group label { display:block; font-size:14px; color:#374151; margin-bottom:6px; }
+.home-page .filter-form .form-group input[type="text"],
+.home-page .filter-form .form-group select {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 9px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 10px;
+    background: #fff;
+    font-size: 14px;
+}
+.home-page .filter-form .form-group input[type="text"]:focus,
+.home-page .filter-form .form-group select:focus { outline: none; border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37,99,235,0.15); }
+.home-page .filter-form .btn {
+    appearance: none;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    background: #2563eb;
+    color: #fff;
+    border: 1px solid #1e55d3;
+}
+.home-page .filter-form .btn:hover { background: #1e55d3; }
+
+@media (max-width: 700px) {
+    .home-page .filter-form .form-row { grid-template-columns: 1fr; }
+}
+
 /* ========== Profile Page (scoped, clean + simple) ========== */
 .profile-page .main-content { max-width: 900px; margin: 24px auto; padding: 0 16px; }
 
