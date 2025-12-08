@@ -103,19 +103,31 @@
         const videoFrame = document.getElementById('videoFrame');
         const closePopupBtn = document.getElementById('closePopupBtn');
 
-            // Initialize price display for each product on first load
+            // Initialize: select the cheapest package and set price
             document.querySelectorAll('.package-selector').forEach(container => {
                 const select = container.querySelector('.package-select-dropdown');
                 const priceSpan = container.querySelector('.price-display span');
-                if (select && priceSpan) {
-                    const initPrice = Number(select.value || 0);
-                    priceSpan.textContent = new Intl.NumberFormat('vi-VN', {
-                        style: 'currency',
-                        currency: 'VND',
-                        maximumFractionDigits: 0,
-                        minimumFractionDigits: 0
-                    }).format(initPrice);
+                if (!select || !priceSpan) return;
+
+                const opts = Array.from(select.options);
+                if (opts.length > 0) {
+                    let minOption = opts[0];
+                    let minVal = Number(minOption.value || Infinity);
+                    for (const o of opts) {
+                        const val = Number(o.value || Infinity);
+                        if (val < minVal) { minVal = val; minOption = o; }
+                    }
+                    // Select the lowest-priced option
+                    select.value = String(minOption.value);
                 }
+
+                const initPrice = Number(select.value || 0);
+                priceSpan.textContent = new Intl.NumberFormat('vi-VN', {
+                    style: 'currency',
+                    currency: 'VND',
+                    maximumFractionDigits: 0,
+                    minimumFractionDigits: 0
+                }).format(initPrice);
             });
 
         // Video popup logic
