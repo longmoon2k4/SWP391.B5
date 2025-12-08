@@ -37,7 +37,6 @@ public class HomeController {
             Optional<Users> userOpt = userRepository.findByUsername(username);
             userOpt.ifPresent(user -> model.addAttribute("loggedInUser", user));
         }
-
         // Lấy danh sách sản phẩm đã duyệt và phân trang
         Pageable pageable = PageRequest.of(page, size);
         Page<ProductCardDTO> productPage = productService.getApprovedProducts(pageable);

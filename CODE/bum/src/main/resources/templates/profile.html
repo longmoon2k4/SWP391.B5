@@ -57,7 +57,7 @@
     <!-- Phần ví tiền -->
     <div class="wallet">
         <h2>Ví của bạn</h2>
-        <p><strong>Số dư:</strong> <span class="balance" th:text="${(loggedInUser.walletBalance != null ? #numbers.formatDecimal(loggedInUser.walletBalance, 1, 'COMMA', 2, 'POINT') : '0,00') + ' ₫'}"></span></p>
+        <p><strong>Số dư:</strong> <span class="balance" th:text="${(loggedInUser.walletBalance != null ? #numbers.formatDecimal(loggedInUser.walletBalance, 1, 'COMMA', 0, 'POINT') : '0,00') + ' ₫'}"></span></p>
         <div class="wallet-actions">
             <button class="primary" onclick="openDepositModal()">Nạp tiền</button>
         </div>
