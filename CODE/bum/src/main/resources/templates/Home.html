@@ -4,39 +4,244 @@
     <meta charset="UTF-8">
     <title>License Marketplace System</title>
     <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css"/>
+    <style>
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 20px;
+        }
+        .product-card {
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .product-card h3 {
+            margin-top: 0;
+        }
+        .product-meta {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            color: #555;
+            margin-bottom: 10px;
+        }
+        .package-selector {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .package-select-dropdown {
+            width: 100%;
+            padding: 8px;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: white;
+        }
+        .price-display {
+            font-size: 1.4em;
+            font-weight: bold;
+            color: #28a745;
+            text-align: center;
+        }
+        .product-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: auto; /* Push actions to the bottom */
+        }
+        .btn {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            width: 100%;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            color: white;
+        }
+        .btn-secondary {
+            background-color: #6c757d;
+            color: white;
+        }
+        .video-popup {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.7);
+            justify-content: center;
+            align-items: center;
+        }
+        .video-popup-content {
+            background: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            position: relative;
+        }
+        .close-popup {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: red;
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            border: none;
+            cursor: pointer;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 20px 0;
+        }
+        .pagination a, .pagination span {
+            margin: 0 5px;
+            padding: 8px 12px;
+            text-decoration: none;
+            border: 1px solid #ddd;
+            color: #007bff;
+        }
+        .pagination .current {
+            font-weight: bold;
+            background-color: #007bff;
+            color: white;
+            border-color: #007bff;
+        }
+        .pagination .disabled {
+            color: #ccc;
+            pointer-events: none;
+            border-color: #ddd;
+        }
+    </style>
 </head>
 <body>
 
-<!-- 1. Thay thế header bằng fragment -->
 <div th:replace="~{layout :: header}"></div>
 
-<!-- 2. Nội dung chính của trang chủ -->
 <div class="main-content">
-    <h2>Sản phẩm bán chạy nhất</h2>
-    <div>
-        <!-- Nội dung sản phẩm bán chạy nhất sẽ được hiển thị ở đây -->
-        <!-- Tên và giá sản phẩm -->
-        <table style="width: 100%">
-            <tr>
-                <th style="text-align: left;">Tên sản phẩm</th>
-                <th style="text-align: right;">Lượt xem</th>
-            </tr>
-            <tr th:each="product : ${mostPurchasedProduct}">
-                <td th:text="${product.name}">Tên sản phẩm</td>
-                <td style="text-align: right;" th:text="${#numbers.formatDecimal(product.viewCount, 0, 'COMMA', 0, 'POINT')} + ' Lượt xem'">Giá sản phẩm</td>
-            </tr>
-        </table>
-        <p th:text="'Chào mừng ' + ${loggedInUser != null ? loggedInUser.fullName : 'Khách'} + ' đến với License Marketplace System!'">
-            Chào mừng quý khách đến với License Marketplace System!
-        </p>
+    <h2>Tất cả sản phẩm</h2>
+
+    <!-- Product Grid -->
+    <div class="product-grid" th:if="${productPage != null && !productPage.isEmpty()}">
+        <div class="product-card" th:each="product : ${productPage.content}">
+            <div>
+                <h3 th:text="${product.name}">Tên sản phẩm</h3>
+                <div class="product-meta">
+                    <span><i class="fas fa-eye"></i> <span th:text="${product.viewCount}">0</span> Lượt xem</span>
+                    <span><i class="fas fa-star"></i> <span th:text="${#numbers.formatDecimal(product.averageRating, 1, 1)}">0.0</span>/5.0</span>
+                </div>
+                <p th:text="${product.shortDescription}">Mô tả ngắn.</p>
+            </div>
+            <div>
+                <!-- Package Selector -->
+                <div class="package-selector" th:if="${!product.packages.isEmpty()}">
+                    <select class="package-select-dropdown" onchange="updatePrice(this)">
+                        <option th:each="pkg : ${product.packages}"
+                                th:value="${pkg.price}"
+                                th:text="${pkg.name}">
+                        </option>
+                    </select>
+                    <div class="price-display">
+                        <span th:text="${#numbers.formatCurrency(product.packages[0].price)}"></span>
+                    </div>
+                </div>
+
+                <!-- Product Actions -->
+                <div class="product-actions">
+                    <button class="btn btn-secondary view-demo-btn"
+                            th:attr="data-video-url=${product.demoVideoUrl}"
+                            th:disabled="${product.demoVideoUrl == null}">
+                        Xem Demo
+                    </button>
+                    <button class="btn btn-primary">Mua Ngay</button>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="placeholder">
-        Cuộn xuống nữa...
+    <div th:if="${productPage == null || productPage.isEmpty()}">
+        <p>Không có sản phẩm nào để hiển thị.</p>
+    </div>
+
+    <!-- Pagination -->
+    <div class="pagination" th:if="${productPage != null && productPage.totalPages > 1}">
+        <a th:href="@{/(page=${productPage.number - 1})}"
+           th:classappend="${productPage.first ? 'disabled' : ''}">
+            &laquo; Trước
+        </a>
+        <span th:each="i : ${#numbers.sequence(0, productPage.totalPages - 1)}">
+            <a th:href="@{/(page=${i})}"
+               th:text="${i + 1}"
+               th:classappend="${i == productPage.number ? 'current' : ''}"></a>
+        </span>
+        <a th:href="@{/(page=${productPage.number + 1})}"
+           th:classappend="${productPage.last ? 'disabled' : ''}">
+            Sau &raquo;
+        </a>
     </div>
 </div>
 
-<!-- 3. Thay thế footer bằng fragment -->
+<!-- Video Popup -->
+<div id="videoPopup" class="video-popup">
+    <div class="video-popup-content">
+        <button id="closePopupBtn" class="close-popup">&times;</button>
+        <iframe id="videoFrame" width="800" height="450" src="" frameborder="0" allowfullscreen></iframe>
+    </div>
+</div>
+
 <div th:replace="~{layout :: footer}"></div>
+
+<script>
+    // Function to update price display when a package is selected
+    function updatePrice(selectElement) {
+        const selectedPrice = selectElement.value;
+        // Find the price display span within the same parent container
+        const priceDisplaySpan = selectElement.parentElement.querySelector('.price-display span');
+        if (priceDisplaySpan) {
+            // Format the number as Vietnamese currency
+            priceDisplaySpan.textContent = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(selectedPrice);
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        const videoPopup = document.getElementById('videoPopup');
+        const videoFrame = document.getElementById('videoFrame');
+        const closePopupBtn = document.getElementById('closePopupBtn');
+
+        // Video popup logic
+        document.querySelectorAll('.view-demo-btn').forEach(button => {
+            button.addEventListener('click', function () {
+                const videoUrl = this.getAttribute('data-video-url');
+                if (videoUrl) {
+                    let embedUrl = videoUrl.replace("watch?v=", "embed/");
+                    videoFrame.src = embedUrl;
+                    videoPopup.style.display = 'flex';
+                }
+            });
+        });
+
+        function closePopup() {
+            videoPopup.style.display = 'none';
+            videoFrame.src = ''; // Stop video playback
+        }
+
+        closePopupBtn.addEventListener('click', closePopup);
+        videoPopup.addEventListener('click', function (e) {
+            if (e.target === videoPopup) {
+                closePopup();
+            }
+        });
+    });
+</script>
 
 </body>
 </html>
