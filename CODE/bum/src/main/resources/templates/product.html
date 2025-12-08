@@ -5,100 +5,71 @@
     <title th:text="${product.name}"></title>
     <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css"/>
     <style>
-        .product-detail-container {
-            display: flex;
-            gap: 30px;
-            padding: 20px;
-            max-width: 1200px;
-            margin: auto;
+        /* Safeguard: prevent long values from breaking sidebar layout */
+        .product-page .info-list .value {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            display: block;
         }
-        .product-main-content {
-            flex: 2;
-        }
-        .product-sidebar {
-            flex: 1;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-            padding: 20px;
-            align-self: flex-start; /* Sticks to the top */
-        }
-        .product-video {
-            margin-bottom: 20px;
-        }
-        .product-description h2 {
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-        }
-        .product-sidebar h3 {
-            margin-top: 0;
-        }
-        .package-select-dropdown {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 15px;
-            border-radius: 5px;
-        }
-        .price-display {
-            font-size: 1.8em;
-            font-weight: bold;
-            color: #28a745;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .btn-buy {
-            width: 100%;
-            padding: 15px;
-            font-size: 1.2em;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        .product-reviews {
-            margin-top: 30px;
-        }
-        .review {
-            border-top: 1px solid #eee;
-            padding: 15px 0;
-        }
-        .review-author {
-            font-weight: bold;
-        }
-        .review-rating {
-            color: #ffc107;
+        @media (max-width: 992px) {
+            .product-page .info-list li { flex-wrap: wrap; }
+            .product-page .info-list .value { white-space: normal; }
         }
     </style>
 </head>
-<body>
+<body class="product-page">
 
 <div th:replace="~{layout :: header}"></div>
 
 <div class="main-content" th:if="${product}">
     <div class="product-detail-container">
-        <!-- Main Content (Video, Description, Reviews) -->
+        <!-- Main Content (Video, Description, Versions, Reviews) -->
         <div class="product-main-content">
             <h1 th:text="${product.name}">Tên sản phẩm</h1>
 
-            <!-- Demo Video -->
             <div class="product-video" th:if="${product.demoVideoUrl}">
-                <iframe width="100%" height="450"
-                        th:src="${product.demoVideoUrl.replace('watch?v=', 'embed/')}"
-                        frameborder="0" allowfullscreen>
-                </iframe>
+                <iframe
+                        th:attr="data-video-url=${product.demoVideoUrl}"
+                        title="Product Demo"
+                        loading="lazy"
+                        referrerpolicy="strict-origin-when-cross-origin"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        allowfullscreen
+                ></iframe>
             </div>
 
-            <!-- Full Description -->
             <div class="product-description">
-                <h2>Mô tả chi tiết</h2>
-                <div th:utext="${product.description}">
-                    <!-- Nội dung HTML/Markdown sẽ được render ở đây -->
-                </div>
+                <h2 class="section-title">Mô tả chi tiết</h2>
+                <div th:utext="${product.description}"></div>
             </div>
 
-            <!-- Reviews -->
+            <!-- Version History -->
+            <div class="version-history" th:if="${!product.versions.isEmpty()}">
+                <h2 class="section-title">Lịch sử phiên bản</h2>
+                <table class="version-history-table">
+                    <thead>
+                    <tr>
+                        <th>Phiên bản</th>
+                        <th>Ngày phát hành</th>
+                        <th>Trạng thái</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="version : ${product.versions}">
+                        <td th:text="${version.versionNumber}">1.0.0</td>
+                        <td th:text="${#temporals.format(version.createdAt, 'dd-MM-yyyy')}">dd-MM-yyyy</td>
+                        <td>
+                            <span th:if="${version.isCurrentVersion}" class="current-version-badge">Hiện tại</span>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+
             <div class="product-reviews">
-                <h2>Đánh giá từ người dùng</h2>
+                <h2 class="section-title">Đánh giá từ người dùng <span th:text="'(' + ${#lists.size(product.reviews)} + ')'"></span></h2>
                 <div th:if="${product.reviews.isEmpty()}">
                     <p>Chưa có đánh giá nào cho sản phẩm này.</p>
                 </div>
@@ -114,43 +85,160 @@
             </div>
         </div>
 
-        <!-- Sidebar (Purchase Options) -->
+        <!-- Sidebar (Purchase & Info) -->
         <div class="product-sidebar">
-            <h3>Mua sản phẩm</h3>
-            <div th:if="${!product.packages.isEmpty()}">
-                <select id="packageSelect" class="package-select-dropdown" onchange="updateSidebarPrice()">
-                    <option th:each="pkg : ${product.packages}"
-                            th:value="${pkg.price}"
-                            th:text="${pkg.name}">
-                    </option>
-                </select>
-                <div id="sidebarPriceDisplay" class="price-display">
-                    <span th:text="${#numbers.formatCurrency(product.packages[0].price)}"></span>
+            <div class="purchase-box">
+                <h3>Mua sản phẩm</h3>
+                <div th:if="${!product.packages.isEmpty()}">
+                    <select id="packageSelect" class="package-select-dropdown" onchange="updateSidebarPrice()">
+                        <option th:each="pkg : ${product.packages}"
+                                th:value="${pkg.price}"
+                                th:text="${pkg.name}">
+                        </option>
+                    </select>
+                    <div id="sidebarPriceDisplay" class="price-display">
+                        <span></span>
+                    </div>
+                    <button class="btn-buy">Thanh toán</button>
                 </div>
-                <button class="btn-buy">Thêm vào giỏ hàng</button>
+                <div th:if="${product.packages.isEmpty()}">
+                    <p>Sản phẩm này hiện chưa có gói giá nào.</p>
+                </div>
             </div>
-            <div th:if="${product.packages.isEmpty()}">
-                <p>Sản phẩm này hiện chưa có gói giá nào.</p>
+
+            <div class="info-box">
+                <h3>Thông tin sản phẩm</h3>
+                <ul class="info-list">
+                    <li>
+                        <span class="label">Dev: </span>
+                        <span class="value" th:text="${product.developer.fullName}">Dev Name</span>
+                    </li>
+                    <li>
+                        <span class="label">Danh mục:</span>
+                        <span class="value" th:text="${product.category.name}">Category Name</span>
+                    </li>
+                    <li>
+                        <span class="label">Lượt bán:</span>
+                        <span class="value" th:text="${product.totalSales}">0</span>
+                    </li>
+                    <li>
+                        <span class="label">Lượt xem:</span>
+                        <span class="value" th:text="${product.viewCount}">0</span>
+                    </li>
+                    <!-- SỬA LỖI LOGIC: Tìm và hiển thị phiên bản có isCurrentVersion = true -->
+                    <th:block th:each="v : ${product.versions}" th:if="${v.isCurrentVersion}">
+                        <li>
+                            <span class="label">Phiên bản:</span>
+                            <span class="value" th:text="${v.versionNumber}">1.0.0</span>
+                        </li>
+                    </th:block>
+                    <li>
+                        <span class="label">Ngày phát hành:</span>
+                        <span class="value" th:text="${#temporals.format(product.createdAt, 'dd-MM-yyyy')}">dd-MM-yyyy</span>
+                    </li>
+                    <li>
+                        <span class="label">Cập nhật lần cuối:</span>
+                        <span class="value" th:text="${#temporals.format(product.updatedAt, 'dd-MM-yyyy')}">dd-MM-yyyy HH:mm</span>
+                    </li>
+                </ul>
             </div>
         </div>
     </div>
 </div>
 
-<div th:if="${product == null}">
-    <p>Không tìm thấy sản phẩm.</p>
+<div th:if="${product == null}" class="main-content">
+    <p style="text-align: center;">Không tìm thấy sản phẩm.</p>
 </div>
 
 <div th:replace="~{layout :: footer}"></div>
 
 <script>
+    function formatVND(value) {
+        const num = Number(value || 0);
+        return new Intl.NumberFormat('vi-VN', {
+            style: 'currency',
+            currency: 'VND',
+            maximumFractionDigits: 0,
+            minimumFractionDigits: 0
+        }).format(num);
+    }
+
     function updateSidebarPrice() {
         const selectElement = document.getElementById('packageSelect');
         const priceDisplaySpan = document.querySelector('#sidebarPriceDisplay span');
         if (selectElement && priceDisplaySpan) {
-            const selectedPrice = selectElement.value;
-            priceDisplaySpan.textContent = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(selectedPrice);
+            priceDisplaySpan.textContent = formatVND(selectElement.value);
         }
     }
+
+    function buildEmbedUrl(rawUrl) {
+        if (!rawUrl) return null;
+        try {
+            const u = new URL(rawUrl);
+            const host = u.hostname.replace('www.', '').toLowerCase();
+            // YouTube variants
+            if (host.includes('youtube.com')) {
+                // /watch?v=ID
+                const v = u.searchParams.get('v');
+                if (v) return `https://www.youtube.com/embed/${v}`;
+                // /shorts/ID, /live/ID, /embed/ID
+                const parts = u.pathname.split('/').filter(Boolean);
+                const idx = parts.findIndex(p => ['shorts','live','embed'].includes(p));
+                if (idx >= 0 && parts[idx+1]) return `https://www.youtube.com/embed/${parts[idx+1]}`;
+            }
+            if (host.includes('youtu.be')) {
+                const id = u.pathname.split('/').filter(Boolean)[0];
+                if (id) return `https://www.youtube.com/embed/${id}`;
+            }
+            // Vimeo
+            if (host.includes('vimeo.com')) {
+                const id = u.pathname.split('/').filter(Boolean).pop();
+                if (id && /^\d+$/.test(id)) return `https://player.vimeo.com/video/${id}`;
+            }
+            return rawUrl; // fallback: maybe already an embed URL
+        } catch (e) {
+            return rawUrl;
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        // Auto-select cheapest package and update price
+        const selectElement = document.getElementById('packageSelect');
+        if (selectElement && selectElement.options.length > 0) {
+            let minIndex = 0;
+            let minValue = Number(selectElement.options[0].value);
+            for (let i = 1; i < selectElement.options.length; i++) {
+                const val = Number(selectElement.options[i].value);
+                if (!isNaN(val) && val < minValue) {
+                    minValue = val;
+                    minIndex = i;
+                }
+            }
+            selectElement.selectedIndex = minIndex;
+            updateSidebarPrice();
+        }
+
+        // Initialize video iframe
+        const iframe = document.querySelector('.product-video iframe');
+        if (iframe) {
+            const raw = iframe.getAttribute('data-video-url');
+            const embed = buildEmbedUrl(raw);
+            if (embed) {
+                iframe.src = embed;
+            } else if (raw) {
+                // Fallback: open in new tab on click
+                const overlay = document.createElement('a');
+                overlay.href = raw;
+                overlay.target = '_blank';
+                overlay.rel = 'noopener noreferrer';
+                overlay.style.position = 'absolute';
+                overlay.style.inset = '0';
+                overlay.style.display = 'block';
+                overlay.style.background = 'transparent';
+                iframe.parentElement.appendChild(overlay);
+            }
+        }
+    });
 </script>
 
 </body>

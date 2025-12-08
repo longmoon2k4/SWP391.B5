@@ -1,7 +1,8 @@
 package com.smiledev.bum.entity;
 
 import java.time.LocalDateTime;
-import java.util.Set;
+import java.util.List;
+import java.util.Set; // Import lại Set
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,6 +15,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 
 @Entity
@@ -69,7 +71,8 @@ public class Products {
     private Categories category;
 
     @OneToMany(mappedBy = "product")
-    private Set<ProductVersions> versions;
+    @OrderBy("createdAt DESC")
+    private Set<ProductVersions> versions; // Đổi lại thành Set
 
     @OneToMany(mappedBy = "product")
     private Set<ProductPackages> packages;
@@ -78,13 +81,14 @@ public class Products {
     private Set<Licenses> licenses;
 
     @OneToMany(mappedBy = "product")
+    @OrderBy("createdAt DESC") // Thêm OrderBy cho reviews
     private Set<Reviews> reviews;
+
+    // --- Getters and Setters ---
 
     public int getProductId() {
         return productId;
     }
-
-    // --- Getters and Setters ---
 
     public void setProductId(int productId) {
         this.productId = productId;
@@ -186,11 +190,11 @@ public class Products {
         this.category = category;
     }
 
-    public Set<ProductVersions> getVersions() {
+    public Set<ProductVersions> getVersions() { // Cập nhật getter
         return versions;
     }
 
-    public void setVersions(Set<ProductVersions> versions) {
+    public void setVersions(Set<ProductVersions> versions) { // Cập nhật setter
         this.versions = versions;
     }
 

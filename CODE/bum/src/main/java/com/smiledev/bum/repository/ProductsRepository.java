@@ -21,7 +21,14 @@ public interface ProductsRepository extends JpaRepository<Products, Integer> {
     @Query("SELECT p FROM Products p WHERE p.status = 'approved'")
     Page<Products> findAllApproved(Pageable pageable);
 
-    // Lấy sản phẩm theo ID và tải sẵn các collection cần thiết
-    @Query("SELECT p FROM Products p LEFT JOIN FETCH p.packages LEFT JOIN FETCH p.reviews WHERE p.productId = :id")
+    // Lấy sản phẩm theo ID và tải sẵn TẤT CẢ các collection và entity liên quan cần thiết
+    @Query("SELECT p FROM Products p " +
+           "LEFT JOIN FETCH p.developer " +
+           "LEFT JOIN FETCH p.category " +
+           "LEFT JOIN FETCH p.packages " +
+           "LEFT JOIN FETCH p.versions " +
+           "LEFT JOIN FETCH p.reviews r " +
+           "LEFT JOIN FETCH r.user " +
+           "WHERE p.productId = :id")
     Optional<Products> findByIdWithDetails(@Param("id") int id);
 }
