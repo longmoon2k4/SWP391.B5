@@ -35,6 +35,12 @@ public class ProductService {
     }
 
     @Transactional(readOnly = true)
+    public Page<ProductCardDTO> getApprovedProducts(Integer categoryId, String name, Pageable pageable) {
+        Page<Products> productPage = productsRepository.findApprovedByCategoryIdAndName(categoryId, name, pageable);
+        return productPage.map(this::convertToProductCardDTO);
+    }
+
+    @Transactional(readOnly = true)
     public Optional<Products> findProductById(int id) {
         // Sử dụng phương thức mới để tải tất cả dữ liệu cần thiết
         return productsRepository.findByIdWithDetails(id);

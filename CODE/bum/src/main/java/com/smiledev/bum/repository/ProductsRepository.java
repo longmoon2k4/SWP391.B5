@@ -31,4 +31,7 @@ public interface ProductsRepository extends JpaRepository<Products, Integer> {
            "LEFT JOIN FETCH r.user " +
            "WHERE p.productId = :id")
     Optional<Products> findByIdWithDetails(@Param("id") int id);
+
+    @Query("SELECT p FROM Products p WHERE p.status = 'approved' AND (:categoryId IS NULL OR p.category.id = :categoryId) AND (:name IS NULL OR p.name LIKE %:name%)")
+    Page<Products> findApprovedByCategoryIdAndName(@Param("categoryId") Integer categoryId, @Param("name") String name, Pageable pageable);
 }

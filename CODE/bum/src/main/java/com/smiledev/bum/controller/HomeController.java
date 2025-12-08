@@ -13,7 +13,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.smiledev.bum.dto.ProductCardDTO;
+import com.smiledev.bum.entity.Categories;
 import com.smiledev.bum.entity.Users;
+import com.smiledev.bum.repository.CategoriesRepository;
 import com.smiledev.bum.repository.UserRepository;
 import com.smiledev.bum.service.ProductService;
 
@@ -26,10 +28,15 @@ public class HomeController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private CategoriesRepository categoriesRepository;
+
     @GetMapping("/")
     public String home(Model model, Authentication authentication,
                        @RequestParam(name = "page", defaultValue = "0") int page,
-                       @RequestParam(name = "size", defaultValue = "8") int size) {
+                       @RequestParam(name = "size", defaultValue = "8") int size,
+                       @RequestParam(value = "category", required = false) Integer categoryId,
+                       @RequestParam(value = "search", required = false) String search) {
 
         // Lấy thông tin người dùng đăng nhập
         if (authentication != null && authentication.isAuthenticated()) {
@@ -39,9 +46,14 @@ public class HomeController {
         }
         // Lấy danh sách sản phẩm đã duyệt và phân trang
         Pageable pageable = PageRequest.of(page, size);
-        Page<ProductCardDTO> productPage = productService.getApprovedProducts(pageable);
+        Page<ProductCardDTO> productPage = productService.getApprovedProducts(categoryId, search, pageable);
 
         model.addAttribute("productPage", productPage);
+
+        Iterable<Categories> categories = categoriesRepository.findAll();
+        model.addAttribute("categories", categories);
+        model.addAttribute("selectedCategoryId", categoryId);
+        model.addAttribute("search", search);
 
         return "Home"; // Trả về view Home.html
     }

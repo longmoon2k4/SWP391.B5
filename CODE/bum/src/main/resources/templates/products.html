@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Danh sách sản phẩm</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css"/>
+</head>
+<body class="products-page">
+
+<div th:replace="~{layout :: header}"></div>
+
+<div class="main-content">
+    <div class="container">
+        <h1>Danh sách sản phẩm</h1>
+
+        <!-- Search and Filter Form -->
+        <form th:action="@{/product}" method="get" class="filter-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="search">Tìm kiếm</label>
+                    <input type="text" id="search" name="search" th:value="${search}" placeholder="Nhập tên sản phẩm...">
+                </div>
+                <div class="form-group">
+                    <label for="category">Lọc theo danh mục</label>
+                    <select id="category" name="category">
+                        <option value="">Tất cả danh mục</option>
+                        <option th:each="cat : ${categories}"
+                                th:value="${cat.categoryId}"
+                                th:text="${cat.name}"
+                                th:selected="${selectedCategoryId != null && selectedCategoryId == cat.categoryId}"></option>
+                    </select>
+                </div>
+            </div>
+            <button type="submit" class="btn">Áp dụng</button>
+        </form>
+
+        <!-- Product Grid -->
+        <div class="product-grid" th:if="${productPage.hasContent()}">
+            <div class="product-card" th:each="product : ${productPage.content}">
+                <a th:href="@{'/product/' + ${product.id}}">
+                    <div class="product-card-image">
+                        <!-- You can add an image here if you have one -->
+                        <img th:src="@{/images/placeholder.png}" alt="Product Image">
+                    </div>
+                    <div class="product-card-body">
+                        <h3 class="product-card-title" th:text="${product.name}">Tên sản phẩm</h3>
+                        <p class="product-card-description" th:text="${product.shortDescription}">Mô tả ngắn</p>
+                        <div class="product-card-footer">
+                            <span class="price" th:if="${!product.packages.isEmpty()}" th:text="${#numbers.formatDecimal(product.packages[0].price, 0, 'COMMA', 0, 'POINT')} + ' VNĐ'"></span>
+                            <span class="price" th:if="${product.packages.isEmpty()}">Chưa có giá</span>
+                            <span class="rating">
+                                <span th:text="${#numbers.formatDecimal(product.averageRating, 1, 1)}">4.5</span> ★
+                            </span>
+                        </div>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <div th:if="${!productPage.hasContent()}">
+            <p>Không tìm thấy sản phẩm nào.</p>
+        </div>
+
+        <!-- Pagination -->
+        <nav class="pagination" th:if="${productPage.totalPages > 1}">
+            <ul>
+                <li th:if="${productPage.hasPrevious()}">
+                    <a th:href="@{/product(page=${productPage.number - 1}, size=${productPage.size}, search=${search}, category=${selectedCategoryId})}">Trước</a>
+                </li>
+                <li th:each="i : ${#numbers.sequence(0, productPage.totalPages - 1)}"
+                    th:classappend="${i == productPage.number} ? 'active' : ''">
+                    <a th:href="@{/product(page=${i}, size=${productPage.size}, search=${search}, category=${selectedCategoryId})}"
+                       th:text="${i + 1}"></a>
+                </li>
+                <li th:if="${productPage.hasNext()}">
+                    <a th:href="@{/product(page=${productPage.number + 1}, size=${productPage.size}, search=${search}, category=${selectedCategoryId})}">Sau</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<div th:replace="~{layout :: footer}"></div>
+
+</body>
+</html>
