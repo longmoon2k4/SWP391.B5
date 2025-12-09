@@ -8,6 +8,8 @@
         - Làm màn hình LOGIN [Done 5:53 9/12/2025]
         - Tích hợp thanh toán VNPay [To do]
         - Làm home page [To do]
+        - Product Detail [Done 10:02 9/12/2025]
+        - Payment [Done 10:02 9/12/2025]
         ...
 # Thông tin sinh viên 
     1. MSSV: HE186065
