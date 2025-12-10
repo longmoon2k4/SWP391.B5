@@ -46,6 +46,14 @@ public class ProductService {
         return productsRepository.findByIdWithDetails(id);
     }
 
+    @Transactional
+    public void incrementViewCount(int productId) {
+        productsRepository.findById(productId).ifPresent(product -> {
+            product.setViewCount(product.getViewCount() + 1);
+            productsRepository.save(product);
+        });
+    }
+
     private ProductCardDTO convertToProductCardDTO(Products product) {
         ProductCardDTO dto = new ProductCardDTO();
         dto.setId(product.getProductId());

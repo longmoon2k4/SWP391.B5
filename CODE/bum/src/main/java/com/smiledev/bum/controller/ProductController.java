@@ -69,6 +69,7 @@ public class ProductController {
             Optional<Users> userOpt = userRepository.findByUsername(username);
             userOpt.ifPresent(user -> model.addAttribute("loggedInUser", user));
         }
+        productService.incrementViewCount(id);
         Optional<Products> productOpt = productService.findProductById(id);
 
         if (productOpt.isPresent()) {

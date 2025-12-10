@@ -174,7 +174,10 @@
                 errorDiv.textContent = '';
 
                 try {
-                    const headers = { 'Content-Type': 'application/x-www-form-urlencoded' };
+                    const headers = { 
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                        'Accept': 'application/json'
+                    };
                     if (csrfToken) {
                         headers[csrfHeader] = csrfToken;
                     }
@@ -184,6 +187,12 @@
                         headers: headers
                     });
 
+                    // Check for unauthorized status first
+                    if (response.status === 401) {
+                        window.location.href = '/login';
+                        return;
+                    }
+
                     if (response.ok) {
                         const data = await response.json();
                         if (data.paymentUrl) {
@@ -191,8 +200,6 @@
                         } else {
                             throw new Error('Không nhận được URL thanh toán.');
                         }
-                    } else if (response.status === 401) {
-                        window.location.href = '/login';
                     } else {
                         const errorText = await response.text();
                         throw new Error(errorText || 'Lỗi không xác định.');
