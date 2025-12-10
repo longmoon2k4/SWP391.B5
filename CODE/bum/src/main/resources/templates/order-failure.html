@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Thanh toán thất bại</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; text-align: center; }
+        .container { max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff8f8; }
+        .error-message { color: #d9534f; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2 class="error-message">Thanh toán không thành công!</h2>
+        <p th:text="${message}">Đã có lỗi xảy ra trong quá trình xử lý thanh toán hoặc bạn đã hủy giao dịch.</p>
+
+        <div th:if="${order}">
+            <p>Đơn hàng của bạn (<strong th:text="'#' + ${order.orderId}"></strong>) chưa được hoàn tất.</p>
+        </div>
+
+        <p>Vui lòng thử lại sau.</p>
+
+        <a href="/" style="display: inline-block; margin-top: 20px; padding: 10px 20px; background-color: #007bff; color: white; text-decoration: none; border-radius: 5px;">Quay về trang chủ</a>
+    </div>
+</body>
+</html>

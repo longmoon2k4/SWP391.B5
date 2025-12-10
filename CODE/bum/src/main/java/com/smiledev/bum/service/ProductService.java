@@ -66,6 +66,7 @@ public class ProductService {
 
     private ProductPackageDTO convertToProductPackageDTO(ProductPackages productPackage) {
         ProductPackageDTO dto = new ProductPackageDTO();
+        dto.setPackageId(productPackage.getPackageId()); // Add this line
         dto.setName(productPackage.getName());
         dto.setPrice(productPackage.getPrice());
         dto.setDurationDays(productPackage.getDurationDays());

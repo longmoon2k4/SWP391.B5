@@ -1,5 +1,6 @@
 package com.smiledev.bum.config;
 
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.text.SimpleDateFormat;
@@ -37,29 +38,13 @@ public class VNPAYConfig {
     @Value("${vnp.version}")
     private String vnp_Version;
 
-    public String getVnp_PayUrl() {
-        return vnp_PayUrl;
-    }
-
-    public String getVnp_ReturnUrl() {
-        return vnp_ReturnUrl;
-    }
-
-    public String getVnp_TmnCode() {
-        return vnp_TmnCode;
-    }
-
-    public String getVnp_HashSecret() {
-        return vnp_HashSecret;
-    }
-
-    public String getVnp_ApiUrl() {
-        return vnp_ApiUrl;
-    }
-
-    public String getVnp_Version() {
-        return vnp_Version;
-    }
+    // Getters for all properties
+    public String getVnp_PayUrl() { return vnp_PayUrl; }
+    public String getVnp_ReturnUrl() { return vnp_ReturnUrl; }
+    public String getVnp_TmnCode() { return vnp_TmnCode; }
+    public String getVnp_HashSecret() { return vnp_HashSecret; }
+    public String getVnp_ApiUrl() { return vnp_ApiUrl; }
+    public String getVnp_Version() { return vnp_Version; }
 
     public String hmacSHA512(final String key, final String data) {
         try {
@@ -103,5 +88,34 @@ public class VNPAYConfig {
             sb.append(chars.charAt(rnd.nextInt(chars.length())));
         }
         return sb.toString();
+    }
+
+    /**
+     * A utility method to build the hash data from a map of parameters.
+     * This is used for verifying the return signature from VNPAY.
+     */
+    public String hashAllFields(Map<String, String> fields) {
+        List<String> fieldNames = new ArrayList<>(fields.keySet());
+        Collections.sort(fieldNames);
+        StringBuilder hashData = new StringBuilder();
+        Iterator<String> itr = fieldNames.iterator();
+        while (itr.hasNext()) {
+            String fieldName = itr.next();
+            String fieldValue = fields.get(fieldName);
+            if ((fieldValue != null) && (fieldValue.length() > 0)) {
+                try {
+                    hashData.append(fieldName);
+                    hashData.append('=');
+                    hashData.append(URLEncoder.encode(fieldValue, StandardCharsets.US_ASCII.toString()));
+                    if (itr.hasNext()) {
+                        hashData.append('&');
+                    }
+                } catch (UnsupportedEncodingException e) {
+                    // This should not happen with US_ASCII
+                    e.printStackTrace();
+                }
+            }
+        }
+        return hashData.toString();
     }
 }

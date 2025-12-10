@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Thanh toán thành công</title>
+    <!-- Add some basic styling -->
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        .container { max-width: 800px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+        .license-key { background-color: #f0f0f0; padding: 10px; border: 1px dashed #ccc; font-family: monospace; font-size: 1.2em; }
+        .download-btn { display: inline-block; padding: 10px 20px; background-color: #28a745; color: white; text-decoration: none; border-radius: 5px; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Thanh toán thành công!</h2>
+        <p>Cảm ơn bạn đã mua hàng. Dưới đây là thông tin chi tiết đơn hàng của bạn.</p>
+
+        <div th:if="${order}">
+            <h3>Chi tiết đơn hàng</h3>
+            <p><strong>Mã đơn hàng:</strong> <span th:text="${order.orderId}"></span></p>
+            <p><strong>Tổng tiền:</strong> <span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'COMMA', 2, 'POINT')} + ' VND'"></span></p>
+            <p><strong>Ngày mua:</strong> <span th:text="${#temporals.format(order.createdAt, 'dd-MM-yyyy HH:mm')}"></span></p>
+        </div>
+
+        <div th:if="${licenses != null and not #lists.isEmpty(licenses)}">
+            <h3>License Key của bạn</h3>
+            <div th:each="license : ${licenses}">
+                <p><strong>Sản phẩm:</strong> <span th:text="${license.product.name}"></span></p>
+                <p class="license-key" th:text="${license.licenseKey}"></p>
+                <a th:href="@{/download/{productId}(productId=${license.product.productId})}" class="download-btn">Tải xuống</a>
+            </div>
+        </div>
+
+        <a href="/" style="display: block; margin-top: 30px;">Quay về trang chủ</a>
+    </div>
+</body>
+</html>

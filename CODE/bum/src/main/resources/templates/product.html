@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<html lang="vi" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title th:text="${product.name}"></title>
@@ -17,6 +17,7 @@
             .product-page .info-list li { flex-wrap: wrap; }
             .product-page .info-list .value { white-space: normal; }
         }
+        .error-message { color: red; margin-top: 10px; }
     </style>
 </head>
 <body class="product-page">
@@ -101,14 +102,16 @@
                 <div th:if="${!product.packages.isEmpty()}">
                     <select id="packageSelect" class="package-select-dropdown" onchange="updateSidebarPrice()">
                         <option th:each="pkg : ${product.packages}"
-                                th:value="${pkg.price}"
+                                th:value="${pkg.packageId}"
+                                th:attr="data-price=${pkg.price}"
                                 th:text="${pkg.name}">
                         </option>
                     </select>
                     <div id="sidebarPriceDisplay" class="price-display">
                         <span></span>
                     </div>
-                    <button id="buy-now-btn" class="btn-buy" th:data-product-name="${product.name}">Thanh toán</button>
+                    <button id="buy-now-btn" class="btn-buy">Thanh toán</button>
+                    <div id="error-message" class="error-message"></div>
                 </div>
                 <div th:if="${product.packages.isEmpty()}">
                     <p>Sản phẩm này hiện chưa có gói giá nào.</p>
@@ -134,7 +137,6 @@
                         <span class="label">Lượt xem:</span>
                         <span class="value" th:text="${product.viewCount}">0</span>
                     </li>
-                    <!-- SỬA LỖI LOGIC: Tìm và hiển thị phiên bản có isCurrentVersion = true -->
                     <th:block th:each="v : ${product.versions}" th:if="${v.isCurrentVersion}">
                         <li>
                             <span class="label">Phiên bản:</span>
@@ -161,11 +163,11 @@
 
 <div th:replace="~{layout :: footer}"></div>
 
-<script>
-    function buyNow(price, productName) {
-        const integerPrice = parseInt(price, 10);
-        window.location.href = '/api/v1/transactions/create-payment?amount=' + integerPrice + '&orderInfo=' + encodeURIComponent('Thanh toan don hang ' + productName);
-    }
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const csrfToken = /*[[${_csrf.token}]]*/ null;
+    const csrfHeader = /*[[${_csrf.headerName}]]*/ null;
+    /*]]>*/
 
     function formatVND(value) {
         const num = Number(value || 0);
@@ -181,7 +183,9 @@
         const selectElement = document.getElementById('packageSelect');
         const priceDisplaySpan = document.querySelector('#sidebarPriceDisplay span');
         if (selectElement && priceDisplaySpan) {
-            priceDisplaySpan.textContent = formatVND(selectElement.value);
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            const price = selectedOption.getAttribute('data-price');
+            priceDisplaySpan.textContent = formatVND(price);
         }
     }
 
@@ -190,12 +194,9 @@
         try {
             const u = new URL(rawUrl);
             const host = u.hostname.replace('www.', '').toLowerCase();
-            // YouTube variants
             if (host.includes('youtube.com')) {
-                // /watch?v=ID
                 const v = u.searchParams.get('v');
                 if (v) return `https://www.youtube.com/embed/${v}`;
-                // /shorts/ID, /live/ID, /embed/ID
                 const parts = u.pathname.split('/').filter(Boolean);
                 const idx = parts.findIndex(p => ['shorts','live','embed'].includes(p));
                 if (idx >= 0 && parts[idx+1]) return `https://www.youtube.com/embed/${parts[idx+1]}`;
@@ -204,25 +205,23 @@
                 const id = u.pathname.split('/').filter(Boolean)[0];
                 if (id) return `https://www.youtube.com/embed/${id}`;
             }
-            // Vimeo
             if (host.includes('vimeo.com')) {
                 const id = u.pathname.split('/').filter(Boolean).pop();
                 if (id && /^\d+$/.test(id)) return `https://player.vimeo.com/video/${id}`;
             }
-            return rawUrl; // fallback: maybe already an embed URL
+            return rawUrl;
         } catch (e) {
             return rawUrl;
         }
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        // Auto-select cheapest package and update price
         const selectElement = document.getElementById('packageSelect');
         if (selectElement && selectElement.options.length > 0) {
             let minIndex = 0;
-            let minValue = Number(selectElement.options[0].value);
+            let minValue = Number(selectElement.options[0].getAttribute('data-price'));
             for (let i = 1; i < selectElement.options.length; i++) {
-                const val = Number(selectElement.options[i].value);
+                const val = Number(selectElement.options[i].getAttribute('data-price'));
                 if (!isNaN(val) && val < minValue) {
                     minValue = val;
                     minIndex = i;
@@ -232,7 +231,6 @@
             updateSidebarPrice();
         }
 
-        // Initialize video iframe
         const iframe = document.querySelector('.product-video iframe');
         if (iframe) {
             const raw = iframe.getAttribute('data-video-url');
@@ -240,7 +238,6 @@
             if (embed) {
                 iframe.src = embed;
             } else if (raw) {
-                // Fallback: open in new tab on click
                 const overlay = document.createElement('a');
                 overlay.href = raw;
                 overlay.target = '_blank';
@@ -253,14 +250,55 @@
             }
         }
 
-        // Add click listener for the buy now button
         const buyNowBtn = document.getElementById('buy-now-btn');
+        const errorMessageDiv = document.getElementById('error-message');
+
         if (buyNowBtn) {
-            buyNowBtn.addEventListener('click', function() {
-                const selectElement = document.getElementById('packageSelect');
-                const selectedPrice = selectElement.value;
-                const productName = this.getAttribute('data-product-name');
-                buyNow(selectedPrice, productName);
+            buyNowBtn.addEventListener('click', async function() {
+                const packageId = document.getElementById('packageSelect').value;
+                if (!packageId) {
+                    errorMessageDiv.textContent = 'Vui lòng chọn một gói.';
+                    return;
+                }
+
+                // Disable button to prevent multiple clicks
+                buyNowBtn.disabled = true;
+                errorMessageDiv.textContent = '';
+
+                try {
+                    const headers = {
+                        'Content-Type': 'application/x-www-form-urlencoded',
+                    };
+                    if (csrfToken) {
+                        headers[csrfHeader] = csrfToken;
+                    }
+
+                    const response = await fetch('/api/v1/orders/checkout?packageId=' + packageId, {
+                        method: 'POST',
+                        headers: headers
+                    });
+
+                    if (response.ok) {
+                        const data = await response.json();
+                        if (data.paymentUrl) {
+                            window.location.href = data.paymentUrl;
+                        } else {
+                            errorMessageDiv.textContent = 'Không nhận được URL thanh toán.';
+                        }
+                    } else if (response.status === 401) {
+                        // Unauthorized, redirect to login
+                        window.location.href = '/login';
+                    } else {
+                        const errorData = await response.text();
+                        errorMessageDiv.textContent = 'Lỗi: ' + (errorData || response.statusText);
+                    }
+                } catch (error) {
+                    errorMessageDiv.textContent = 'Đã xảy ra lỗi kết nối. Vui lòng thử lại.';
+                    console.error('Checkout error:', error);
+                } finally {
+                    // Re-enable the button
+                    buyNowBtn.disabled = false;
+                }
             });
         }
     });

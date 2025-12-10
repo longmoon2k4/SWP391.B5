@@ -10,6 +10,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class ProductPackageDTO {
+    private int packageId; // Add the missing field
     private String name;
     private BigDecimal price;
     private Integer durationDays;
