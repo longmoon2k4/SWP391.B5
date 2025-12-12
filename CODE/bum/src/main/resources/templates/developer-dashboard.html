@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
+<head>
+    <title>Developer Dashboard</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container mt-4">
+        <h1>Developer Dashboard</h1>
+        <p>Welcome to the developer dashboard. Here you can manage your products and view sales analytics.</p>
+        <!-- Add developer-specific widgets and links here -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">My Products</h5>
+                        <p class="card-text">View and manage your products.</p>
+                        <a href="#" class="btn btn-primary">Go to My Products</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Sales Analytics</h5>
+                        <p class="card-text">View sales and download reports.</p>
+                        <a href="#" class="btn btn-primary">View Analytics</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">API Keys</h5>
+                        <p class="card-text">Manage your API keys for product integration.</p>
+                        <a href="#" class="btn btn-primary">Manage API Keys</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

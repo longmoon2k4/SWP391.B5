@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
+<head>
+    <title>User Dashboard</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <div class="container mt-4">
+        <h1>User Dashboard</h1>
+        <p>Welcome to your dashboard. Here you can view your purchased products and manage your account.</p>
+        <!-- Add user-specific widgets and links here -->
+        <div class="row">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">My Products</h5>
+                        <p class="card-text">View and download your purchased products.</p>
+                        <a href="#" class="btn btn-primary">Go to My Products</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">My Profile</h5>
+                        <p class="card-text">Update your profile and account settings.</p>
+                        <a href="#" class="btn btn-primary">Go to My Profile</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

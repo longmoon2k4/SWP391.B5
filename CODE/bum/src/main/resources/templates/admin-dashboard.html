@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
+<head>
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css"/>
+</head>
+<body>
+<div th:replace="~{layout :: header}"></div>
+<div layout:fragment="content">
+    <div class="container mt-4">
+        <h1>Admin Dashboard</h1>
+        <p>Welcome to the admin dashboard. Here you can manage users, products, and system settings.</p>
+        <!-- Add admin-specific widgets and links here -->
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">User Management</h5>
+                        <p class="card-text">Manage all users in the system.</p>
+                        <a href="#" class="btn btn-primary">Go to Users</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">Product Management</h5>
+                        <p class="card-text">Manage all products.</p>
+                        <a href="#" class="btn btn-primary">Go to Products</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">System Settings</h5>
+                        <p class="card-text">Configure system-wide settings.</p>
+                        <a href="#" class="btn btn-primary">Go to Settings</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

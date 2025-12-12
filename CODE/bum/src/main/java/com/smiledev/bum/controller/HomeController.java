@@ -59,4 +59,9 @@ public class HomeController {
 
         return "Home"; // Trả về view Home.html
     }
+
+    @GetMapping("/403")
+    public String accessDenied() {
+        return "403";
+    }
 }
