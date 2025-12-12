@@ -34,6 +34,9 @@ public class OrderService {
     @Autowired
     private VNPAYConfig vnPayConfig;
 
+    @Autowired
+    private ActivityLogService activityLogService;
+
     @Transactional
     public Orders createOrder(int packageId, Users user) {
         ProductPackages productPackage = productPackagesRepository.findById(packageId)
@@ -90,9 +93,11 @@ public class OrderService {
             // Create Transactions
             recordTransactions(order, productPackage.getProduct().getDeveloper());
 
+            activityLogService.logActivity(order.getUser(), "PURCHASE", "Orders", order.getOrderId(), "Purchased package " + productPackage.getPackageId());
         } else {
             // --- FAILURE ---
             order.setStatus(Orders.Status.failed);
+            activityLogService.logActivity(order.getUser(), "PURCHASE_FAILED", "Orders", order.getOrderId(), "Purchase failed");
         }
 
         ordersRepository.save(order);

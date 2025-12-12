@@ -31,6 +31,8 @@ public class HomeController {
     @Autowired
     private CategoriesRepository categoriesRepository;
 
+
+
     @GetMapping("/")
     public String home(Model model, Authentication authentication,
                        @RequestParam(name = "page", defaultValue = "0") int page,
@@ -48,8 +50,8 @@ public class HomeController {
         Pageable pageable = PageRequest.of(page, size);
         Page<ProductCardDTO> productPage = productService.getApprovedProducts(categoryId, search, pageable);
 
-        model.addAttribute("productPage", productPage);
 
+        model.addAttribute("productPage", productPage);
         Iterable<Categories> categories = categoriesRepository.findAll();
         model.addAttribute("categories", categories);
         model.addAttribute("selectedCategoryId", categoryId);

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Chi tiết đơn hàng</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css"/>
+</head>
+<body class="home-page order-details-page">
+
+<div th:replace="~{layout :: header}"></div>
+
+<div class="main-content">
+    <div class="page-heading">
+        <div>
+            <p class="eyebrow">Chi tiết giao dịch</p>
+            <h2>Đơn hàng <span th:text="'#' + ${order.orderId}"></span></h2>
+            <p class="subheading">Theo dõi tiến trình và key bản quyền của bạn.</p>
+        </div>
+    </div>
+
+    <div class="card order-summary">
+        <div class="order-summary__status">
+            <span class="status-chip"
+                  th:text="${order.status.name()}"
+                  th:classappend="${order.status.name() == 'completed' ? ' status-completed' : (order.status.name() == 'pending' ? ' status-pending' : ' status-failed')}"></span>
+            <div class="order-meta">
+                <p><strong>Ngày tạo:</strong> <span th:text="${#temporals.format(order.createdAt, 'dd-MM-yyyy HH:mm')}"></span></p>
+                <p><strong>Tổng tiền:</strong> <span th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'POINT', 0, 'COMMA') + ' ₫'}"></span></p>
+            </div>
+        </div>
+
+        <div th:if="${statusMessage}"
+             th:text="${statusMessage}"
+             th:classappend="${order.status.name() == 'completed' ? ' alert success' : ' alert warning'}">
+        </div>
+    </div>
+
+    <div th:if="${order.status.name() == 'completed' and not #lists.isEmpty(licenses)}" class="card">
+        <div class="card-header">
+            <div>
+                <p class="eyebrow">Key bản quyền</p>
+                <h3>Bản quyền đã nhận</h3>
+            </div>
+        </div>
+        <div class="table-responsive">
+            <table class="table modern-table">
+                <thead>
+                    <tr>
+                        <th>Sản phẩm</th>
+                        <th>Mã key</th>
+                        <th>Ngày hết hạn</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="license : ${licenses}">
+                        <td th:text="${license.product.name}"></td>
+                        <td th:text="${license.licenseKey}"></td>
+                        <td th:text="${license.expireDate != null ? #temporals.format(license.expireDate, 'dd-MM-yyyy') : 'Vĩnh viễn'}"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div th:if="${order.status.name() != 'completed'}" class="card muted-card">
+        <p>Đơn hàng này chưa hoàn tất. Bạn sẽ nhận được key khi thanh toán thành công.</p>
+    </div>
+
+    <div class="page-actions">
+        <a th:href="@{/orders}" class="btn ghost">Quay lại lịch sử đơn hàng</a>
+    </div>
+</div>
+
+<div th:replace="~{layout :: footer}"></div>
+
+</body>
+</html>

@@ -1,10 +1,5 @@
 package com.smiledev.bum.controller;
 
-import com.smiledev.bum.dto.request.RegistrationRequest;
-import com.smiledev.bum.entity.Users;
-import com.smiledev.bum.service.ActivityLogService;
-import com.smiledev.bum.service.UserService;
-import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -16,6 +11,13 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import com.smiledev.bum.dto.request.RegistrationRequest;
+import com.smiledev.bum.entity.Users;
+import com.smiledev.bum.service.ActivityLogService;
+import com.smiledev.bum.service.UserService;
+
+import jakarta.validation.Valid;
 
 @Controller
 public class AuthController {

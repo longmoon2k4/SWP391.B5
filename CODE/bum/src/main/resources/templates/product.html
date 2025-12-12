@@ -274,7 +274,7 @@
                         headers[csrfHeader] = csrfToken;
                     }
 
-                    const response = await fetch('/api/v1/orders/checkout?packageId=' + packageId, {
+                    const response = await fetch('/orders/checkout?packageId=' + packageId, {
                         method: 'POST',
                         headers: headers
                     });

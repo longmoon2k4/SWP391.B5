@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="vi" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Lịch sử đơn hàng</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css"/>
+</head>
+<body class="home-page orders-page">
+
+<div th:replace="~{layout :: header}"></div>
+
+<div class="main-content">
+    <div class="page-heading">
+        <div>
+            <p class="eyebrow">Quản lý đơn hàng</p>
+            <h2>Lịch sử đơn hàng</h2>
+            <p class="subheading">Theo dõi các giao dịch và trạng thái thanh toán của bạn.</p>
+        </div>
+    </div>
+
+    <form th:action="@{/orders}" method="get" class="filter-form card">
+        <div class="form-row">
+            <div class="form-group">
+                <label for="search">Tìm theo Mã Đơn Hàng</label>
+                <input type="text" id="search" name="search" th:value="${search}" placeholder="Nhập mã đơn hàng...">
+            </div>
+            <div class="form-group">
+                <label for="status">Lọc theo trạng thái</label>
+                <select id="status" name="status">
+                    <option value="">Tất cả</option>
+                    <option th:each="st : ${allStatuses}"
+                            th:value="${st}"
+                            th:text="${st}"
+                            th:selected="${st == status}"></option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="startDate">Từ ngày</label>
+                <input type="date" id="startDate" name="startDate" th:value="${startDate}">
+            </div>
+            <div class="form-group">
+                <label for="endDate">Đến ngày</label>
+                <input type="date" id="endDate" name="endDate" th:value="${endDate}">
+            </div>
+        </div>
+        <div class="form-actions">
+            <button type="submit" class="btn primary">Áp dụng</button>
+            <a th:href="@{/orders}" class="btn ghost">Xóa bộ lọc</a>
+        </div>
+    </form>
+
+    <div class="card table-card">
+        <div class="table-responsive">
+            <table class="table modern-table">
+                <thead>
+                    <tr>
+                        <th>Mã đơn hàng</th>
+                        <th>Ngày tạo</th>
+                        <th>Tổng tiền</th>
+                        <th>Trạng thái</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="order : ${orders}">
+                        <td th:text="${order.orderId}"></td>
+                        <td th:text="${#temporals.format(order.createdAt, 'dd-MM-yyyy HH:mm')}"></td>
+                        <td th:text="${#numbers.formatDecimal(order.totalAmount, 0, 'POINT', 0, 'COMMA') + ' ₫'}"></td>
+                        <td>
+                            <span class="status-chip"
+                                  th:text="${order.status}"
+                                  th:classappend="${order.status.name() == 'completed' ? ' status-completed' : (order.status.name() == 'pending' ? ' status-pending' : ' status-failed')}">
+                            </span>
+                        </td>
+                        <td class="actions-cell">
+                            <a th:href="@{/orders/details(orderId=${order.orderId})}" class="btn ghost btn-sm">Xem chi tiết</a>
+                        </td>
+                    </tr>
+                    <tr th:if="${#lists.isEmpty(orders)}">
+                        <td colspan="5" class="empty-state">Không tìm thấy đơn hàng nào phù hợp.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div th:replace="~{layout :: footer}"></div>
+
+</body>
+</html>
