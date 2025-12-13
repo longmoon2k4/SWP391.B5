@@ -10,6 +10,12 @@
     <h1>
         <a th:href="@{/}" style="text-decoration: none; color: inherit;">License Marketplace System</a>
     </h1>
+    <nav class="main-menu">
+        <a th:href="@{/}">Trang chủ</a>
+        <a th:href="@{/products}">Sản phẩm</a>
+        <a th:href="@{/about}">Giới thiệu</a>
+        <a th:href="@{/contact}">Liên hệ</a>
+    </nav>
     <nav class="user-menu">
         <!-- Khi đã đăng nhập: hiển thị tên người dùng + menu -->
         <div class="dropdown" th:if="${loggedInUser != null}">

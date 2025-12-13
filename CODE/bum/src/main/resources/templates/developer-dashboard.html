@@ -2,8 +2,10 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
 <head>
     <title>Developer Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css"/>
 </head>
 <body>
+<div th:replace="~{layout :: header}"></div>
 <div layout:fragment="content">
     <div class="container mt-4">
         <h1>Developer Dashboard</h1>
@@ -40,5 +42,6 @@
         </div>
     </div>
 </div>
+<div th:replace="~{layout :: footer}"></div>
 </body>
 </html>
