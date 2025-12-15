@@ -211,6 +211,7 @@ public class DashboardController {
         // Statistics
         long totalUsersCount = userRepository.count();
         BigDecimal totalRevenue = transactionsRepository.calculateTotalRevenue(Transactions.Type.sale_revenue);
+        BigDecimal totalWithdrawal = transactionsRepository.calculateTotalRevenue(Transactions.Type.withdrawal);
         long pendingProductsCount = productsRepository.countByStatus(Products.Status.pending);
         long activeLicensesCount = licensesRepository.countByStatus(Licenses.Status.active);
         long approvedProductsCount = productsRepository.countByStatus(Products.Status.approved);
@@ -218,6 +219,7 @@ public class DashboardController {
 
         model.addAttribute("totalUsers", totalUsersCount);
         model.addAttribute("totalRevenue", totalRevenue != null ? totalRevenue : BigDecimal.ZERO);
+        model.addAttribute("totalWithdrawal", totalWithdrawal != null ? totalWithdrawal : BigDecimal.ZERO);
         model.addAttribute("pendingProductsCount", pendingProductsCount);
         model.addAttribute("activeLicensesCount", activeLicensesCount);
         model.addAttribute("approvedProductsCount", approvedProductsCount);
