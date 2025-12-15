@@ -6,10 +6,14 @@
         - Hoàn thành các entity[Done 1:08PM 4/12/2025]
         - Hoàn thành các service [To do]
         - Làm màn hình LOGIN [Done 5:53 9/12/2025]
-        - Tích hợp thanh toán VNPay [To do]
-        - Làm home page [To do]
+        - Tích hợp thanh toán VNPay [Done 15/12/2025]
+        - Làm home page [Done 15/12/2025]
         - Product Detail [Done 10:02 9/12/2025]
         - Payment [Done 10:02 9/12/2025]
+        - Admin Dashboard[To do]
+        - Dev Dashboard[To do]
+        - User Dashboard[To do]
+        - Tích hợp quét viruss[To do]
         ...
 # Thông tin sinh viên 
     1. MSSV: HE186065
