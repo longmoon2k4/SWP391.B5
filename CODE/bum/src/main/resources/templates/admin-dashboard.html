@@ -32,8 +32,8 @@
         .dashboard-header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
-            padding: 2rem 0;
-            margin-bottom: 2rem;
+            padding: 1.25rem 0;
+            margin-bottom: 1.25rem;
             box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
 
@@ -51,8 +51,8 @@
 
         /* Statistics Cards */
         .stat-card {
-            border-radius: 0.75rem;
-            padding: 1.5rem;
+            border-radius: 0.6rem;
+            padding: 1rem;
             color: white;
             transition: all 0.3s ease;
             border: none;
@@ -142,8 +142,8 @@
         .card {
             border: none;
             box-shadow: 0 4px 10px rgba(0,0,0,0.08);
-            margin-bottom: 1.5rem;
-            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+            border-radius: 0.6rem;
             transition: all 0.3s ease;
         }
 
@@ -155,7 +155,7 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            padding: 1rem 1.5rem;
+            padding: 0.75rem 1rem;
             font-weight: 600;
         }
 
@@ -163,9 +163,7 @@
             margin-right: 0.5rem;
         }
 
-        .card-body {
-            padding: 1.5rem;
-        }
+        .card-body { padding: 1rem; }
 
         /* Table Styles */
         .table {
@@ -177,11 +175,11 @@
             border-top: 1px solid #e9ecef;
             font-weight: 600;
             color: #495057;
-            padding: 1rem;
+            padding: 0.75rem;
         }
 
         .table tbody td {
-            padding: 1rem;
+            padding: 0.75rem;
             vertical-align: middle;
             border-bottom: 1px solid #e9ecef;
         }
@@ -250,9 +248,7 @@
                 font-size: 1.5rem;
             }
 
-            .stat-card {
-                margin-bottom: 1rem;
-            }
+            .stat-card { margin-bottom: 0.75rem; }
 
             .nav-link {
                 padding: 0.5rem 1rem;
@@ -372,6 +368,27 @@
                 <i class="fas fa-shield-alt me-2"></i>License Validation
             </a>
         </li>
+        <li class="nav-item" role="presentation">
+            <a th:href="@{/dashboard/admin(tab=systemLogs)}"
+               th:classappend="${activeTab == 'systemLogs' ? 'active' : ''}"
+               class="nav-link">
+                <i class="fas fa-list me-2"></i>System Logs
+            </a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a th:href="@{/dashboard/admin(tab=users)}"
+               th:classappend="${activeTab == 'users' ? 'active' : ''}"
+               class="nav-link">
+                <i class="fas fa-users me-2"></i>Users
+            </a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a th:href="@{/dashboard/admin(tab=products)}"
+               th:classappend="${activeTab == 'products' ? 'active' : ''}"
+               class="nav-link">
+                <i class="fas fa-box-open me-2"></i>Products
+            </a>
+        </li>
     </ul>
 
     <!-- Tab Content -->
@@ -404,9 +421,9 @@
                                             <td>
                                                 <strong th:text="${product.name}">Product Name</strong>
                                             </td>
-                                            <td th:text="${product.developer.username}">Developer</td>
+                                            <td th:text="${product.developer != null ? product.developer.username : 'N/A'}">Developer</td>
                                             <td>
-                                                <span class="badge bg-info" th:text="${product.category.name}">Category</span>
+                                                <span class="badge bg-info" th:text="${product.category != null ? product.category.name : 'N/A'}">Category</span>
                                             </td>
                                             <td>
                                                 <small th:text="${#temporals.format(product.createdAt, 'dd/MM HH:mm')}">Date</small>
@@ -415,15 +432,32 @@
                                                 <button type="button" class="btn btn-sm btn-primary btn-action" data-bs-toggle="modal" 
                                                         th:data-product-id="${product.productId}" data-bs-target="#reviewModal"
                                                         th:data-product-name="${product.name}"
-                                                        th:data-product-developer="${product.developer.username}"
-                                                        th:data-product-email="${product.developer.email}"
-                                                        th:data-product-category="${product.category.name}">
+                                                        th:data-product-developer="${product.developer != null ? product.developer.username : 'N/A'}"
+                                                        th:data-product-email="${product.developer != null ? product.developer.email : 'N/A'}"
+                                                        th:data-product-category="${product.category != null ? product.category.name : 'N/A'}">
                                                     <i class="fas fa-eye"></i> Review
                                                 </button>
                                             </td>
                                         </tr>
                                         </tbody>
                                     </table>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center p-2">
+                                    <div>
+                                        <small th:text="'Page ' + (${pendingPage}+1) + ' / ' + ${pendingTotalPages}"></small>
+                                    </div>
+                                    <div class="btn-group">
+                                        <a class="btn btn-sm btn-outline-secondary"
+                                           th:classappend="${pendingPage == 0} ? 'disabled'"
+                                           th:href="@{/dashboard/admin(tab=overview, pendingPage=${pendingPage-1}, logsPage=${logsPage}, systemLogsPage=${systemLogsPage})}">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                        <a class="btn btn-sm btn-outline-secondary"
+                                           th:classappend="${pendingPage+1 >= pendingTotalPages} ? 'disabled'"
+                                           th:href="@{/dashboard/admin(tab=overview, pendingPage=${pendingPage+1}, logsPage=${logsPage}, systemLogsPage=${systemLogsPage})}">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                             <div th:if="${#lists.isEmpty(pendingProducts)}" class="empty-state">
@@ -447,29 +481,49 @@
                                         <thead>
                                         <tr>
                                             <th>License Key</th>
+                                            <th>Hardware ID</th>
+                                            <th>IP</th>
                                             <th>Status</th>
+                                            <th>Fail Reason</th>
                                             <th>Time</th>
                                         </tr>
                                         </thead>
                                         <tbody>
                                         <tr th:each="log : ${keyValidationLogs}">
+                                            <td><code style="font-size: 0.8rem;" th:text="${#strings.substring(log.licenseKey, 0, 12) + '***'}"></code></td>
+                                            <td><small th:text="${log.hardwareId != null ? #strings.substring(log.hardwareId, 0, 10) + '...' : 'N/A'}"></small></td>
+                                            <td><small th:text="${log.ipAddress}"></small></td>
                                             <td>
-                                                <code style="font-size: 0.8rem;" th:text="${#strings.substring(log.licenseKey, 0, 12) + '***'}"></code>
-                                            </td>
-                                            <td>
-                                                <span th:if="${log.status == 'success'}" class="badge bg-success">
+                                                <span th:if="${log.status.name() == 'success'}" class="badge bg-success">
                                                     <i class="fas fa-check"></i> Success
                                                 </span>
-                                                <span th:if="${log.status == 'failed'}" class="badge bg-danger">
+                                                <span th:if="${log.status.name() == 'failed'}" class="badge bg-danger">
                                                     <i class="fas fa-times"></i> Failed
                                                 </span>
                                             </td>
-                                            <td>
-                                                <small th:text="${#temporals.format(log.requestTime, 'HH:mm:ss')}">Time</small>
-                                            </td>
+                                            <td><small th:text="${log.failReason != null ? log.failReason : '-'}"></small></td>
+                                            <td><small th:text="${#temporals.format(log.requestTime, 'HH:mm:ss')}"></small></td>
                                         </tr>
                                         </tbody>
                                     </table>
+                                </div>
+                                <div class="d-flex justify-content-between align-items-center p-2">
+                                    <div>
+                                        <small th:text="'Page ' + (${logsPage}+1) + ' / ' + ${keyLogsTotalPages}"></small>
+                                    </div>
+                                    <div class="btn-group">
+                                        <a class="btn btn-sm btn-outline-secondary"
+                                           th:classappend="${logsPage == 0} ? 'disabled'"
+                                           th:href="@{/dashboard/admin(tab=overview, pendingPage=${pendingPage}, logsPage=${logsPage-1}, systemLogsPage=${systemLogsPage})}">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                        <a class="btn btn-sm btn-outline-secondary"
+                                           th:classappend="${logsPage+1 >= keyLogsTotalPages} ? 'disabled'"
+                                           th:href="@{/dashboard/admin(tab=overview, pendingPage=${pendingPage}, logsPage=${logsPage+1}, systemLogsPage=${systemLogsPage})}"
+                                        >
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                             <div th:if="${#lists.isEmpty(keyValidationLogs)}" class="empty-state">
@@ -510,8 +564,8 @@
                                 <tbody>
                                 <tr th:each="product : ${pendingProducts}">
                                     <td><strong th:text="${product.name}">Product</strong></td>
-                                    <td th:text="${product.developer.username}">Dev</td>
-                                    <td><span class="badge bg-info" th:text="${product.category.name}">Cat</span></td>
+                                    <td th:text="${product.developer != null ? product.developer.username : 'N/A'}">Dev</td>
+                                    <td><span class="badge bg-info" th:text="${product.category != null ? product.category.name : 'N/A'}">Cat</span></td>
                                     <td><small th:text="${#temporals.format(product.createdAt, 'dd/MM HH:mm')}">Date</small></td>
                                     <td>
                                         <span class="badge-status status-pending">
@@ -522,15 +576,32 @@
                                         <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" 
                                                 th:data-product-id="${product.productId}" data-bs-target="#reviewModal"
                                                 th:data-product-name="${product.name}"
-                                                th:data-product-developer="${product.developer.username}"
-                                                th:data-product-email="${product.developer.email}"
-                                                th:data-product-category="${product.category.name}">
+                                                th:data-product-developer="${product.developer != null ? product.developer.username : 'N/A'}"
+                                                th:data-product-email="${product.developer != null ? product.developer.email : 'N/A'}"
+                                                th:data-product-category="${product.category != null ? product.category.name : 'N/A'}">
                                             <i class="fas fa-eye"></i> Review
                                         </button>
                                     </td>
                                 </tr>
                                 </tbody>
                             </table>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center p-2">
+                            <div>
+                                <small th:text="'Page ' + (${pendingPage}+1) + ' / ' + ${pendingTotalPages}"></small>
+                            </div>
+                            <div class="btn-group">
+                                <a class="btn btn-sm btn-outline-secondary"
+                                   th:classappend="${pendingPage == 0} ? 'disabled'"
+                                   th:href="@{/dashboard/admin(tab=review, pendingPage=${pendingPage-1})}">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                                <a class="btn btn-sm btn-outline-secondary"
+                                   th:classappend="${pendingPage+1 >= pendingTotalPages} ? 'disabled'"
+                                   th:href="@{/dashboard/admin(tab=review, pendingPage=${pendingPage+1})}">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </div>
                         </div>
                     </div>
                     <div th:if="${#lists.isEmpty(pendingProducts)}" class="empty-state">
@@ -589,9 +660,227 @@
                             </tbody>
                         </table>
                     </div>
+                    <div class="d-flex justify-content-between align-items-center p-2">
+                        <div>
+                            <small th:text="'Page ' + (${logsPage}+1) + ' / ' + ${keyLogsTotalPages}"></small>
+                        </div>
+                        <div class="btn-group">
+                            <a class="btn btn-sm btn-outline-secondary"
+                               th:classappend="${logsPage == 0} ? 'disabled'"
+                               th:href="@{/dashboard/admin(tab=licenses, logsPage=${logsPage-1})}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                            <a class="btn btn-sm btn-outline-secondary"
+                               th:classappend="${logsPage+1 >= keyLogsTotalPages} ? 'disabled'"
+                               th:href="@{/dashboard/admin(tab=licenses, logsPage=${logsPage+1})}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </div>
+                    </div>
                     <div th:if="${#lists.isEmpty(keyValidationLogs)}" class="empty-state">
                         <i class="fas fa-inbox"></i>
                         <p>No validation logs available</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Logs Tab -->
+        <div th:if="${activeTab == 'systemLogs'}">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-list"></i> System Activity Logs
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>User</th>
+                                <th>Action</th>
+                                <th>Entity</th>
+                                <th>Details</th>
+                                <th>Time</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="log : ${systemLogs}">
+                                <td th:text="${log.logId}">1</td>
+                                <td th:text="${log.user != null ? log.user.username : 'SYSTEM'}">user</td>
+                                <td th:text="${log.actionType}">action</td>
+                                <td th:text="${log.targetTable}">entity</td>
+                                <td><small th:text="${log.description}"></small></td>
+                                <td><small th:text="${#temporals.format(log.createdAt, 'dd/MM HH:mm:ss')}"></small></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center p-2">
+                        <div>
+                            <small th:text="'Page ' + (${systemLogsPage}+1) + ' / ' + ${systemLogsTotalPages}"></small>
+                        </div>
+                        <div class="btn-group">
+                            <a class="btn btn-sm btn-outline-secondary"
+                               th:classappend="${systemLogsPage == 0} ? 'disabled'"
+                               th:href="@{/dashboard/admin(tab=systemLogs, systemLogsPage=${systemLogsPage-1})}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                            <a class="btn btn-sm btn-outline-secondary"
+                               th:classappend="${systemLogsPage+1 >= systemLogsTotalPages} ? 'disabled'"
+                               th:href="@{/dashboard/admin(tab=systemLogs, systemLogsPage=${systemLogsPage+1})}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Management Tab -->
+        <div th:if="${activeTab == 'users'}">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-users"></i> Manage Users
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Full Name</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="u : ${users}">
+                                <td th:text="${u.userId}">1</td>
+                                <td th:text="${u.username}">username</td>
+                                <td th:text="${u.fullName}">name</td>
+                                <td th:text="${u.email}">email</td>
+                                <td>
+                                    <span th:if="${u.active}" class="badge bg-success">Active</span>
+                                    <span th:if="${!u.active}" class="badge bg-secondary">Banned</span>
+                                </td>
+                                <td class="d-flex gap-2">
+                                    <form th:if="${u.active}" th:action="@{'/dashboard/admin/users/' + ${u.userId} + '/ban'}" method="post">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-ban"></i> Ban
+                                        </button>
+                                    </form>
+                                    <form th:if="${!u.active}" th:action="@{'/dashboard/admin/users/' + ${u.userId} + '/unban'}" method="post">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                        <button type="submit" class="btn btn-sm btn-outline-success">
+                                            <i class="fas fa-check"></i> Unban
+                                        </button>
+                                    </form>
+                                    <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#editUserModal"
+                                            th:data-user-id="${u.userId}" th:data-username="${u.username}" th:data-fullname="${u.fullName}" th:data-email="${u.email}">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center p-2">
+                        <div>
+                            <small th:text="'Page ' + (${userPage}+1) + ' / ' + ${userTotalPages}"></small>
+                        </div>
+                        <div class="btn-group">
+                                     <a class="btn btn-sm btn-outline-secondary" th:classappend="${userPage == 0} ? 'disabled'"
+                                         th:href="@{/dashboard/admin(tab=users, userPage=${userPage-1})}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                                     <a class="btn btn-sm btn-outline-secondary" th:classappend="${userPage+1 >= userTotalPages} ? 'disabled'"
+                                         th:href="@{/dashboard/admin(tab=users, userPage=${userPage+1})}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products Management Tab -->
+        <div th:if="${activeTab == 'products'}">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <div>
+                        <i class="fas fa-box-open"></i> Manage Products
+                    </div>
+                    <form class="d-flex align-items-center" th:action="@{/dashboard/admin}" method="get">
+                        <label class="me-2">Status:</label>
+                        <select class="form-select form-select-sm me-2" name="status">
+                            <option th:selected="${filterStatus == 'ALL'}" th:value="">All</option>
+                            <option th:selected="${filterStatus == 'pending'}" th:value="pending">Pending</option>
+                            <option th:selected="${filterStatus == 'approved'}" th:value="approved">Approved</option>
+                            <option th:selected="${filterStatus == 'rejected'}" th:value="rejected">Rejected</option>
+                        </select>
+                        <input type="hidden" name="tab" value="products" />
+                        <button class="btn btn-sm btn-outline-primary" type="submit"><i class="fas fa-filter"></i> Apply</button>
+                    </form>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Name</th>
+                                <th>Developer</th>
+                                <th>Category</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="p : ${products}">
+                                <td th:text="${p.productId}">1</td>
+                                <td th:text="${p.name}">name</td>
+                                <td th:text="${p.developer != null ? p.developer.username : 'N/A'}">dev</td>
+                                <td><span class="badge bg-info" th:text="${p.category != null ? p.category.name : 'N/A'}">cat</span></td>
+                                <td>
+                                    <span th:if="${p.status.name() == 'pending'}" class="badge badge-status status-pending">Pending</span>
+                                    <span th:if="${p.status.name() == 'approved'}" class="badge badge-status status-success">Approved</span>
+                                    <span th:if="${p.status.name() == 'rejected'}" class="badge badge-status status-rejected">Rejected</span>
+                                </td>
+                                <td><small th:text="${#temporals.format(p.createdAt, 'dd/MM HH:mm')}"></small></td>
+                                <td class="d-flex gap-2">
+                                    <form th:action="@{'/dashboard/admin/products/' + ${p.productId} + '/status'}" method="post" class="d-flex gap-2">
+                                        <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                                        <select name="status" class="form-select form-select-sm" style="width:auto;">
+                                            <option th:selected="${p.status.name() == 'pending'}" th:value="pending">Pending</option>
+                                            <option th:selected="${p.status.name() == 'approved'}" th:value="approved">Approved</option>
+                                            <option th:selected="${p.status.name() == 'rejected'}" th:value="rejected">Rejected</option>
+                                        </select>
+                                        <button class="btn btn-sm btn-outline-primary" type="submit"><i class="fas fa-save"></i> Update</button>
+                                    </form>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center p-2">
+                        <div>
+                            <small th:text="'Page ' + (${productPage}+1) + ' / ' + ${productTotalPages}"></small>
+                        </div>
+                        <div class="btn-group">
+                                     <a class="btn btn-sm btn-outline-secondary" th:classappend="${productPage == 0} ? 'disabled'"
+                                         th:href="@{/dashboard/admin(tab=products, productPage=${productPage-1}, status=${filterStatus == 'ALL' ? null : filterStatus})}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                                     <a class="btn btn-sm btn-outline-secondary" th:classappend="${productPage+1 >= productTotalPages} ? 'disabled'"
+                                         th:href="@{/dashboard/admin(tab=products, productPage=${productPage+1}, status=${filterStatus == 'ALL' ? null : filterStatus})}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -610,38 +899,12 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
-                <div id="productInfo">
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <h6>Product Name</h6>
-                            <p id="modalProductName"><strong>-</strong></p>
-                        </div>
-                        <div class="col-md-6">
-                            <h6>Developer</h6>
-                            <p id="modalProductDeveloper"><strong>-</strong></p>
-                        </div>
-                    </div>
-
-                    <div class="row mb-3">
-                        <div class="col-md-6">
-                            <h6>Developer Email</h6>
-                            <p id="modalProductEmail"><small>-</small></p>
-                        </div>
-                        <div class="col-md-6">
-                            <h6>Category</h6>
-                            <p id="modalProductCategory"><span class="badge bg-info">-</span></p>
-                        </div>
-                    </div>
-
-                    <div class="alert alert-info">
-                        <i class="fas fa-info-circle"></i>
-                        <strong>Note:</strong> Approve or reject this product submission.
-                    </div>
-                </div>
+                <div id="productInfo"><!-- full detail injected here --></div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                 <form id="approveForm" th:action="@{/dashboard/admin/product/__${currentProductId}__/approve}" method="POST" style="display: inline;">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                     <button type="submit" class="btn btn-success">
                         <i class="fas fa-check"></i> Approve
                     </button>
@@ -665,6 +928,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <form id="rejectForm" method="POST">
+                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
                 <div class="modal-body">
                     <div class="mb-3">
                         <label for="rejectionReason" class="form-label">Rejection Reason</label>
@@ -684,6 +948,97 @@
     </div>
 </div>
 
+<!-- Hidden full product detail templates -->
+<div style="display:none;">
+    <div th:each="product : ${pendingProducts}" th:id="${'product-detail-' + product.productId}">
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <h6>Product Name</h6>
+                <p><strong th:text="${product.name}">-</strong></p>
+            </div>
+            <div class="col-md-6">
+                <h6>Developer</h6>
+                <p><strong th:text="${product.developer != null ? product.developer.username : 'N/A'}">-</strong></p>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <h6>Developer Email</h6>
+                <p><small th:text="${product.developer != null ? product.developer.email : 'N/A'}">-</small></p>
+            </div>
+            <div class="col-md-6">
+                <h6>Category</h6>
+                <p><span class="badge bg-info" th:text="${product.category != null ? product.category.name : 'N/A'}">-</span></p>
+            </div>
+        </div>
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <h6>Price</h6>
+                <p><strong th:text="${product.price}">0</strong></p>
+            </div>
+            <div class="col-md-6">
+                <h6>Created</h6>
+                <p><small th:text="${#temporals.format(product.createdAt, 'dd/MM/yyyy HH:mm')}">-</small></p>
+            </div>
+        </div>
+        <div class="mb-3">
+            <h6>Description</h6>
+            <p th:text="${product.description}">-</p>
+        </div>
+        <div class="row">
+            <div class="col-md-6">
+                <h6>Versions</h6>
+                <ul class="list-unstyled mb-0">
+                    <li th:each="v : ${product.versions}"><small th:text="${v.versionName}"></small></li>
+                </ul>
+            </div>
+            <div class="col-md-6">
+                <h6>Packages</h6>
+                <ul class="list-unstyled mb-0">
+                    <li th:each="pkg : ${product.packages}"><small th:text="${pkg.packageName}"></small></li>
+                </ul>
+            </div>
+        </div>
+        <div class="alert alert-info mt-3">
+            <i class="fas fa-info-circle"></i>
+            <strong>Note:</strong> Approve or reject this product submission.
+        </div>
+    </div>
+    </div>
+
+    <!-- Edit User Modal -->
+    <div class="modal fade" id="editUserModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title"><i class="fas fa-user-edit"></i> Edit User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form id="editUserForm" method="post">
+                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+                    <div class="modal-body">
+                        <div class="mb-2">
+                            <label class="form-label">Username</label>
+                            <input type="text" class="form-control" id="editUsername" readonly>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="editFullName" name="fullName" required>
+                        </div>
+                        <div class="mb-2">
+                            <label class="form-label">Email</label>
+                            <input type="email" class="form-control" id="editEmail" name="email" required>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     let currentProductId = null;
@@ -693,16 +1048,10 @@
     reviewModal.addEventListener('show.bs.modal', function(e) {
         const button = e.relatedTarget;
         currentProductId = button.getAttribute('data-product-id');
-        const productName = button.getAttribute('data-product-name');
-        const productDeveloper = button.getAttribute('data-product-developer');
-        const productEmail = button.getAttribute('data-product-email');
-        const productCategory = button.getAttribute('data-product-category');
-
-        // Update modal content
-        document.getElementById('modalProductName').textContent = productName;
-        document.getElementById('modalProductDeveloper').textContent = productDeveloper;
-        document.getElementById('modalProductEmail').textContent = productEmail;
-        document.getElementById('modalProductCategory').innerHTML = '<span class="badge bg-info">' + productCategory + '</span>';
+        // Inject full product detail from hidden template
+        const detailTemplate = document.getElementById('product-detail-' + currentProductId);
+        const productInfo = document.getElementById('productInfo');
+        productInfo.innerHTML = detailTemplate ? detailTemplate.innerHTML : '<p class="text-muted">No details available.</p>';
 
         // Update form action
         const approveForm = document.getElementById('approveForm');
@@ -715,6 +1064,21 @@
         const rejectForm = document.getElementById('rejectForm');
         rejectForm.action = '/dashboard/admin/product/' + currentProductId + '/reject';
         document.getElementById('rejectionReason').value = '';
+    });
+
+    // Handle Edit User modal
+    const editUserModal = document.getElementById('editUserModal');
+    editUserModal.addEventListener('show.bs.modal', function(e) {
+        const btn = e.relatedTarget;
+        const userId = btn.getAttribute('data-user-id');
+        const username = btn.getAttribute('data-username');
+        const fullName = btn.getAttribute('data-fullname');
+        const email = btn.getAttribute('data-email');
+        document.getElementById('editUsername').value = username || '';
+        document.getElementById('editFullName').value = fullName || '';
+        document.getElementById('editEmail').value = email || '';
+        const form = document.getElementById('editUserForm');
+        form.action = '/dashboard/admin/users/' + userId + '/edit';
     });
 </script>
 </body>
