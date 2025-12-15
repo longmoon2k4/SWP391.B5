@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
 import java.util.Optional;
 
 
@@ -34,4 +35,8 @@ public interface ProductsRepository extends JpaRepository<Products, Integer> {
 
     @Query("SELECT p FROM Products p WHERE p.status = 'approved' AND (:categoryId IS NULL OR p.category.id = :categoryId) AND (:name IS NULL OR p.name LIKE %:name%)")
     Page<Products> findApprovedByCategoryIdAndName(@Param("categoryId") Integer categoryId, @Param("name") String name, Pageable pageable);
+
+    long countByStatus(Products.Status status);
+
+    List<Products> findByStatus(Products.Status status, Pageable pageable);
 }

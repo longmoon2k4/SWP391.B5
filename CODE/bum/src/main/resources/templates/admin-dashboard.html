@@ -1,47 +1,721 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
-    <title>Admin Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="_csrf" th:content="${_csrf.token}"/>
+    <meta name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <title>Admin Dashboard - LMS</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
     <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css"/>
+    <style>
+        :root {
+            --primary: #0d6efd;
+            --success: #198754;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --dark: #212529;
+            --light: #f8f9fa;
+        }
+
+        * {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light);
+            padding-bottom: 2rem;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .dashboard-header h1 {
+            font-weight: 700;
+            margin: 0;
+            font-size: 2rem;
+        }
+
+        .dashboard-header .breadcrumb {
+            margin: 0.5rem 0 0 0;
+            background: transparent;
+            color: rgba(255,255,255,0.8);
+        }
+
+        /* Statistics Cards */
+        .stat-card {
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            color: white;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            height: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            opacity: 0.1;
+            transform: translate(30%, -30%);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
+
+        .stat-card .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+        }
+
+        .stat-card .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+
+        .stat-card .stat-icon {
+            font-size: 2.5rem;
+            opacity: 0.8;
+        }
+
+        .bg-primary-gradient {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .bg-success-gradient {
+            background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+        }
+
+        .bg-warning-gradient {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .bg-danger-gradient {
+            background: linear-gradient(135deg, #f93b1d 0%, #ea1e63 100%);
+        }
+
+        /* Tabs & Navigation */
+        .nav-tabs {
+            border-bottom: 2px solid #e9ecef;
+            gap: 0.5rem;
+        }
+
+        .nav-link {
+            color: #6c757d;
+            border: none;
+            border-bottom: 3px solid transparent;
+            font-weight: 600;
+            transition: all 0.3s;
+            padding: 0.75rem 1.5rem;
+        }
+
+        .nav-link:hover {
+            color: var(--primary);
+            background-color: #f8f9fa;
+        }
+
+        .nav-link.active {
+            color: var(--primary);
+            border-bottom-color: var(--primary);
+            background-color: transparent;
+        }
+
+        /* Card Styles */
+        .card {
+            border: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+            border-radius: 0.75rem;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 1rem 1.5rem;
+            font-weight: 600;
+        }
+
+        .card-header i {
+            margin-right: 0.5rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        /* Table Styles */
+        .table {
+            margin-bottom: 0;
+        }
+
+        .table thead th {
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            font-weight: 600;
+            color: #495057;
+            padding: 1rem;
+        }
+
+        .table tbody td {
+            padding: 1rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        /* Status Badges */
+        .badge-status {
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.25rem;
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+
+        .status-pending {
+            background-color: #ffeaa7;
+            color: #d63031;
+        }
+
+        .status-approved {
+            background-color: #74b9ff;
+            color: #0984e3;
+        }
+
+        .status-success {
+            background-color: #55efc4;
+            color: #00b894;
+        }
+
+        .status-rejected {
+            background-color: #fab1a0;
+            color: #e17055;
+        }
+
+        /* Buttons */
+        .btn-sm {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        .btn-action {
+            transition: all 0.2s;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        @media (max-width: 768px) {
+            .dashboard-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .stat-card {
+                margin-bottom: 1rem;
+            }
+
+            .nav-link {
+                padding: 0.5rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
 </head>
 <body>
 <div th:replace="~{layout :: header}"></div>
-<div layout:fragment="content">
-    <div class="container mt-4">
-        <h1>Admin Dashboard</h1>
-        <p>Welcome to the admin dashboard. Here you can manage users, products, and system settings.</p>
-        <!-- Add admin-specific widgets and links here -->
-        <div class="row">
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">User Management</h5>
-                        <p class="card-text">Manage all users in the system.</p>
-                        <a href="#" class="btn btn-primary">Go to Users</a>
+
+<!-- Dashboard Header -->
+<div class="dashboard-header">
+    <div class="container-fluid">
+        <div class="d-flex justify-content-between align-items-start">
+            <div>
+                <h1><i class="fas fa-chart-line me-2"></i>Admin Dashboard</h1>
+                <nav class="breadcrumb mt-2 mb-0">
+                    <a class="breadcrumb-item" href="/">Home</a>
+                    <span class="breadcrumb-item active">Dashboard</span>
+                </nav>
+            </div>
+            <div class="text-end" style="color: rgba(255,255,255,0.9);">
+                <p class="mb-0">Last updated: <span th:text="${#dates.format(#dates.createNow(), 'dd/MM/yyyy HH:mm')}"></span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container-fluid">
+    <!-- Alert Messages -->
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <i class="fas fa-check-circle"></i> <span th:text="${successMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <i class="fas fa-exclamation-circle"></i> <span th:text="${errorMessage}"></span>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="row g-4 mb-4">
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card bg-primary-gradient">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="stat-label"><i class="fas fa-money-bill-wave"></i> Total Revenue</div>
+                        <div class="stat-value" th:text="${#numbers.formatDecimal(totalRevenue, 0, 'COMMA', 0, 'POINT')} + ' ₫'">₫0</div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-chart-line"></i>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">Product Management</h5>
-                        <p class="card-text">Manage all products.</p>
-                        <a href="#" class="btn btn-primary">Go to Products</a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card bg-success-gradient">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="stat-label"><i class="fas fa-users"></i> Total Users</div>
+                        <div class="stat-value" th:text="${totalUsers}">0</div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-user-friends"></i>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">System Settings</h5>
-                        <p class="card-text">Configure system-wide settings.</p>
-                        <a href="#" class="btn btn-primary">Go to Settings</a>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card bg-warning-gradient">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="stat-label"><i class="fas fa-clock"></i> Pending Products</div>
+                        <div class="stat-value" th:text="${pendingProductsCount}">0</div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-hourglass-half"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6 col-lg-3">
+            <div class="stat-card bg-danger-gradient">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="stat-label"><i class="fas fa-key"></i> Active Licenses</div>
+                        <div class="stat-value" th:text="${activeLicensesCount}">0</div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-lock"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tab Navigation -->
+    <ul class="nav nav-tabs mb-4" role="tablist">
+        <li class="nav-item" role="presentation">
+            <a th:href="@{/dashboard/admin(tab=overview)}" 
+               th:classappend="${activeTab == 'overview' ? 'active' : ''}"
+               class="nav-link">
+                <i class="fas fa-chart-bar me-2"></i>Overview
+            </a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a th:href="@{/dashboard/admin(tab=review)}" 
+               th:classappend="${activeTab == 'review' ? 'active' : ''}"
+               class="nav-link">
+                <i class="fas fa-box me-2"></i>Product Review
+            </a>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a th:href="@{/dashboard/admin(tab=licenses)}" 
+               th:classappend="${activeTab == 'licenses' ? 'active' : ''}"
+               class="nav-link">
+                <i class="fas fa-shield-alt me-2"></i>License Validation
+            </a>
+        </li>
+    </ul>
+
+    <!-- Tab Content -->
+    <div>
+        <!-- Overview Tab -->
+        <div th:if="${activeTab == 'overview' or activeTab == null}">
+            <div class="row g-4">
+                <!-- Pending Products -->
+                <div class="col-lg-7">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-hourglass-half"></i> Products Awaiting Approval
+                            <span class="badge bg-warning float-end" th:text="${pendingProductsCount}">0</span>
+                        </div>
+                        <div class="card-body p-0">
+                            <div th:if="${!#lists.isEmpty(pendingProducts)}">
+                                <div class="table-responsive">
+                                    <table class="table table-hover mb-0">
+                                        <thead>
+                                        <tr>
+                                            <th>Product Name</th>
+                                            <th>Developer</th>
+                                            <th>Category</th>
+                                            <th>Submitted</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:each="product : ${pendingProducts}">
+                                            <td>
+                                                <strong th:text="${product.name}">Product Name</strong>
+                                            </td>
+                                            <td th:text="${product.developer.username}">Developer</td>
+                                            <td>
+                                                <span class="badge bg-info" th:text="${product.category.name}">Category</span>
+                                            </td>
+                                            <td>
+                                                <small th:text="${#temporals.format(product.createdAt, 'dd/MM HH:mm')}">Date</small>
+                                            </td>
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-primary btn-action" data-bs-toggle="modal" 
+                                                        th:data-product-id="${product.productId}" data-bs-target="#reviewModal"
+                                                        th:data-product-name="${product.name}"
+                                                        th:data-product-developer="${product.developer.username}"
+                                                        th:data-product-email="${product.developer.email}"
+                                                        th:data-product-category="${product.category.name}">
+                                                    <i class="fas fa-eye"></i> Review
+                                                </button>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div th:if="${#lists.isEmpty(pendingProducts)}" class="empty-state">
+                                <i class="fas fa-check-circle"></i>
+                                <p>All products approved! ✓</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Key Validation Logs -->
+                <div class="col-lg-5">
+                    <div class="card">
+                        <div class="card-header">
+                            <i class="fas fa-key"></i> Recent License Validations
+                        </div>
+                        <div class="card-body p-0">
+                            <div th:if="${!#lists.isEmpty(keyValidationLogs)}">
+                                <div class="table-responsive">
+                                    <table class="table table-sm mb-0">
+                                        <thead>
+                                        <tr>
+                                            <th>License Key</th>
+                                            <th>Status</th>
+                                            <th>Time</th>
+                                        </tr>
+                                        </thead>
+                                        <tbody>
+                                        <tr th:each="log : ${keyValidationLogs}">
+                                            <td>
+                                                <code style="font-size: 0.8rem;" th:text="${#strings.substring(log.licenseKey, 0, 12) + '***'}"></code>
+                                            </td>
+                                            <td>
+                                                <span th:if="${log.status == 'success'}" class="badge bg-success">
+                                                    <i class="fas fa-check"></i> Success
+                                                </span>
+                                                <span th:if="${log.status == 'failed'}" class="badge bg-danger">
+                                                    <i class="fas fa-times"></i> Failed
+                                                </span>
+                                            </td>
+                                            <td>
+                                                <small th:text="${#temporals.format(log.requestTime, 'HH:mm:ss')}">Time</small>
+                                            </td>
+                                        </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                            <div th:if="${#lists.isEmpty(keyValidationLogs)}" class="empty-state">
+                                <i class="fas fa-inbox"></i>
+                                <p>No validation logs yet</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Product Review Tab -->
+        <div th:if="${activeTab == 'review'}">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-boxes"></i> Products For Review
+                    <div class="float-end">
+                        <span class="badge bg-warning" th:text="'Pending: ' + ${pendingProductsCount}"></span>
+                        <span class="badge bg-success ms-2" th:text="'Approved: ' + ${approvedProductsCount}"></span>
+                        <span class="badge bg-danger ms-2" th:text="'Rejected: ' + ${rejectedProductsCount}"></span>
+                    </div>
+                </div>
+                <div class="card-body p-0">
+                    <div th:if="${!#lists.isEmpty(pendingProducts)}">
+                        <div class="table-responsive">
+                            <table class="table table-hover mb-0">
+                                <thead>
+                                <tr>
+                                    <th>Product Name</th>
+                                    <th>Developer</th>
+                                    <th>Category</th>
+                                    <th>Submitted</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="product : ${pendingProducts}">
+                                    <td><strong th:text="${product.name}">Product</strong></td>
+                                    <td th:text="${product.developer.username}">Dev</td>
+                                    <td><span class="badge bg-info" th:text="${product.category.name}">Cat</span></td>
+                                    <td><small th:text="${#temporals.format(product.createdAt, 'dd/MM HH:mm')}">Date</small></td>
+                                    <td>
+                                        <span class="badge-status status-pending">
+                                            <i class="fas fa-clock"></i> Pending
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal" 
+                                                th:data-product-id="${product.productId}" data-bs-target="#reviewModal"
+                                                th:data-product-name="${product.name}"
+                                                th:data-product-developer="${product.developer.username}"
+                                                th:data-product-email="${product.developer.email}"
+                                                th:data-product-category="${product.category.name}">
+                                            <i class="fas fa-eye"></i> Review
+                                        </button>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                    <div th:if="${#lists.isEmpty(pendingProducts)}" class="empty-state">
+                        <i class="fas fa-check-circle"></i>
+                        <p>No products pending review!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- License Validation Tab -->
+        <div th:if="${activeTab == 'licenses'}">
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-shield-alt"></i> License Key Validation History
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                            <tr>
+                                <th>License Key</th>
+                                <th>Hardware ID</th>
+                                <th>IP Address</th>
+                                <th>Status</th>
+                                <th>Fail Reason</th>
+                                <th>Time</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="log : ${keyValidationLogs}">
+                                <td>
+                                    <code style="font-size: 0.75rem;" th:text="${#strings.substring(log.licenseKey, 0, 16) + '...'}"></code>
+                                </td>
+                                <td>
+                                    <small th:text="${log.hardwareId != null ? #strings.substring(log.hardwareId, 0, 10) + '...' : 'N/A'}"></small>
+                                </td>
+                                <td>
+                                    <small th:text="${log.ipAddress}">IP</small>
+                                </td>
+                                <td>
+                                    <span th:if="${log.status.name() == 'success'}" class="badge badge-status status-success">
+                                        <i class="fas fa-check"></i> Success
+                                    </span>
+                                    <span th:if="${log.status.name() == 'failed'}" class="badge badge-status status-rejected">
+                                        <i class="fas fa-times"></i> Failed
+                                    </span>
+                                </td>
+                                <td>
+                                    <small th:text="${log.failReason != null ? log.failReason : '-'}"></small>
+                                </td>
+                                <td>
+                                    <small th:text="${#temporals.format(log.requestTime, 'dd/MM HH:mm:ss')}"></small>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div th:if="${#lists.isEmpty(keyValidationLogs)}" class="empty-state">
+                        <i class="fas fa-inbox"></i>
+                        <p>No validation logs available</p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<div th:replace="~{layout :: footer}"></div>
+
+<!-- Review Modal -->
+<div class="modal fade" id="reviewModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-magnifying-glass"></i> Review Product
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="productInfo">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6>Product Name</h6>
+                            <p id="modalProductName"><strong>-</strong></p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Developer</h6>
+                            <p id="modalProductDeveloper"><strong>-</strong></p>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h6>Developer Email</h6>
+                            <p id="modalProductEmail"><small>-</small></p>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Category</h6>
+                            <p id="modalProductCategory"><span class="badge bg-info">-</span></p>
+                        </div>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Note:</strong> Approve or reject this product submission.
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <form id="approveForm" th:action="@{/dashboard/admin/product/__${currentProductId}__/approve}" method="POST" style="display: inline;">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check"></i> Approve
+                    </button>
+                </form>
+                <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#rejectModal" data-bs-dismiss="modal">
+                    <i class="fas fa-times"></i> Reject
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reject Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-exclamation-circle"></i> Reject Product
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form id="rejectForm" method="POST">
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="rejectionReason" class="form-label">Rejection Reason</label>
+                        <textarea class="form-control" id="rejectionReason" name="rejectionReason" rows="4" required 
+                                  placeholder="Please provide a clear reason for rejection..."></textarea>
+                        <small class="text-muted">This reason will be sent to the developer.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-check"></i> Confirm Rejection
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let currentProductId = null;
+
+    // Handle review modal show
+    const reviewModal = document.getElementById('reviewModal');
+    reviewModal.addEventListener('show.bs.modal', function(e) {
+        const button = e.relatedTarget;
+        currentProductId = button.getAttribute('data-product-id');
+        const productName = button.getAttribute('data-product-name');
+        const productDeveloper = button.getAttribute('data-product-developer');
+        const productEmail = button.getAttribute('data-product-email');
+        const productCategory = button.getAttribute('data-product-category');
+
+        // Update modal content
+        document.getElementById('modalProductName').textContent = productName;
+        document.getElementById('modalProductDeveloper').textContent = productDeveloper;
+        document.getElementById('modalProductEmail').textContent = productEmail;
+        document.getElementById('modalProductCategory').innerHTML = '<span class="badge bg-info">' + productCategory + '</span>';
+
+        // Update form action
+        const approveForm = document.getElementById('approveForm');
+        approveForm.action = '/dashboard/admin/product/' + currentProductId + '/approve';
+    });
+
+    // Handle reject modal show
+    const rejectModal = document.getElementById('rejectModal');
+    rejectModal.addEventListener('show.bs.modal', function(e) {
+        const rejectForm = document.getElementById('rejectForm');
+        rejectForm.action = '/dashboard/admin/product/' + currentProductId + '/reject';
+        document.getElementById('rejectionReason').value = '';
+    });
+</script>
 </body>
 </html>

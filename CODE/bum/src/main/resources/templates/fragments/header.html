@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <title>Header</title>
+</head>
+<body>
+
+<header th:fragment="header" class="p-3 bg-dark text-white">
+    <div class="container">
+        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+            <a href="/" class="d-flex align-items-center mb-2 mb-lg-0 text-white text-decoration-none">
+                <svg class="bi me-2" width="40" height="32" role="img" aria-label="Bootstrap"><use xlink:href="#bootstrap"></use></svg>
+            </a>
+
+            <ul class="nav col-12 col-lg-auto me-lg-auto mb-2 justify-content-center mb-md-0">
+                <li><a href="/" class="nav-link px-2 text-secondary">Home</a></li>
+                <li><a href="/products" class="nav-link px-2 text-white">Products</a></li>
+                <!-- Admin-specific links -->
+                <li sec:authorize="hasRole('ADMIN')"><a href="/dashboard/admin" class="nav-link px-2 text-white">Admin Dashboard</a></li>
+                <!-- Developer-specific links -->
+                <li sec:authorize="hasRole('DEVELOPER')"><a href="/dashboard/developer" class="nav-link px-2 text-white">Developer Dashboard</a></li>
+                 <!-- User-specific links -->
+                <li sec:authorize="hasRole('USER')"><a href="/dashboard/user" class="nav-link px-2 text-white">My Dashboard</a></li>
+            </ul>
+
+            <div class="text-end">
+                <!-- If user is not authenticated -->
+                <div sec:authorize="!isAuthenticated()">
+                    <a href="/login" class="btn btn-outline-light me-2">Login</a>
+                    <a href="/register" class="btn btn-warning">Sign-up</a>
+                </div>
+
+                <!-- If user is authenticated -->
+                <div sec:authorize="isAuthenticated()" class="dropdown">
+                    <a href="#" class="d-block link-light text-decoration-none dropdown-toggle" id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
+                        <img src="https://github.com/mdo.png" alt="mdo" width="32" height="32" class="rounded-circle">
+                        <span sec:authentication="name"></span>
+                    </a>
+                    <ul class="dropdown-menu text-small" aria-labelledby="dropdownUser1">
+                        <li><a class="dropdown-item" href="/profile">Profile</a></li>
+                        <li><a class="dropdown-item" href="/orders">My Orders</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form th:action="@{/logout}" method="post" style="display: inline;">
+                                <button type="submit" class="dropdown-item">Sign out</button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+</body>
+</html>

@@ -15,4 +15,6 @@ public interface LicensesRepository extends JpaRepository<Licenses, Integer> {
     List<Licenses> findByUser(Users user);
 
     Licenses findTopByOrderByLicenseIdDesc();
+
+    long countByStatus(Licenses.Status status);
 }
