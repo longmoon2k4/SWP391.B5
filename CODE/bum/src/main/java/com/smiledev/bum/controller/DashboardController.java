@@ -210,6 +210,8 @@ public class DashboardController {
 
         // Statistics
         long totalUsersCount = userRepository.count();
+        long activeUsersCount = userRepository.findAll().stream().filter(Users::isActive).count();
+        long bannedUsersCount = totalUsersCount - activeUsersCount;
         BigDecimal totalRevenue = transactionsRepository.calculateTotalRevenue(Transactions.Type.sale_revenue);
         BigDecimal totalWithdrawal = transactionsRepository.calculateTotalRevenue(Transactions.Type.withdrawal);
         long pendingProductsCount = productsRepository.countByStatus(Products.Status.pending);
@@ -218,6 +220,8 @@ public class DashboardController {
         long rejectedProductsCount = productsRepository.countByStatus(Products.Status.rejected);
 
         model.addAttribute("totalUsers", totalUsersCount);
+        model.addAttribute("activeUsersCount", activeUsersCount);
+        model.addAttribute("bannedUsersCount", bannedUsersCount);
         model.addAttribute("totalRevenue", totalRevenue != null ? totalRevenue : BigDecimal.ZERO);
         model.addAttribute("totalWithdrawal", totalWithdrawal != null ? totalWithdrawal : BigDecimal.ZERO);
         model.addAttribute("pendingProductsCount", pendingProductsCount);
