@@ -973,9 +973,12 @@
         </div>
         <div class="row mb-3">
             <div class="col-md-6">
-                <h6>Price</h6>
+                <h6>Price Range</h6>
                 <p>
-                    <strong th:text="${product.packages != null ? 'See packages' : 'N/A'}">0</strong>
+                    <span th:if="${!#lists.isEmpty(product.packages)}" class="badge bg-success">
+                        <span th:each="pkg : ${product.packages}" th:text="${#numbers.formatDecimal(pkg.price, 0, 'COMMA', 2, 'POINT')} + ' ₫'" style="margin-right: 5px;"></span>
+                    </span>
+                    <span th:if="${#lists.isEmpty(product.packages)}">N/A</span>
                 </p>
             </div>
             <div class="col-md-6">
@@ -990,11 +993,40 @@
         <div class="row">
             <div class="col-md-6">
                 <h6>Versions</h6>
-                <p class="text-muted mb-0">See detail in product page</p>
+                <div th:if="${!#lists.isEmpty(product.versions)}">
+                    <ul class="list-unstyled small">
+                        <li th:each="v : ${product.versions}" class="mb-2 p-2" style="background-color: #f8f9fa; border-radius: 4px;">
+                            <strong th:text="'v' + ${v.versionNumber}">v1.0</strong>
+                            <small th:text="${#temporals.format(v.createdAt, 'dd/MM/yyyy')}"></small>
+                            <br/>
+                            <small th:text="'Status: ' + ${v.virusScanStatus}">Status</small>
+                            <th:block th:if="${v.virusTotalReportLink != null and v.virusTotalReportLink != ''}">
+                                <br/>
+                                <a th:href="${v.virusTotalReportLink}" target="_blank" class="link-primary">
+                                    <small><i class="fas fa-external-link-alt"></i> Report</small>
+                                </a>
+                            </th:block>
+                        </li>
+                    </ul>
+                </div>
+                <p th:if="${#lists.isEmpty(product.versions)}" class="text-muted mb-0">No versions available</p>
             </div>
             <div class="col-md-6">
                 <h6>Packages</h6>
-                <p class="text-muted mb-0">See detail in product page</p>
+                <div th:if="${!#lists.isEmpty(product.packages)}">
+                    <ul class="list-unstyled small">
+                        <li th:each="pkg : ${product.packages}" class="mb-2 p-2" style="background-color: #f8f9fa; border-radius: 4px;">
+                            <strong th:text="${pkg.name}">Package Name</strong>
+                            <br/>
+                            <span class="badge bg-success" th:text="${#numbers.formatDecimal(pkg.price, 0, 'COMMA', 2, 'POINT')} + ' ₫'">Price</span>
+                            <th:block th:if="${pkg.durationDays != null}">
+                                <br/>
+                                <small th:text="'Duration: ' + ${pkg.durationDays} + ' days'"></small>
+                            </th:block>
+                        </li>
+                    </ul>
+                </div>
+                <p th:if="${#lists.isEmpty(product.packages)}" class="text-muted mb-0">No packages available</p>
             </div>
         </div>
         <div class="alert alert-info mt-3">

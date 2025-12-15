@@ -224,9 +224,9 @@ public class DashboardController {
         model.addAttribute("rejectedProductsCount", rejectedProductsCount);
         model.addAttribute("totalOrders", ordersRepository.count());
 
-        // Pending products (paged, 5 per page)
+        // Pending products (paged, 5 per page) - with eager loading to avoid lazy loading issues
         Pageable pendingPageable = PageRequest.of(Math.max(pendingPage, 0), 5, Sort.by(Sort.Direction.DESC, "createdAt"));
-        List<Products> pendingProducts = productsRepository.findByStatus(Products.Status.pending, pendingPageable);
+        List<Products> pendingProducts = productsRepository.findByStatusWithDetails(Products.Status.pending, pendingPageable);
         model.addAttribute("pendingProducts", pendingProducts);
         model.addAttribute("pendingPage", pendingPage);
         long totalPending = pendingProductsCount;
