@@ -817,7 +817,7 @@
                     <form class="d-flex align-items-center" th:action="@{/dashboard/admin}" method="get">
                         <label class="me-2">Status:</label>
                         <select class="form-select form-select-sm me-2" name="status">
-                            <option th:selected="${filterStatus == 'ALL'}" th:value="">All</option>
+                            <option th:selected="${filterStatus == 'ALL'}" value="">All</option>
                             <option th:selected="${filterStatus == 'pending'}" th:value="pending">Pending</option>
                             <option th:selected="${filterStatus == 'approved'}" th:value="approved">Approved</option>
                             <option th:selected="${filterStatus == 'rejected'}" th:value="rejected">Rejected</option>
@@ -873,11 +873,11 @@
                         </div>
                         <div class="btn-group">
                                      <a class="btn btn-sm btn-outline-secondary" th:classappend="${productPage == 0} ? 'disabled'"
-                                         th:href="@{/dashboard/admin(tab=products, productPage=${productPage-1}, status=${filterStatus == 'ALL' ? null : filterStatus})}">
+                                         th:href="@{/dashboard/admin(tab=products, productPage=${productPage-1}, status=${filterStatus == 'ALL' ? '' : filterStatus})}">
                                 <i class="fas fa-chevron-left"></i>
                             </a>
                                      <a class="btn btn-sm btn-outline-secondary" th:classappend="${productPage+1 >= productTotalPages} ? 'disabled'"
-                                         th:href="@{/dashboard/admin(tab=products, productPage=${productPage+1}, status=${filterStatus == 'ALL' ? null : filterStatus})}">
+                                         th:href="@{/dashboard/admin(tab=products, productPage=${productPage+1}, status=${filterStatus == 'ALL' ? '' : filterStatus})}">
                                 <i class="fas fa-chevron-right"></i>
                             </a>
                         </div>
@@ -974,7 +974,9 @@
         <div class="row mb-3">
             <div class="col-md-6">
                 <h6>Price</h6>
-                <p><strong th:text="${product.price}">0</strong></p>
+                <p>
+                    <strong th:text="${product.packages != null ? 'See packages' : 'N/A'}">0</strong>
+                </p>
             </div>
             <div class="col-md-6">
                 <h6>Created</h6>
@@ -988,15 +990,11 @@
         <div class="row">
             <div class="col-md-6">
                 <h6>Versions</h6>
-                <ul class="list-unstyled mb-0">
-                    <li th:each="v : ${product.versions}"><small th:text="${v.versionName}"></small></li>
-                </ul>
+                <p class="text-muted mb-0">See detail in product page</p>
             </div>
             <div class="col-md-6">
                 <h6>Packages</h6>
-                <ul class="list-unstyled mb-0">
-                    <li th:each="pkg : ${product.packages}"><small th:text="${pkg.packageName}"></small></li>
-                </ul>
+                <p class="text-muted mb-0">See detail in product page</p>
             </div>
         </div>
         <div class="alert alert-info mt-3">
