@@ -1,8 +1,16 @@
 package com.smiledev.bum.controller;
 
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -11,14 +19,24 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.smiledev.bum.dto.ProductCardDTO;
 import com.smiledev.bum.entity.Categories;
+import com.smiledev.bum.entity.ProductPackages;
+import com.smiledev.bum.entity.ProductVersions;
 import com.smiledev.bum.entity.Products;
 import com.smiledev.bum.entity.Users;
+import com.smiledev.bum.entity.Products.Status;
+import com.smiledev.bum.entity.ProductVersions.VirusScanStatus;
 import com.smiledev.bum.repository.CategoriesRepository;
+import com.smiledev.bum.repository.ProductPackagesRepository;
+import com.smiledev.bum.repository.ProductVersionsRepository;
+import com.smiledev.bum.repository.ProductsRepository;
 import com.smiledev.bum.repository.UserRepository;
 import com.smiledev.bum.service.ProductService;
 
@@ -34,6 +52,18 @@ public class ProductController {
 
     @Autowired
     private CategoriesRepository categoriesRepository;
+
+    @Autowired
+    private ProductsRepository productsRepository;
+
+    @Autowired
+    private ProductVersionsRepository productVersionsRepository;
+
+    @Autowired
+    private ProductPackagesRepository productPackagesRepository;
+
+    @Value("${app.upload.dir}")
+    private String uploadDir;
 
     @GetMapping
     public String listProducts(
@@ -78,6 +108,111 @@ public class ProductController {
             return "product"; // Trả về file product.html
         } else {
             return "redirect:/"; // Nếu không tìm thấy, quay về trang chủ
+        }
+    }
+
+    @PostMapping("/create")
+    public String createProduct(
+            @RequestParam("name") String name,
+            @RequestParam("categoryId") Integer categoryId,
+            @RequestParam(value = "shortDescription", required = false) String shortDescription,
+            @RequestParam("description") String description,
+            @RequestParam(value = "demoVideoUrl", required = false) String demoVideoUrl,
+            @RequestParam("exeFile") MultipartFile exeFile,
+            @RequestParam("versionNumber") String versionNumber,
+            @RequestParam(value = "packageNames", required = false) String[] packageNames,
+            @RequestParam(value = "packagePrices", required = false) Double[] packagePrices,
+            @RequestParam(value = "packageDurations", required = false) Integer[] packageDurations,
+            Authentication authentication,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            // Get current user
+            String username = authentication.getName();
+            Optional<Users> userOpt = userRepository.findByUsername(username);
+            if (!userOpt.isPresent()) {
+                redirectAttributes.addFlashAttribute("error", "Không tìm thấy người dùng");
+                return "redirect:/dashboard/developer";
+            }
+            Users user = userOpt.get();
+
+            // Validate category
+            Optional<Categories> categoryOpt = categoriesRepository.findById(categoryId);
+            if (!categoryOpt.isPresent()) {
+                redirectAttributes.addFlashAttribute("error", "Không tìm thấy danh mục");
+                return "redirect:/dashboard/developer";
+            }
+
+            // Validate file
+            if (exeFile.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Vui lòng chọn file .exe");
+                return "redirect:/dashboard/developer";
+            }
+
+            // Create upload directory if not exists
+            Path uploadPath = Paths.get(uploadDir);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            // Save file with unique name
+            String originalFilename = exeFile.getOriginalFilename();
+            String fileExtension = "";
+            if (originalFilename != null && originalFilename.contains(".")) {
+                fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            }
+            String uniqueFilename = UUID.randomUUID().toString() + fileExtension;
+            Path filePath = uploadPath.resolve(uniqueFilename);
+            Files.copy(exeFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            // Create Product
+            Products product = new Products();
+            product.setName(name);
+            product.setCategory(categoryOpt.get());
+            product.setShortDescription(shortDescription);
+            product.setDescription(description);
+            product.setDemoVideoUrl(demoVideoUrl);
+            product.setDeveloper(user);
+            product.setStatus(Status.pending);
+            product.setTotalSales(0);
+            product.setViewCount(0);
+            Products savedProduct = productsRepository.save(product);
+
+            // Create ProductVersion
+            ProductVersions version = new ProductVersions();
+            version.setProduct(savedProduct);
+            version.setVersionNumber(versionNumber);
+            version.setBuildFilePath(filePath.toString());
+            version.setSourceCodePath(""); // Not required for now
+            version.setVirusScanStatus(VirusScanStatus.pending);
+            version.setCurrentVersion(true);
+            productVersionsRepository.save(version);
+
+            // Create ProductPackages if any
+            if (packageNames != null && packageNames.length > 0) {
+                for (int i = 0; i < packageNames.length; i++) {
+                    if (packageNames[i] != null && !packageNames[i].trim().isEmpty()) {
+                        ProductPackages pkg = new ProductPackages();
+                        pkg.setProduct(savedProduct);
+                        pkg.setName(packageNames[i]);
+                        pkg.setPrice(BigDecimal.valueOf(packagePrices[i]));
+                        pkg.setDurationDays(packageDurations[i]);
+                        productPackagesRepository.save(pkg);
+                    }
+                }
+            }
+
+            redirectAttributes.addFlashAttribute("success", "Sản phẩm đã được tạo thành công! Đang chờ admin xét duyệt.");
+            return "redirect:/dashboard/developer";
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Lỗi upload file: " + e.getMessage());
+            return "redirect:/dashboard/developer";
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Lỗi tạo sản phẩm: " + e.getMessage());
+            return "redirect:/dashboard/developer";
         }
     }
 }

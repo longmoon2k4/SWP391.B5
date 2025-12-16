@@ -25,12 +25,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import com.smiledev.bum.entity.ActivityLogs;
+import com.smiledev.bum.entity.Categories;
 import com.smiledev.bum.entity.KeyValidationLogs;
 import com.smiledev.bum.entity.Licenses;
 import com.smiledev.bum.entity.Products;
 import com.smiledev.bum.entity.Transactions;
 import com.smiledev.bum.entity.Users;
 import com.smiledev.bum.repository.ActivityLogRepository;
+import com.smiledev.bum.repository.CategoriesRepository;
 import com.smiledev.bum.repository.KeyValidationLogsRepository;
 import com.smiledev.bum.repository.LicensesRepository;
 import com.smiledev.bum.repository.OrdersRepository;
@@ -65,6 +67,9 @@ public class DashboardController {
 
     @Autowired
     private OrdersRepository ordersRepository;
+
+    @Autowired
+    private CategoriesRepository categoriesRepository;
 
     @Autowired
     private ActivityLogService activityLogService;
@@ -435,6 +440,10 @@ public class DashboardController {
             model.addAttribute("publicApiKey", publicApiKey);
             model.addAttribute("webhookUrl", webhookUrl);
             model.addAttribute("recentActivities", recentActivities);
+            
+            // Add categories for product creation modal
+            Iterable<Categories> categories = categoriesRepository.findAll();
+            model.addAttribute("categories", categories);
             }
         }
         return "developer-dashboard";
