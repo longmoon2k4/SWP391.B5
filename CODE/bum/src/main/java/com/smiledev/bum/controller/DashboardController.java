@@ -540,9 +540,82 @@ public class DashboardController {
         if (authentication != null && authentication.isAuthenticated()) {
             String username = authentication.getName();
             Optional<Users> userOpt = userRepository.findByUsername(username);
-            userOpt.ifPresent(user -> model.addAttribute("loggedInUser", user));
+            if (userOpt.isPresent()) {
+                Users user = userOpt.get();
+                model.addAttribute("loggedInUser", user);
+
+                // Wallet
+                model.addAttribute("walletBalance", user.getWalletBalance() != null ? user.getWalletBalance() : BigDecimal.ZERO);
+
+                // Orders stats
+                long ordersTotal = ordersRepository.countByUser(user);
+                long ordersCompleted = ordersRepository.countByUserAndStatus(user, Orders.Status.completed);
+                long ordersPending = ordersRepository.countByUserAndStatus(user, Orders.Status.pending);
+                long ordersFailed = ordersRepository.countByUserAndStatus(user, Orders.Status.failed);
+                BigDecimal totalSpent = ordersRepository.sumTotalAmountByUserAndStatus(user, Orders.Status.completed);
+                List<Orders> recentOrders = ordersRepository.findTop5ByUserOrderByCreatedAtDesc(user);
+
+                // Licenses stats
+                long licensesTotal = licensesRepository.countByUser(user);
+                long licensesActive = licensesRepository.countByUserAndStatus(user, Licenses.Status.active);
+                long licensesExpired = licensesRepository.countByUserAndStatus(user, Licenses.Status.expired);
+                long licensesUnused = licensesRepository.countByUserAndStatus(user, Licenses.Status.unused);
+                List<Licenses> recentLicenses = licensesRepository.findTop5ByUserOrderByCreatedAtDesc(user);
+
+                model.addAttribute("ordersTotal", ordersTotal);
+                model.addAttribute("ordersCompleted", ordersCompleted);
+                model.addAttribute("ordersPending", ordersPending);
+                model.addAttribute("ordersFailed", ordersFailed);
+                model.addAttribute("totalSpent", totalSpent);
+                model.addAttribute("recentOrders", recentOrders);
+
+                model.addAttribute("licensesTotal", licensesTotal);
+                model.addAttribute("licensesActive", licensesActive);
+                model.addAttribute("licensesExpired", licensesExpired);
+                model.addAttribute("licensesUnused", licensesUnused);
+                model.addAttribute("recentLicenses", recentLicenses);
+            }
         }
         return "user-dashboard";
+    }
+
+    /**
+     * User Licenses page
+     */
+    @GetMapping("/user/licenses")
+    @PreAuthorize("hasRole('USER')")
+    public String userLicenses(Model model,
+                               Authentication authentication,
+                               @RequestParam(value = "search", required = false) String search,
+                               @RequestParam(value = "page", defaultValue = "0") int page,
+                               @RequestParam(value = "size", defaultValue = "15") int size) {
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return "redirect:/login";
+        }
+
+        String username = authentication.getName();
+        Optional<Users> userOpt = userRepository.findByUsername(username);
+        if (userOpt.isEmpty()) {
+            return "redirect:/error";
+        }
+
+        Users user = userOpt.get();
+        model.addAttribute("loggedInUser", user);
+
+        org.springframework.data.domain.Pageable pageable = org.springframework.data.domain.PageRequest.of(page, size);
+        org.springframework.data.domain.Page<Licenses> licensesPage;
+        if (search != null && !search.trim().isEmpty()) {
+            licensesPage = licensesRepository.findByUserAndProduct_NameContainingIgnoreCase(user, search.trim(), pageable);
+        } else {
+            licensesPage = licensesRepository.findByUser(user, pageable);
+        }
+
+        model.addAttribute("licensesPage", licensesPage);
+        model.addAttribute("search", search);
+        model.addAttribute("page", page);
+        model.addAttribute("size", size);
+
+        return "user-licenses";
     }
 
     /**

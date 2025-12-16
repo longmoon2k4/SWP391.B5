@@ -1,38 +1,277 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
     <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css"/>
+    <style>
+        :root {
+            --primary: #0d6efd;
+            --success: #198754;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --dark: #212529;
+            --light: #f8f9fa;
+        }
+
+        * { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+
+        body {
+            background: var(--light);
+            padding-bottom: 2rem;
+        }
+
+        .dashboard-header {
+            background: #6366f1;
+            color: white;
+            padding: 1.25rem 0;
+            margin-bottom: 1.25rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .dashboard-header h1 { margin: 0; font-weight: 700; }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 16px;
+            margin-bottom: 1.5rem;
+        }
+
+        .stat-card {
+            border-radius: 0.6rem;
+            padding: 1rem;
+            color: white;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; right: 0;
+            width: 100px; height: 100px;
+            border-radius: 50%;
+            opacity: 0.1;
+            transform: translate(30%, -30%);
+        }
+
+        .stat-card:hover { transform: translateY(-6px); box-shadow: 0 8px 20px rgba(0,0,0,0.12); }
+        .stat-value { font-size: 2rem; font-weight: 700; margin: 0.25rem 0; }
+        .stat-label { font-size: 0.95rem; opacity: 0.9; font-weight: 500; }
+        .stat-icon { font-size: 2.25rem; opacity: 0.85; }
+
+        .bg-primary-gradient { background: #4F46E5; }
+        .bg-success-gradient { background: #10B981; }
+        .bg-warning-gradient { background: #F59E0B; }
+        .bg-danger-gradient { background: #EF4444; }
+
+        .card { border: none; box-shadow: 0 4px 10px rgba(0,0,0,0.08); border-radius: 0.6rem; }
+        .card-header { background: #6366f1; color: white; font-weight: 600; }
+
+        .table thead th { background-color: #f8f9fa; font-weight: 600; }
+        .badge { font-weight: 600; }
+    </style>
 </head>
 <body>
 <div th:replace="~{layout :: header}"></div>
 <div layout:fragment="content">
-    <div class="container mt-4">
-        <h1>User Dashboard</h1>
-        <p>Welcome to your dashboard. Here you can view your purchased products and manage your account.</p>
-        <!-- Add user-specific widgets and links here -->
-        <div class="row">
-            <div class="col-md-6">
-                <div class="card">
+    <div class="dashboard-header">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1><i class="fas fa-house-user me-2"></i>User Dashboard</h1>
+                    <p class="mb-0 mt-2" style="opacity:0.9;">Quản lý đơn hàng, license và ví của bạn</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a class="btn btn-light" th:href="@{/}"><i class="fas fa-store me-1"></i> Mua sản phẩm</a>
+                    <a class="btn btn-outline-light" th:href="@{/dashboard/user}"><i class="fas fa-rotate"></i> Làm mới</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <!-- Stat cards -->
+        <div class="stat-grid">
+            <div class="stat-card bg-primary-gradient">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="stat-label">Số dư ví</div>
+                        <div class="stat-value" th:text="${#numbers.formatDecimal(walletBalance ?: 0, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</div>
+                        <div class="small" style="opacity:0.9;">Sử dụng để thanh toán đơn hàng</div>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-wallet"></i></div>
+                </div>
+            </div>
+            <div class="stat-card bg-success-gradient">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="stat-label">Đơn hàng thành công</div>
+                        <div class="stat-value" th:text="${ordersCompleted ?: 0}">0</div>
+                        <div class="small" style="opacity:0.9;" th:text="'Tổng đơn: ' + (${ordersTotal ?: 0})"></div>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-cart-shopping"></i></div>
+                </div>
+            </div>
+            <div class="stat-card bg-warning-gradient">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="stat-label">License đang hoạt động</div>
+                        <div class="stat-value" th:text="${licensesActive ?: 0}">0</div>
+                        <div class="small" style="opacity:0.9;" th:text="'Tổng license: ' + (${licensesTotal ?: 0})"></div>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-key"></i></div>
+                </div>
+            </div>
+            <div class="stat-card bg-danger-gradient">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="stat-label">Chi tiêu</div>
+                        <div class="stat-value" th:text="${#numbers.formatDecimal(totalSpent ?: 0, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</div>
+                        <div class="small" style="opacity:0.9;" th:text="'Đang chờ: ' + (${ordersPending ?: 0}) + ' | Thất bại: ' + (${ordersFailed ?: 0})"></div>
+                    </div>
+                    <div class="stat-icon"><i class="fas fa-receipt"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick actions -->
+        <div class="row g-3 mb-3">
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-bolt"></i> Tác vụ nhanh</span>
+                    </div>
                     <div class="card-body">
-                        <h5 class="card-title">My Products</h5>
-                        <p class="card-text">View and download your purchased products.</p>
-                        <a href="#" class="btn btn-primary">Go to My Products</a>
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <a class="btn btn-outline-primary w-100" th:href="@{/}"><i class="fas fa-store"></i> Mua sản phẩm</a>
+                            </div>
+                            <div class="col-6">
+                                <a class="btn btn-outline-success w-100" th:href="@{/dashboard/user/licenses}"><i class="fas fa-ticket"></i> License của tôi</a>
+                            </div>
+                            <div class="col-6">
+                                <a class="btn btn-outline-dark w-100" th:href="@{/dashboard/user}"><i class="fas fa-cart-arrow-down"></i> Đơn hàng của tôi</a>
+                            </div>
+                            <div class="col-6">
+                                <a class="btn btn-outline-secondary w-100" th:href="@{/dashboard/user}"><i class="fas fa-user"></i> Thông tin cá nhân</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-6">
-                <div class="card">
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-info-circle"></i> Trạng thái</span>
+                    </div>
                     <div class="card-body">
-                        <h5 class="card-title">My Profile</h5>
-                        <p class="card-text">Update your profile and account settings.</p>
-                        <a href="#" class="btn btn-primary">Go to My Profile</a>
+                        <div class="alert alert-info mb-2">
+                            <i class="fas fa-key me-2"></i> Bạn có <strong th:text="${licensesActive ?: 0}">0</strong> license đang hoạt động.
+                        </div>
+                        <div class="alert alert-warning mb-2">
+                            <i class="fas fa-hourglass-half me-2"></i> License chờ kích hoạt: <strong th:text="${licensesUnused ?: 0}">0</strong>
+                        </div>
+                        <div class="alert alert-secondary mb-0">
+                            <i class="fas fa-clock me-2"></i> License đã hết hạn: <strong th:text="${licensesExpired ?: 0}">0</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders & Licenses -->
+        <div class="row g-3 mb-3">
+            <div class="col-lg-7">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-receipt"></i> Đơn hàng gần đây</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table mb-0 align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Mã</th>
+                                        <th>Số tiền</th>
+                                        <th>Trạng thái</th>
+                                        <th>Thời gian</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="o : ${recentOrders}">
+                                        <td th:text="'#' + ${o.orderId}">#1</td>
+                                        <td class="fw-semibold" th:text="${#numbers.formatDecimal(o.totalAmount, 0, 'COMMA', 0, 'POINT')} + ' ₫'"></td>
+                                        <td>
+                                            <span class="badge bg-success" th:if="${o.status.name() == 'completed'}">Completed</span>
+                                            <span class="badge bg-warning text-dark" th:if="${o.status.name() == 'pending'}">Pending</span>
+                                            <span class="badge bg-danger" th:if="${o.status.name() == 'failed'}">Failed</span>
+                                            <span class="badge bg-secondary" th:if="${o.status.name() == 'refunded'}">Refunded</span>
+                                        </td>
+                                        <td class="text-muted" th:text="${#temporals.format(o.createdAt, 'HH:mm dd/MM')}">-</td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(recentOrders)}">
+                                        <td colspan="4" class="text-center text-muted py-3">Chưa có đơn hàng.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span><i class="fas fa-key"></i> License gần đây</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table mb-0 align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Key</th>
+                                        <th>Trạng thái</th>
+                                        <th>Hết hạn</th>
+                                        <th class="text-center">Tải xuống</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="l : ${recentLicenses}">
+                                        <td class="text-truncate" style="max-width:140px;" th:text="${l.licenseKey}">KEY</td>
+                                        <td>
+                                            <span class="badge bg-success" th:if="${l.status.name() == 'active'}">Active</span>
+                                            <span class="badge bg-warning text-dark" th:if="${l.status.name() == 'unused'}">Unused</span>
+                                            <span class="badge bg-danger" th:if="${l.status.name() == 'banned'}">Banned</span>
+                                            <span class="badge bg-secondary" th:if="${l.status.name() == 'expired'}">Expired</span>
+                                        </td>
+                                        <td class="text-muted" th:text="${l.expireDate != null ? #temporals.format(l.expireDate, 'dd/MM/yyyy') : 'Không giới hạn'}">-</td>
+                                        <td class="text-center">
+                                            <a class="btn btn-sm btn-outline-primary" th:if="${l.product != null}" th:href="@{/download/{id}(id=${l.product.productId})}"><i class="fas fa-download"></i></a>
+                                            <span class="text-muted small" th:if="${l.product == null}">N/A</span>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(recentLicenses)}">
+                                        <td colspan="4" class="text-center text-muted py-3">Chưa có license.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 <div th:replace="~{layout :: footer}"></div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

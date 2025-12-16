@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.UUID;
+import java.time.LocalDateTime;
 
 @Service
 public class OrderService {
@@ -130,8 +131,10 @@ public class OrderService {
         license.setStatus(Licenses.Status.unused);
 
         if (productPackage.getDurationDays() != null) {
-            // Set expire date based on duration, but start date is null until activation
-            license.setExpireDate(null); // Will be set on first use
+            // Start counting immediately after purchase
+            LocalDateTime start = LocalDateTime.now();
+            license.setStartDate(start);
+            license.setExpireDate(start.plusDays(productPackage.getDurationDays()));
         } else {
             license.setExpireDate(null); // Represents lifetime
         }

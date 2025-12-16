@@ -94,6 +94,12 @@ public class LicenseService {
             license.setHardwareId(request.getHardwareId());
             license.setStatus(Licenses.Status.active);
             license.setStartDate(LocalDateTime.now());
+
+            // Apply package duration on first activation; null duration means lifetime
+            Integer durationDays = license.getProductPackage() != null ? license.getProductPackage().getDurationDays() : null;
+            if (durationDays != null && license.getExpireDate() == null) {
+                license.setExpireDate(license.getStartDate().plusDays(durationDays));
+            }
             licensesRepository.save(license);
         }
 
