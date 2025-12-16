@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -40,6 +41,8 @@ import com.smiledev.bum.repository.ProductsRepository;
 import com.smiledev.bum.repository.UserRepository;
 import com.smiledev.bum.service.ProductService;
 import com.smiledev.bum.service.VirusScanService;
+import com.smiledev.bum.service.ActivityLogService;
+import com.smiledev.bum.repository.OrdersRepository;
 
 @Controller
 @RequestMapping("/product")
@@ -65,6 +68,12 @@ public class ProductController {
 
     @Autowired
     private VirusScanService virusScanService;
+
+    @Autowired
+    private ActivityLogService activityLogService;
+
+    @Autowired
+    private OrdersRepository ordersRepository;
 
     @Value("${app.upload.dir}")
     private String uploadDir;
@@ -220,6 +229,231 @@ public class ProductController {
             e.printStackTrace();
             redirectAttributes.addFlashAttribute("error", "Lỗi tạo sản phẩm: " + e.getMessage());
             return "redirect:/dashboard/developer";
+        }
+    }
+
+    // ===== Developer Product Management =====
+    @GetMapping("/developer/manage")
+    public String manageDeveloperProducts(
+            @RequestParam(name = "page", defaultValue = "0") int page,
+            @RequestParam(name = "status", required = false) String status,
+            @RequestParam(name = "search", required = false) String search,
+            Authentication authentication,
+            Model model) {
+
+        // Get current user (developer)
+        String username = authentication.getName();
+        Optional<Users> userOpt = userRepository.findByUsername(username);
+        if (!userOpt.isPresent()) {
+            return "redirect:/login";
+        }
+        Users developer = userOpt.get();
+
+        // Get products with pagination
+        Pageable pageable = PageRequest.of(Math.max(page, 0), 10, Sort.by(Sort.Direction.DESC, "updatedAt"));
+        Page<Products> productsPage = productsRepository.findByDeveloper(developer, pageable);
+
+        // Filter by status if provided
+        if (status != null && !status.isEmpty() && !status.equals("all")) {
+            try {
+                Products.Status filterStatus = Products.Status.valueOf(status);
+                productsPage = productsRepository.findByDeveloperAndStatus(developer, filterStatus, pageable);
+            } catch (IllegalArgumentException e) {
+                // Invalid status, show all
+            }
+        }
+
+        // Filter by search if provided
+        if (search != null && !search.isEmpty()) {
+            productsPage = productsRepository.findByDeveloperAndNameContainingIgnoreCase(developer, search, pageable);
+        }
+
+        model.addAttribute("products", productsPage.getContent());
+        model.addAttribute("currentPage", page);
+        model.addAttribute("totalPages", productsPage.getTotalPages());
+        model.addAttribute("totalElements", productsPage.getTotalElements());
+        model.addAttribute("status", status);
+        model.addAttribute("search", search);
+        model.addAttribute("developer", developer);
+
+        return "developer-manage-products";
+    }
+
+    // Upgrade to new version
+    @PostMapping("/{productId}/upgrade-version")
+    public String upgradeVersion(
+            @PathVariable("productId") int productId,
+            @RequestParam("versionNumber") String versionNumber,
+            @RequestParam("exeFile") MultipartFile exeFile,
+            @RequestParam(value = "packageNames", required = false) String[] packageNames,
+            @RequestParam(value = "packagePrices", required = false) Double[] packagePrices,
+            @RequestParam(value = "packageDurations", required = false) Integer[] packageDurations,
+            Authentication authentication,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            // Get product
+            Optional<Products> productOpt = productsRepository.findById(productId);
+            if (!productOpt.isPresent()) {
+                redirectAttributes.addFlashAttribute("error", "Không tìm thấy sản phẩm");
+                return "redirect:/product/developer/manage";
+            }
+
+            Products product = productOpt.get();
+
+            // Verify developer owns this product
+            String username = authentication.getName();
+            Optional<Users> userOpt = userRepository.findByUsername(username);
+            if (!userOpt.isPresent() || userOpt.get().getUserId() != product.getDeveloper().getUserId()) {
+                redirectAttributes.addFlashAttribute("error", "Bạn không có quyền quản lý sản phẩm này");
+                return "redirect:/product/developer/manage";
+            }
+
+            Users developer = userOpt.get();
+
+            // Validate file
+            if (exeFile.isEmpty()) {
+                redirectAttributes.addFlashAttribute("error", "Vui lòng chọn file .exe");
+                return "redirect:/product/developer/manage?search=" + product.getName();
+            }
+
+            // Create upload directory if not exists
+            Path uploadPath = Paths.get(uploadDir);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            // Save file with unique name
+            String originalFilename = exeFile.getOriginalFilename();
+            String fileExtension = "";
+            if (originalFilename != null && originalFilename.contains(".")) {
+                fileExtension = originalFilename.substring(originalFilename.lastIndexOf("."));
+            }
+            String uniqueFilename = UUID.randomUUID().toString() + fileExtension;
+            Path filePath = uploadPath.resolve(uniqueFilename);
+            Files.copy(exeFile.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            // Set old version to not current
+            var currentVersionOpt = productVersionsRepository.findByProductAndIsCurrentVersionTrue(product);
+            if (currentVersionOpt.isPresent()) {
+                ProductVersions oldVersion = currentVersionOpt.get();
+                oldVersion.setCurrentVersion(false);
+                productVersionsRepository.save(oldVersion);
+            }
+
+            // Create new ProductVersion
+            ProductVersions newVersion = new ProductVersions();
+            newVersion.setProduct(product);
+            newVersion.setVersionNumber(versionNumber);
+            newVersion.setBuildFilePath(filePath.toString());
+            newVersion.setSourceCodePath("");
+            newVersion.setVirusScanStatus(VirusScanStatus.pending);
+            newVersion.setCurrentVersion(true);
+            ProductVersions savedVersion = productVersionsRepository.save(newVersion);
+
+            // Trigger virus scan asynchronously
+            virusScanService.scanFileAsync(savedVersion, filePath.toString());
+
+            // Update product status to pending (for admin review)
+            product.setStatus(Products.Status.pending);
+            productsRepository.save(product);
+
+            // Update packages if provided
+            if (packageNames != null && packageNames.length > 0) {
+                for (int i = 0; i < packageNames.length; i++) {
+                    if (packageNames[i] != null && !packageNames[i].trim().isEmpty()) {
+                        ProductPackages pkg = new ProductPackages();
+                        pkg.setProduct(product);
+                        pkg.setName(packageNames[i]);
+                        pkg.setPrice(BigDecimal.valueOf(packagePrices[i]));
+                        pkg.setDurationDays(packageDurations[i]);
+                        productPackagesRepository.save(pkg);
+                    }
+                }
+            }
+
+            // Log activity
+            activityLogService.logActivity(
+                    developer,
+                    "UPGRADE_VERSION",
+                    "Products",
+                    productId,
+                    "Nâng cấp sản phẩm lên phiên bản " + versionNumber
+            );
+
+            redirectAttributes.addFlashAttribute("success", "Sản phẩm đã được nâng cấp thành công! Đang chờ admin xét duyệt.");
+            return "redirect:/product/developer/manage";
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Lỗi upload file: " + e.getMessage());
+            return "redirect:/product/developer/manage";
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Lỗi nâng cấp sản phẩm: " + e.getMessage());
+            return "redirect:/product/developer/manage";
+        }
+    }
+
+    // Delete product
+    @PostMapping("/{productId}/delete")
+    public String deleteProduct(
+            @PathVariable("productId") int productId,
+            Authentication authentication,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            // Get product
+            Optional<Products> productOpt = productsRepository.findById(productId);
+            if (!productOpt.isPresent()) {
+                redirectAttributes.addFlashAttribute("error", "Không tìm thấy sản phẩm");
+                return "redirect:/product/developer/manage";
+            }
+
+            Products product = productOpt.get();
+
+            // Verify developer owns this product
+            String username = authentication.getName();
+            Optional<Users> userOpt = userRepository.findByUsername(username);
+            if (!userOpt.isPresent() || userOpt.get().getUserId() != product.getDeveloper().getUserId()) {
+                redirectAttributes.addFlashAttribute("error", "Bạn không có quyền xóa sản phẩm này");
+                return "redirect:/product/developer/manage";
+            }
+
+            Users developer = userOpt.get();
+
+            // Check if product has sales (orders)
+            long salesCount = ordersRepository.countByProductId(productId);
+            if (salesCount > 0) {
+                redirectAttributes.addFlashAttribute("error", "Không thể xóa sản phẩm đã có bán hàng");
+                return "redirect:/product/developer/manage";
+            }
+
+            // Only allow delete if status is pending or rejected
+            if (product.getStatus() != Products.Status.pending && product.getStatus() != Products.Status.rejected) {
+                redirectAttributes.addFlashAttribute("error", "Chỉ có thể xóa sản phẩm ở trạng thái pending hoặc rejected");
+                return "redirect:/product/developer/manage";
+            }
+
+            // Log activity
+            activityLogService.logActivity(
+                    developer,
+                    "DELETE_PRODUCT",
+                    "Products",
+                    productId,
+                    "Xóa sản phẩm: " + product.getName()
+            );
+
+            // Delete product (cascade will handle versions and packages)
+            productsRepository.deleteById(productId);
+
+            redirectAttributes.addFlashAttribute("success", "Sản phẩm đã được xóa thành công");
+            return "redirect:/product/developer/manage";
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Lỗi xóa sản phẩm: " + e.getMessage());
+            return "redirect:/product/developer/manage";
         }
     }
 }

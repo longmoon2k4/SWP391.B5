@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý Sản phẩm</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
+    <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css"/>
+    <style>
+        :root {
+            --primary: #6366f1;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --info: #3b82f6;
+            --light: #f8f9fa;
+            --dark: #1f2937;
+        }
+
+        * {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--light);
+            padding-bottom: 2rem;
+        }
+
+        .page-header {
+            background: linear-gradient(135deg, var(--primary) 0%, #4f46e5 100%);
+            color: white;
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .page-header h1 {
+            font-weight: 700;
+            margin: 0;
+            font-size: 2rem;
+        }
+
+        .page-header p {
+            opacity: 0.9;
+            margin-top: 0.5rem;
+        }
+
+        .filters-card {
+            background: white;
+            border-radius: 0.6rem;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 1.5rem;
+        }
+
+        .alert {
+            border-radius: 0.6rem;
+            border: none;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .product-card {
+            background: white;
+            border-radius: 0.6rem;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 1rem;
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--primary);
+        }
+
+        .product-card:hover {
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+            transform: translateY(-2px);
+        }
+
+        .product-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .product-title {
+            flex: 1;
+        }
+
+        .product-title h5 {
+            font-weight: 700;
+            margin: 0;
+            color: var(--dark);
+            font-size: 1.1rem;
+        }
+
+        .product-title p {
+            color: #6b7280;
+            margin: 0.25rem 0 0;
+            font-size: 0.9rem;
+        }
+
+        .status-badge {
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.375rem;
+            font-weight: 600;
+            font-size: 0.85rem;
+            white-space: nowrap;
+        }
+
+        .status-pending {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .status-approved {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .status-rejected {
+            background: #fee2e2;
+            color: #7f1d1d;
+        }
+
+        .status-hidden {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .product-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 1rem;
+            padding: 1rem;
+            background: var(--light);
+            border-radius: 0.4rem;
+        }
+
+        .info-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+
+        .info-label {
+            color: #6b7280;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .info-value {
+            color: var(--dark);
+            font-size: 1.1rem;
+            font-weight: 600;
+        }
+
+        .product-description {
+            color: #6b7280;
+            font-size: 0.95rem;
+            margin-bottom: 1rem;
+            line-height: 1.5;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .rejection-reason {
+            background: #fee2e2;
+            border: 1px solid #fca5a5;
+            border-radius: 0.4rem;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            color: #7f1d1d;
+        }
+
+        .rejection-reason strong {
+            color: #dc2626;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .btn-sm-action {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .btn-upgrade {
+            background: var(--primary);
+            color: white;
+            border: none;
+        }
+
+        .btn-upgrade:hover {
+            background: #4f46e5;
+            color: white;
+        }
+
+        .btn-delete {
+            background: var(--danger);
+            color: white;
+            border: none;
+        }
+
+        .btn-delete:hover {
+            background: #dc2626;
+            color: white;
+        }
+
+        .btn-disabled {
+            background: #d1d5db;
+            color: #6b7280;
+            cursor: not-allowed;
+        }
+
+        .btn-disabled:hover {
+            background: #d1d5db;
+            color: #6b7280;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #6b7280;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            color: #d1d5db;
+            margin-bottom: 1rem;
+        }
+
+        .pagination {
+            justify-content: center;
+        }
+
+        .modal-header {
+            background: var(--primary);
+            color: white;
+        }
+
+        .modal-header .btn-close {
+            filter: brightness(0) invert(1);
+        }
+
+        @media (max-width: 768px) {
+            .product-header {
+                flex-direction: column;
+            }
+
+            .product-info {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn-sm-action {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+<div th:replace="~{layout :: header}"></div>
+<div layout:fragment="content">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1><i class="fas fa-boxes me-2"></i>Quản lý Sản phẩm</h1>
+                    <p>Quản lý, cập nhật, hoặc xóa các sản phẩm của bạn</p>
+                </div>
+                <a href="/dashboard/developer" class="btn btn-light"><i class="fas fa-arrow-left me-1"></i>Quay lại</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid">
+        <!-- Flash Messages -->
+        <div th:if="${success != null or error != null}">
+            <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+                <i class="fas fa-check-circle me-2"></i>
+                <span th:text="${success}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+                <i class="fas fa-exclamation-circle me-2"></i>
+                <span th:text="${error}"></span>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="filters-card">
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold"><i class="fas fa-search me-2"></i>Tìm kiếm</label>
+                    <form th:action="@{/product/developer/manage}" method="get" class="d-flex gap-2">
+                        <input type="text" class="form-control" name="search" th:value="${search}" placeholder="Nhập tên sản phẩm...">
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-search"></i></button>
+                    </form>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold"><i class="fas fa-filter me-2"></i>Trạng thái</label>
+                    <form th:action="@{/product/developer/manage}" method="get" class="d-flex gap-2">
+                        <select class="form-select" name="status" onchange="this.form.submit()">
+                            <option value="all" th:selected="${status == null or status == 'all'}">-- Tất cả --</option>
+                            <option value="pending" th:selected="${status == 'pending'}">Pending</option>
+                            <option value="approved" th:selected="${status == 'approved'}">Approved</option>
+                            <option value="rejected" th:selected="${status == 'rejected'}">Rejected</option>
+                            <option value="hidden" th:selected="${status == 'hidden'}">Hidden</option>
+                        </select>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Products List -->
+        <div th:if="${products != null and products.size() > 0}">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <h5 class="mb-0">Tổng cộng: <span th:text="${totalElements}">0</span> sản phẩm</h5>
+            </div>
+
+            <div th:each="product : ${products}">
+                <div class="product-card">
+                    <div class="product-header">
+                        <div class="product-title">
+                            <h5 th:text="${product.name}">Product Name</h5>
+                            <p th:text="${product.shortDescription ?: 'Không có mô tả'}">Product description</p>
+                        </div>
+                        <span class="status-badge" th:classappend="'status-' + ${product.status.name()}" th:text="${product.status.name() == 'pending' ? 'Pending' : product.status.name() == 'approved' ? 'Approved' : product.status.name() == 'rejected' ? 'Rejected' : 'Hidden'}">Status</span>
+                    </div>
+
+                    <!-- Rejection Reason (if rejected) -->
+                    <div th:if="${product.status.name() == 'rejected'}" class="rejection-reason">
+                        <div>
+                            <strong><i class="fas fa-exclamation-circle me-2"></i>Lý do từ chối:</strong>
+                            <p class="mb-0" th:text="${product.rejectionReason ?: 'Không có thông tin'}">Reason</p>
+                        </div>
+                    </div>
+
+                    <!-- Product Info -->
+                    <div class="product-info">
+                        <div class="info-item">
+                            <span class="info-label">Danh mục</span>
+                            <span class="info-value" th:text="${product.category.name ?: 'N/A'}">Category</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Tổng bán</span>
+                            <span class="info-value" th:text="${product.totalSales}">0</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Lượt xem</span>
+                            <span class="info-value" th:text="${product.viewCount}">0</span>
+                        </div>
+                        <div class="info-item">
+                            <span class="info-label">Cập nhật</span>
+                            <span class="info-value" th:text="${#temporals.format(product.updatedAt, 'dd/MM/yyyy')}">--</span>
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="product-description" th:text="${product.description}">Description</div>
+
+                    <!-- Action Buttons -->
+                    <div class="action-buttons">
+                        <!-- View Button -->
+                        <a th:href="@{/product/{id}(id=${product.productId})}" class="btn btn-outline-info btn-sm-action">
+                            <i class="fas fa-eye me-1"></i>Xem
+                        </a>
+
+                        <!-- Upgrade Version Button (only for approved/pending/hidden) -->
+                        <button th:if="${product.status.name() != 'rejected'}" 
+                                type="button" 
+                                class="btn btn-sm-action btn-upgrade"
+                                data-bs-toggle="modal" 
+                                th:data-bs-target="'#upgradeModal' + ${product.productId}">
+                            <i class="fas fa-arrow-up me-1"></i>Nâng cấp
+                        </button>
+                        <span th:if="${product.status.name() == 'rejected'}" 
+                              class="btn btn-sm-action btn-disabled" 
+                              title="Không thể nâng cấp sản phẩm bị từ chối">
+                            <i class="fas fa-arrow-up me-1"></i>Nâng cấp
+                        </span>
+
+                        <!-- Delete Button (only for pending/rejected and no sales) -->
+                        <button th:if="${product.status.name() == 'pending' or product.status.name() == 'rejected'} and ${product.totalSales == 0}"
+                                type="button" 
+                                class="btn btn-sm-action btn-delete"
+                                data-bs-toggle="modal" 
+                                th:data-bs-target="'#deleteModal' + ${product.productId}">
+                            <i class="fas fa-trash me-1"></i>Xóa
+                        </button>
+                        <span th:if="${!(product.status.name() == 'pending' or product.status.name() == 'rejected')} or ${product.totalSales > 0}"
+                              class="btn btn-sm-action btn-disabled" 
+                              th:title="${product.totalSales > 0 ? 'Không thể xóa sản phẩm đã có bán hàng' : 'Chỉ có thể xóa sản phẩm ở trạng thái pending hoặc rejected'}">
+                            <i class="fas fa-trash me-1"></i>Xóa
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Upgrade Version Modal -->
+                <div class="modal fade" th:id="'upgradeModal' + ${product.productId}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title"><i class="fas fa-arrow-up me-2"></i>Nâng cấp phiên bản</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <form th:action="@{/product/{id}/upgrade-version(id=${product.productId})}" method="post" enctype="multipart/form-data">
+                                <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                <div class="modal-body">
+                                    <div class="alert alert-info mb-3">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        Tạo một phiên bản mới cho sản phẩm "<span th:text="${product.name}"></span>". Sản phẩm sẽ được gửi lại để xét duyệt.
+                                    </div>
+
+                                    <!-- Version Number -->
+                                    <div class="mb-3">
+                                        <label for="versionNumber" class="form-label fw-semibold">Phiên bản <span class="text-danger">*</span></label>
+                                        <input type="text" class="form-control" id="versionNumber" name="versionNumber" placeholder="1.0.0" required pattern="^\d+\.\d+\.\d+$">
+                                        <div class="form-text">Định dạng: major.minor.patch (VD: 1.0.0)</div>
+                                    </div>
+
+                                    <!-- EXE File Upload -->
+                                    <div class="mb-3">
+                                        <label for="exeFile" class="form-label fw-semibold">File thực thi (.exe) <span class="text-danger">*</span></label>
+                                        <input type="file" class="form-control" id="exeFile" name="exeFile" accept=".exe" required>
+                                        <div class="form-text">Chọn file .exe mới (tối đa 100MB)</div>
+                                    </div>
+
+                                    <!-- Packages Section -->
+                                    <div class="mb-3">
+                                        <label class="form-label fw-semibold">Gói giá (tùy chọn)</label>
+                                        <div class="form-text mb-2">Cập nhật các gói giá cho phiên bản mới</div>
+                                        
+                                        <div class="packagesContainer">
+                                            <!-- Packages will be added here dynamically -->
+                                        </div>
+                                        
+                                        <button type="button" class="btn btn-outline-primary btn-sm addPackageBtn">
+                                            <i class="fas fa-plus me-1"></i>Thêm gói giá
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                    <button type="submit" class="btn btn-primary"><i class="fas fa-check me-1"></i>Nâng cấp</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Delete Confirmation Modal -->
+                <div class="modal fade" th:id="'deleteModal' + ${product.productId}" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title"><i class="fas fa-trash me-2"></i>Xác nhận xóa</h5>
+                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="alert alert-warning mb-3">
+                                    <i class="fas fa-exclamation-triangle me-2"></i>
+                                    <strong>Chú ý!</strong> Hành động này không thể hoàn tác.
+                                </div>
+                                <p>Bạn có chắc chắn muốn xóa sản phẩm <strong th:text="${product.name}">Product</strong>?</p>
+                                <p class="text-muted small">Tất cả các phiên bản, gói giá liên quan sẽ bị xóa.</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+                                <form th:action="@{/product/{id}/delete(id=${product.productId})}" method="post" class="d-inline">
+                                    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}"/>
+                                    <button type="submit" class="btn btn-danger"><i class="fas fa-trash me-1"></i>Xóa sản phẩm</button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Pagination -->
+            <nav th:if="${totalPages > 1}" class="mt-4">
+                <ul class="pagination">
+                    <li class="page-item" th:classappend="${currentPage == 0 ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/product/developer/manage(page=${currentPage - 1})}" th:if="${currentPage > 0}">
+                            <i class="fas fa-chevron-left"></i> Trước
+                        </a>
+                        <span class="page-link" th:if="${currentPage == 0}">
+                            <i class="fas fa-chevron-left"></i> Trước
+                        </span>
+                    </li>
+                    <li class="page-item" th:each="i : ${#numbers.sequence(0, totalPages - 1)}" th:classappend="${i == currentPage ? 'active' : ''}">
+                        <a class="page-link" th:href="@{/product/developer/manage(page=${i})}" th:text="${i + 1}">1</a>
+                    </li>
+                    <li class="page-item" th:classappend="${currentPage >= totalPages - 1 ? 'disabled' : ''}">
+                        <a class="page-link" th:href="@{/product/developer/manage(page=${currentPage + 1})}" th:if="${currentPage < totalPages - 1}">
+                            Sau <i class="fas fa-chevron-right"></i>
+                        </a>
+                        <span class="page-link" th:if="${currentPage >= totalPages - 1}">
+                            Sau <i class="fas fa-chevron-right"></i>
+                        </span>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+
+        <!-- Empty State -->
+        <div th:if="${products == null or products.size() == 0}" class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <h5 class="mt-2">Không tìm thấy sản phẩm</h5>
+            <p>Bạn chưa có sản phẩm nào hoặc không có sản phẩm phù hợp với bộ lọc được chọn.</p>
+            <a href="/dashboard/developer" class="btn btn-primary mt-3"><i class="fas fa-arrow-left me-1"></i>Quay lại Dashboard</a>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+let packageIndexMap = {};
+
+// Initialize package container for each modal
+document.querySelectorAll('.modal').forEach(modal => {
+    const modalId = modal.id;
+    packageIndexMap[modalId] = 0;
+    
+    // Add click listener for add package button
+    const addBtn = modal.querySelector('.addPackageBtn');
+    if (addBtn) {
+        addBtn.addEventListener('click', function() {
+            addPackage(modalId);
+        });
+    }
+});
+
+function addPackage(modalId) {
+    const modal = document.getElementById(modalId);
+    const container = modal.querySelector('.packagesContainer');
+    const packageDiv = document.createElement('div');
+    packageDiv.className = 'package-item';
+    
+    const index = packageIndexMap[modalId]++;
+    packageDiv.dataset.index = index;
+    
+    packageDiv.innerHTML = `
+        <div style="border: 1px solid #e9ecef; border-radius: 0.5rem; padding: 1rem; background: #f8f9fa; margin-bottom: 0.75rem; position: relative;">
+            <button type="button" class="btn btn-sm btn-danger" style="position: absolute; top: 0.5rem; right: 0.5rem;" onclick="removePackage('${modalId}', ${index})">
+                <i class="fas fa-times"></i>
+            </button>
+            <div class="row g-2">
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Tên gói</label>
+                    <input type="text" class="form-control form-control-sm" name="packageNames" 
+                           placeholder="VD: Basic, Pro, Enterprise">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Giá (₫)</label>
+                    <input type="number" class="form-control form-control-sm" name="packagePrices" 
+                           placeholder="0" min="0" step="1000">
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label small fw-semibold">Thời hạn (ngày)</label>
+                    <input type="number" class="form-control form-control-sm" name="packageDurations" 
+                           placeholder="30, 365, 0=vĩnh viễn" min="0">
+                </div>
+            </div>
+        </div>
+    `;
+    
+    container.appendChild(packageDiv);
+}
+
+function removePackage(modalId, index) {
+    const modal = document.getElementById(modalId);
+    const packageItem = modal.querySelector(`.package-item[data-index="${index}"]`);
+    if (packageItem) {
+        packageItem.remove();
+    }
+}
+
+// Reset modals when closed
+document.querySelectorAll('.modal').forEach(modal => {
+    modal.addEventListener('hidden.bs.modal', function () {
+        const form = this.querySelector('form');
+        if (form) {
+            form.reset();
+        }
+        const container = this.querySelector('.packagesContainer');
+        if (container) {
+            container.innerHTML = '';
+            packageIndexMap[this.id] = 0;
+        }
+    });
+});
+</script>
+<div th:replace="~{layout :: footer}"></div>
+</body>
+</html>

@@ -51,9 +51,16 @@ public interface ProductsRepository extends JpaRepository<Products, Integer> {
            "ORDER BY p.createdAt DESC")
     List<Products> findByStatusWithDetails(@Param("status") Products.Status status, Pageable pageable);
 
-       long countByDeveloper(Users developer);
+    long countByDeveloper(Users developer);
 
-       long countByDeveloperAndStatus(Users developer, Products.Status status);
+    long countByDeveloperAndStatus(Users developer, Products.Status status);
 
-       List<Products> findTop5ByDeveloperOrderByUpdatedAtDesc(Users developer);
+    List<Products> findTop5ByDeveloperOrderByUpdatedAtDesc(Users developer);
+
+    // Developer product management queries
+    Page<Products> findByDeveloper(Users developer, Pageable pageable);
+
+    Page<Products> findByDeveloperAndStatus(Users developer, Products.Status status, Pageable pageable);
+
+    Page<Products> findByDeveloperAndNameContainingIgnoreCase(Users developer, String name, Pageable pageable);
 }
