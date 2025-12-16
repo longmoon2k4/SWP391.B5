@@ -31,10 +31,14 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(authorize -> authorize
                         .requestMatchers("/", "/login", "/register", "/css/**", "/js/**", "/images/**", "/product/**", "/403").permitAll()
+                        .requestMatchers("/api/v1/**").permitAll() // Allow public API access
                         .requestMatchers("/dashboard/admin/**").hasRole("ADMIN")
                         .requestMatchers("/dashboard/developer/**").hasRole("DEVELOPER")
                         .requestMatchers("/dashboard/user/**").hasRole("USER")
                         .anyRequest().authenticated()
+                )
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/api/v1/**") // Disable CSRF for API endpoints
                 )
                 .formLogin(form -> form
                         .loginPage("/login")

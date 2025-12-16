@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SDK Documentation - Bum Platform</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="/css/style.css" rel="stylesheet">
+    <style>
+        .sdk-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 3rem 0;
+            margin-bottom: 2rem;
+        }
+        
+        .sdk-card {
+            border: 1px solid #dee2e6;
+            border-radius: 8px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.3s ease;
+        }
+        
+        .sdk-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .sdk-card h4 {
+            color: #667eea;
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+        
+        .code-block {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 1rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+        
+        .code-block code {
+            color: #d63384;
+            font-size: 0.9rem;
+        }
+        
+        .btn-download {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+        }
+        
+        .btn-download:hover {
+            background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .nav-tabs .nav-link.active {
+            color: #667eea;
+            border-bottom: 2px solid #667eea;
+            background: none;
+        }
+        
+        .tab-pane {
+            padding-top: 1.5rem;
+        }
+        
+        .feature-list {
+            list-style: none;
+            padding: 0;
+        }
+        
+        .feature-list li {
+            padding: 0.5rem 0;
+            padding-left: 1.8rem;
+            position: relative;
+        }
+        
+        .feature-list li:before {
+            content: '\f058';
+            font-family: 'Font Awesome 6 Free';
+            font-weight: 900;
+            color: #28a745;
+            position: absolute;
+            left: 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="sdk-header">
+        <div class="container">
+            <h1><i class="fas fa-code"></i> SDK Documentation</h1>
+            <p class="lead">Integrate license validation into your application</p>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mb-5">
+        <div class="row">
+            <div class="col-md-3">
+                <div class="list-group sticky-top" style="top: 20px;">
+                    <a href="#quick-start" class="list-group-item list-group-item-action">Quick Start</a>
+                    <a href="#java-sdk" class="list-group-item list-group-item-action">Java SDK</a>
+                    <a href="#javascript-sdk" class="list-group-item list-group-item-action">JavaScript SDK</a>
+                    <a href="#python-sdk" class="list-group-item list-group-item-action">Python SDK</a>
+                    <a href="#api-reference" class="list-group-item list-group-item-action">API Reference</a>
+                    <a href="#error-codes" class="list-group-item list-group-item-action">Error Codes</a>
+                </div>
+            </div>
+
+            <div class="col-md-9">
+                <!-- Quick Start -->
+                <section id="quick-start">
+                    <h2 class="mb-4"><i class="fas fa-rocket"></i> Quick Start</h2>
+                    
+                    <div class="sdk-card">
+                        <h4>Installation</h4>
+                        <p>Choose your platform and download the SDK:</p>
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <a href="/dashboard/sdk/download/java" class="btn btn-download w-100">
+                                    <i class="fab fa-java"></i> Java SDK
+                                </a>
+                            </div>
+                            <div class="col-md-4">
+                                <a href="/dashboard/sdk/download/javascript" class="btn btn-download w-100">
+                                    <i class="fab fa-js"></i> JavaScript SDK
+                                </a>
+                            </div>
+                            <div class="col-md-4">
+                                <a href="/dashboard/sdk/download/python" class="btn btn-download w-100">
+                                    <i class="fab fa-python"></i> Python SDK
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="sdk-card">
+                        <h4>Your API Key</h4>
+                        <p>Use your API key for authentication. Get it from the <a href="/dashboard/api-keys">API Keys</a> page.</p>
+                        <div class="alert alert-info">
+                            <strong>API Key Format:</strong> <code>sk_live_xxxxx</code>
+                        </div>
+                    </div>
+                </section>
+
+                <hr class="my-5">
+
+                <!-- Java SDK -->
+                <section id="java-sdk">
+                    <h2 class="mb-4"><i class="fab fa-java"></i> Java SDK</h2>
+                    
+                    <div class="sdk-card">
+                        <h4>Installation</h4>
+                        <ol>
+                            <li>Download <code>BumApiClient.java</code></li>
+                            <li>Add to your project: <code>src/main/java/com/example/</code></li>
+                            <li>Add dependency: <code>org.json:json:20231013</code> to pom.xml</li>
+                        </ol>
+                    </div>
+
+                    <div class="sdk-card">
+                        <h4>Usage</h4>
+                        <div class="code-block">
+<pre>import com.example.BumApiClient;
+
+// Initialize client
+BumApiClient client = new BumApiClient("your-api-key", "https://yoursite.com");
+
+// Validate API key
+boolean isValid = client.validateApiKey();
+
+// Validate license
+BumApiClient.LicenseResponse response = client.validateLicense("LICENSE-KEY");
+if (response.valid) {
+    System.out.println("License is valid!");
+    System.out.println("Product: " + response.productName);
+    System.out.println("Expires: " + response.expireDate);
+} else {
+    System.out.println("License invalid: " + response.message);
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="sdk-card">
+                        <h4>Hardware-Locked License</h4>
+                        <div class="code-block">
+<pre>// For hardware-locked licenses
+String hardwareId = getSystemHardwareId();
+BumApiClient.LicenseResponse response = client.validateLicense("LICENSE-KEY", hardwareId);
+
+if (response.valid) {
+    System.out.println("Hardware match!");
+}</pre>
+                        </div>
+                    </div>
+                </section>
+
+                <hr class="my-5">
+
+                <!-- JavaScript SDK -->
+                <section id="javascript-sdk">
+                    <h2 class="mb-4"><i class="fab fa-js"></i> JavaScript SDK</h2>
+                    
+                    <div class="sdk-card">
+                        <h4>Installation</h4>
+                        <ol>
+                            <li>Download <code>bum-sdk.js</code></li>
+                            <li>Include in your HTML: <code>&lt;script src="bum-sdk.js"&gt;&lt;/script&gt;</code></li>
+                        </ol>
+                    </div>
+
+                    <div class="sdk-card">
+                        <h4>Usage</h4>
+                        <div class="code-block">
+<pre>// Initialize client
+const client = new BumApiClient('your-api-key', 'https://yoursite.com');
+
+// Validate API key
+const isValid = await client.validateApiKey();
+
+// Validate license
+const response = await client.validateLicense('LICENSE-KEY');
+if (response.valid) {
+    console.log('License is valid!');
+    console.log('Product: ' + response.productName);
+    console.log('Expires: ' + response.expireDate);
+} else {
+    console.log('License invalid: ' + response.message);
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="sdk-card">
+                        <h4>Hardware-Locked License</h4>
+                        <div class="code-block">
+<pre>// For hardware-locked licenses
+const hardwareId = await getHardwareId();
+const response = await client.validateLicense('LICENSE-KEY', hardwareId);
+
+if (response.valid) {
+    console.log('Hardware match!');
+}</pre>
+                        </div>
+                    </div>
+                </section>
+
+                <hr class="my-5">
+
+                <!-- Python SDK -->
+                <section id="python-sdk">
+                    <h2 class="mb-4"><i class="fab fa-python"></i> Python SDK</h2>
+                    
+                    <div class="sdk-card">
+                        <h4>Installation</h4>
+                        <ol>
+                            <li>Download <code>bum_sdk.py</code></li>
+                            <li>Install required dependency: <code>pip install requests</code></li>
+                            <li>Import in your script: <code>from bum_sdk import BumApiClient</code></li>
+                        </ol>
+                    </div>
+
+                    <div class="sdk-card">
+                        <h4>Usage</h4>
+                        <div class="code-block">
+<pre>from bum_sdk import BumApiClient
+
+# Initialize client
+client = BumApiClient('your-api-key', 'https://yoursite.com')
+
+# Validate API key
+is_valid = client.validate_api_key()
+
+# Validate license
+response = client.validate_license('LICENSE-KEY')
+if response['valid']:
+    print('License is valid!')
+    print('Product: ' + response['productName'])
+    print('Expires: ' + response['expireDate'])
+else:
+    print('License invalid: ' + response['message'])</pre>
+                        </div>
+                    </div>
+
+                    <div class="sdk-card">
+                        <h4>Hardware-Locked License</h4>
+                        <div class="code-block">
+<pre>import uuid
+
+# For hardware-locked licenses
+hardware_id = str(uuid.getnode())
+response = client.validate_license('LICENSE-KEY', hardware_id)
+
+if response['valid']:
+    print('Hardware match!')</pre>
+                        </div>
+                    </div>
+                </section>
+
+                <hr class="my-5">
+
+                <!-- API Reference -->
+                <section id="api-reference">
+                    <h2 class="mb-4"><i class="fas fa-book"></i> API Reference</h2>
+                    
+                    <div class="sdk-card">
+                        <h4>License Validation Endpoint</h4>
+                        <p><strong>POST</strong> <code>/api/v1/licenses/validate</code></p>
+                        
+                        <h5 class="mt-3">Request Headers</h5>
+                        <div class="code-block">
+<pre>Authorization: Bearer {your-api-key}
+Content-Type: application/json</pre>
+                        </div>
+
+                        <h5 class="mt-3">Request Body</h5>
+                        <div class="code-block">
+<pre>{
+    "licenseKey": "LICENSE-KEY",
+    "hardwareId": "optional-hardware-id"
+}</pre>
+                        </div>
+
+                        <h5 class="mt-3">Response (Success)</h5>
+                        <div class="code-block">
+<pre>{
+    "valid": true,
+    "status": "active",
+    "message": "License is valid",
+    "productName": "Product Name",
+    "expireDate": "2025-12-31 23:59:59",
+    "hardwareId": "hardware-id",
+    "userId": "123"
+}</pre>
+                        </div>
+
+                        <h5 class="mt-3">Response (Error)</h5>
+                        <div class="code-block">
+<pre>{
+    "valid": false,
+    "status": "expired",
+    "message": "License has expired",
+    "productName": "Product Name",
+    "expireDate": null,
+    "hardwareId": null,
+    "userId": "123"
+}</pre>
+                        </div>
+                    </div>
+
+                    <div class="sdk-card">
+                        <h4>Response Status Codes</h4>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Status</th>
+                                    <th>Description</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>active</code></td>
+                                    <td>License is active and valid</td>
+                                </tr>
+                                <tr>
+                                    <td><code>expired</code></td>
+                                    <td>License has passed expiration date</td>
+                                </tr>
+                                <tr>
+                                    <td><code>banned</code></td>
+                                    <td>License has been revoked</td>
+                                </tr>
+                                <tr>
+                                    <td><code>unused</code></td>
+                                    <td>License not yet activated</td>
+                                </tr>
+                                <tr>
+                                    <td><code>not_found</code></td>
+                                    <td>License key does not exist</td>
+                                </tr>
+                                <tr>
+                                    <td><code>hardware_mismatch</code></td>
+                                    <td>Hardware ID does not match</td>
+                                </tr>
+                                <tr>
+                                    <td><code>unauthorized</code></td>
+                                    <td>License does not belong to your product</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <hr class="my-5">
+
+                <!-- Error Codes -->
+                <section id="error-codes">
+                    <h2 class="mb-4"><i class="fas fa-exclamation-triangle"></i> Error Codes</h2>
+                    
+                    <div class="sdk-card">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Error</th>
+                                    <th>Message</th>
+                                    <th>Solution</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>invalid</code></td>
+                                    <td>Invalid or inactive API key</td>
+                                    <td>Check your API key in dashboard</td>
+                                </tr>
+                                <tr>
+                                    <td><code>not_found</code></td>
+                                    <td>License key not found</td>
+                                    <td>Verify the license key spelling</td>
+                                </tr>
+                                <tr>
+                                    <td><code>expired</code></td>
+                                    <td>License has expired</td>
+                                    <td>Renew license or contact support</td>
+                                </tr>
+                                <tr>
+                                    <td><code>banned</code></td>
+                                    <td>License has been banned</td>
+                                    <td>Contact support for more info</td>
+                                </tr>
+                                <tr>
+                                    <td><code>hardware_mismatch</code></td>
+                                    <td>Hardware ID does not match</td>
+                                    <td>Use correct hardware ID or request license transfer</td>
+                                </tr>
+                                <tr>
+                                    <td><code>rate_limited</code></td>
+                                    <td>Rate limit exceeded</td>
+                                    <td>Cache validation results, wait before retrying</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <hr class="my-5">
+
+                <!-- Best Practices -->
+                <section id="best-practices">
+                    <h2 class="mb-4"><i class="fas fa-lightbulb"></i> Best Practices</h2>
+                    
+                    <div class="sdk-card">
+                        <h4><i class="fas fa-lock"></i> Security</h4>
+                        <ul class="feature-list">
+                            <li>Store API key in environment variables, never hardcode</li>
+                            <li>Use HTTPS for all API calls</li>
+                            <li>Implement request timeout (5-10 seconds)</li>
+                            <li>Never expose API key in client-side code</li>
+                            <li>Rotate API keys regularly</li>
+                        </ul>
+                    </div>
+
+                    <div class="sdk-card">
+                        <h4><i class="fas fa-tachometer-alt"></i> Performance</h4>
+                        <ul class="feature-list">
+                            <li>Cache validation results for 24 hours</li>
+                            <li>Implement offline fallback</li>
+                            <li>Use async validation where possible</li>
+                            <li>Monitor API usage in dashboard</li>
+                            <li>Set appropriate rate limits</li>
+                        </ul>
+                    </div>
+
+                    <div class="sdk-card">
+                        <h4><i class="fas fa-wrench"></i> Development</h4>
+                        <ul class="feature-list">
+                            <li>Handle all error cases gracefully</li>
+                            <li>Test with test licenses first</li>
+                            <li>Implement proper logging</li>
+                            <li>Use connection timeouts</li>
+                            <li>Validate input before sending</li>
+                        </ul>
+                    </div>
+                </section>
+
+                <div class="alert alert-info mt-5">
+                    <i class="fas fa-info-circle"></i> Need help? <a href="/contact">Contact support</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
