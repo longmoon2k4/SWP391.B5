@@ -248,6 +248,13 @@ public class ProductController {
             return "redirect:/login";
         }
         Users developer = userOpt.get();
+        
+        // Lấy thông tin người dùng đăng nhập
+        if (authentication != null && authentication.isAuthenticated()) {
+            String loggedInUsername = authentication.getName();
+            Optional<Users> loggedInUserOpt = userRepository.findByUsername(loggedInUsername);
+            loggedInUserOpt.ifPresent(user -> model.addAttribute("loggedInUser", user));
+        }
 
         // Get products with pagination
         Pageable pageable = PageRequest.of(Math.max(page, 0), 10, Sort.by(Sort.Direction.DESC, "updatedAt"));
