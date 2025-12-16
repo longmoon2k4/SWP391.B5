@@ -1,67 +1,125 @@
 <!DOCTYPE html>
 <html lang="en" xmlns:th="http://www.thymeleaf.org" xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout" layout:decorate="~{layout}">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Developer Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"/>
     <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css"/>
     <style>
         :root {
-            --bg: #f3f4f7;
-            --card: #ffffff;
-            --muted: #6b7280;
-            --border: #e5e7eb;
-            --primary: #1d4ed8;
-            --success: #16a34a;
-            --warning: #f97316;
-            --slate: #0f172a;
-            --shadow-soft: 0 12px 32px rgba(15, 23, 42, 0.08);
+            --primary: #0d6efd;
+            --success: #198754;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --dark: #212529;
+            --light: #f8f9fa;
         }
 
-        body { background: var(--bg); }
+        * {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
 
-        h1, .dev-section-title { color: var(--slate); }
-        .dev-section-title { font-weight: 700; font-size: 1.08rem; letter-spacing: 0.01em; }
+        body {
+            background-color: var(--light);
+            padding-bottom: 2rem;
+        }
+
+        .dashboard-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.25rem 0;
+            margin-bottom: 1.25rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .dashboard-header h1 {
+            font-weight: 700;
+            margin: 0;
+            font-size: 2rem;
+        }
 
         .stat-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
             gap: 16px;
+            margin-bottom: 1.5rem;
         }
 
         .stat-card {
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 16px;
-            color: #fff;
-            padding: 1.1rem 1.3rem;
-            box-shadow: var(--shadow-soft);
+            border-radius: 0.6rem;
+            padding: 1rem;
+            color: white;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
             height: 100%;
-            transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+            position: relative;
+            overflow: hidden;
         }
 
-        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 18px 46px rgba(0,0,0,0.14); filter: brightness(1.03); }
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            opacity: 0.1;
+            transform: translate(30%, -30%);
+        }
 
-        .stat-icon { font-size: 1.55rem; opacity: 0.92; }
-        .stat-value { font-size: 1.9rem; font-weight: 800; margin: 0.05rem 0; }
-        .text-white-50 { color: rgba(255,255,255,0.8); }
-        .text-white-75 { color: rgba(255,255,255,0.92); }
+        .stat-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+        }
 
-        .bg-solid-blue { background: var(--primary); }
-        .bg-solid-green { background: var(--success); }
-        .bg-solid-orange { background: var(--warning); }
-        .bg-solid-slate { background: #334155; }
+        .stat-card .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            margin: 0.5rem 0;
+        }
+
+        .stat-card .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+            font-weight: 500;
+        }
+
+        .stat-card .stat-icon {
+            font-size: 2.5rem;
+            opacity: 0.8;
+        }
+
+        .bg-primary-gradient { background: #4F46E5; }
+        .bg-success-gradient { background: #10B981; }
+        .bg-warning-gradient { background: #F59E0B; }
+        .bg-danger-gradient { background: #EF4444; }
 
         .card {
-            border: 1px solid var(--border);
-            border-radius: 14px;
-            background: var(--card);
-            box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
+            border: none;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+            margin-bottom: 1rem;
+            border-radius: 0.6rem;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 8px 20px rgba(0,0,0,0.12);
         }
 
         .card-header {
-            background: transparent;
-            border-bottom: 1px solid var(--border);
-            font-weight: 700;
-            padding: 0.9rem 1rem;
-            color: var(--slate);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1rem;
+            font-weight: 600;
+        }
+
+        .card-header i {
+            margin-right: 0.5rem;
         }
 
         .card-body { padding: 1rem; }
@@ -69,101 +127,149 @@
         .chip {
             display: inline-flex;
             align-items: center;
-            padding: 0.34rem 0.75rem;
+            padding: 0.5rem 0.75rem;
             border-radius: 999px;
             background: #eef2ff;
             color: #4338ca;
-            font-size: 0.86rem;
+            font-size: 0.85rem;
             gap: 0.35rem;
             border: 1px solid #e0e7ff;
+            white-space: nowrap;
+            font-weight: 500;
         }
 
         .progress { height: 8px; border-radius: 999px; background: #e9edf5; }
 
-        table.table thead { background: #f5f6fa; }
-        table.table th { font-weight: 700; border-bottom: 1px solid var(--border) !important; color: var(--slate); }
-        table.table td { vertical-align: middle; color: var(--slate); }
+        .table {
+            margin-bottom: 0;
+        }
 
-        .badge { padding: 0.45rem 0.65rem; font-weight: 700; border-radius: 10px; letter-spacing: 0.01em; }
+        .table thead th {
+            background-color: #f8f9fa;
+            border-top: 1px solid #e9ecef;
+            font-weight: 600;
+            color: #495057;
+            padding: 0.75rem;
+        }
 
-        .btn { border-radius: 10px; font-weight: 600; letter-spacing: 0.01em; }
-        .btn-outline-secondary, .btn-outline-primary, .btn-outline-success, .btn-outline-dark { border-width: 1.4px; }
+        .table tbody td {
+            padding: 0.75rem;
+            vertical-align: middle;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .table tbody tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .badge {
+            padding: 0.5rem 0.75rem;
+            font-weight: 500;
+            font-size: 0.85rem;
+        }
+
+        .btn {
+            border-radius: 0.375rem;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-sm {
+            padding: 0.4rem 0.75rem;
+            font-size: 0.85rem;
+        }
 
         .section-gap { margin-bottom: 1.5rem; }
-
         .quick-actions { gap: 0.65rem; }
-
-        .table > :not(caption) > * > * { padding: 0.85rem 1rem; }
 
         .activity-item {
             padding: 0.65rem 0.75rem;
             border-radius: 12px;
-            border: 1px solid var(--border);
+            border: 1px solid #e9ecef;
             background: #f9fafb;
         }
 
-        @media (max-width: 991px) {
-            .stat-card { padding: 1rem; border-radius: 12px; }
-            .stat-value { font-size: 1.55rem; }
-            .dev-section-title { font-size: 1rem; }
+        @media (max-width: 768px) {
+            .dashboard-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .stat-card { margin-bottom: 0.75rem; }
         }
     </style>
 </head>
 <body>
 <div th:replace="~{layout :: header}"></div>
 <div layout:fragment="content">
-    <div class="container py-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-            <div>
-                <h1 class="h4 mb-1">Developer Dashboard</h1>
-                <p class="text-muted mb-0">Quản lý sản phẩm, doanh thu và tích hợp API.</p>
-            </div>
-            <div class="d-flex gap-2">
-                <a class="btn btn-primary" th:href="@{/product/create}"><i class="fas fa-plus"></i> Thêm sản phẩm</a>
-                <a class="btn btn-outline-secondary" th:href="@{/dashboard/developer}"><i class="fas fa-rotate"></i> Làm mới</a>
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="container-fluid">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1><i class="fas fa-code me-2"></i>Developer Dashboard</h1>
+                    <p class="mb-0 mt-2" style="opacity: 0.9;">Quản lý sản phẩm, doanh thu và tích hợp API</p>
+                </div>
+                <div class="d-flex gap-2">
+                    <a class="btn btn-light" th:href="@{/product/create}"><i class="fas fa-plus"></i> Thêm sản phẩm</a>
+                    <a class="btn btn-outline-light" th:href="@{/dashboard/developer}"><i class="fas fa-rotate"></i> Làm mới</a>
+                </div>
             </div>
         </div>
+    </div>
 
+    <div class="container-fluid">
         <!-- Stat cards -->
-        <div class="stat-grid mb-4">
-            <div class="stat-card bg-solid-blue">
+        <div class="stat-grid">
+            <div class="stat-card bg-primary-gradient">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
-                        <div class="text-white-50">Doanh thu tháng</div>
+                        <div class="stat-label">Doanh thu tháng</div>
                         <div class="stat-value" th:text="${#numbers.formatDecimal(monthRevenue, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</div>
-                        <div class="small text-white-75" th:text="'Tăng ' + ${monthRevenueGrowth} + '%'">+0%</div>
+                        <div class="small" style="opacity: 0.9;" th:text="'Tăng ' + ${monthRevenueGrowth} + '%'">+0%</div>
                     </div>
-                    <i class="fas fa-wallet stat-icon"></i>
+                    <div class="stat-icon">
+                        <i class="fas fa-wallet"></i>
+                    </div>
                 </div>
             </div>
-            <div class="stat-card bg-solid-green">
+            <div class="stat-card bg-success-gradient">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
-                        <div class="text-white-50">Đơn hàng</div>
+                        <div class="stat-label">Đơn hàng</div>
                         <div class="stat-value" th:text="${ordersCount}">0</div>
-                        <div class="small text-white-75" th:text="'Thành công: ' + ${ordersSuccess}">-</div>
+                        <div class="small" style="opacity: 0.9;" th:text="'Thành công: ' + ${ordersSuccess}">-</div>
                     </div>
-                    <i class="fas fa-cart-shopping stat-icon"></i>
+                    <div class="stat-icon">
+                        <i class="fas fa-cart-shopping"></i>
+                    </div>
                 </div>
             </div>
-            <div class="stat-card bg-solid-orange">
+            <div class="stat-card bg-warning-gradient">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
-                        <div class="text-white-50">Sản phẩm</div>
+                        <div class="stat-label">Sản phẩm</div>
                         <div class="stat-value" th:text="${productsCount}">0</div>
-                        <div class="small text-white-75" th:text="'Pending: ' + ${productsPending}">Pending: 0</div>
+                        <div class="small" style="opacity: 0.9;" th:text="'Pending: ' + ${productsPending}">Pending: 0</div>
                     </div>
-                    <i class="fas fa-box-open stat-icon"></i>
+                    <div class="stat-icon">
+                        <i class="fas fa-box-open"></i>
+                    </div>
                 </div>
             </div>
-            <div class="stat-card bg-solid-slate">
+            <div class="stat-card bg-danger-gradient">
                 <div class="d-flex justify-content-between align-items-start">
                     <div>
-                        <div class="text-white-50">Tỉ lệ duyệt</div>
+                        <div class="stat-label">Tỉ lệ duyệt</div>
                         <div class="stat-value" th:text="${approvalRate} + '%'">0%</div>
-                        <div class="small text-white-75" th:text="'Bị từ chối: ' + ${productsRejected}">-</div>
+                        <div class="small" style="opacity: 0.9;" th:text="'Bị từ chối: ' + ${productsRejected}">-</div>
                     </div>
-                    <i class="fas fa-clipboard-check stat-icon"></i>
+                    <div class="stat-icon">
+                        <i class="fas fa-clipboard-check"></i>
+                    </div>
                 </div>
             </div>
         </div>
@@ -173,7 +279,7 @@
             <div class="col-lg-6">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <span class="dev-section-title">Tác vụ nhanh</span>
+                        <span><i class="fas fa-bolt"></i> Tác vụ nhanh</span>
                     </div>
                     <div class="card-body d-flex flex-wrap quick-actions">
                         <a class="btn btn-outline-primary" th:href="@{/product/create}"><i class="fas fa-plus"></i> Đăng sản phẩm</a>
@@ -186,7 +292,7 @@
             <div class="col-lg-6">
                 <div class="card">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <span class="dev-section-title">Hiệu suất tuần</span>
+                        <span><i class="fas fa-chart-line"></i> Hiệu suất tuần</span>
                     </div>
                     <div class="card-body">
                         <div class="d-flex justify-content-between align-items-center mb-2">
@@ -213,8 +319,8 @@
             <div class="col-lg-8">
                 <div class="card h-100">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <span class="dev-section-title">Sản phẩm của tôi</span>
-                        <a class="btn btn-sm btn-outline-primary" th:href="@{/dashboard/developer/products}"><i class="fas fa-box-open"></i> Tất cả</a>
+                        <span><i class="fas fa-boxes"></i> Sản phẩm của tôi</span>
+                        <a class="btn btn-sm btn-light" th:href="@{/dashboard/developer/products}"><i class="fas fa-box-open"></i> Tất cả</a>
                     </div>
                     <div class="card-body p-0">
                         <div class="table-responsive">
@@ -239,7 +345,7 @@
                                             <span class="badge bg-success" th:if="${p.status.name() == 'approved'}">Approved</span>
                                             <span class="badge bg-danger" th:if="${p.status.name() == 'rejected'}">Rejected</span>
                                         </td>
-                                        <td class="fw-semibold" th:text="${#numbers.formatDecimal(p.revenue, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</td>
+                                        <td class="fw-semibold" th:text="${#numbers.formatDecimal(p.totalSales, 0, 'COMMA', 0, 'POINT')}">0</td>
                                         <td class="text-muted" th:text="${#temporals.format(p.updatedAt, 'HH:mm dd/MM')}">-</td>
                                         <td class="text-end">
                                             <div class="btn-group btn-group-sm" role="group">
@@ -261,8 +367,8 @@
             <div class="col-lg-4">
                 <div class="card h-100">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <span class="dev-section-title">Doanh thu & Payout</span>
-                        <a class="btn btn-sm btn-outline-success" th:href="@{/dashboard/developer/payouts}"><i class="fas fa-money-bill-wave"></i> Rút tiền</a>
+                        <span><i class="fas fa-wallet"></i> Doanh thu & Payout</span>
+                        <a class="btn btn-sm btn-light" th:href="@{/dashboard/developer/payouts}"><i class="fas fa-money-bill-wave"></i> Rút tiền</a>
                     </div>
                     <div class="card-body">
                         <div class="d-flex justify-content-between mb-2">
@@ -278,7 +384,7 @@
                             <div class="fw-semibold" th:text="${#numbers.formatDecimal(payoutPending, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</div>
                         </div>
                         <hr>
-                        <div class="dev-section-title mb-2">Tác vụ</div>
+                        <div class="fw-bold mb-2">Tác vụ</div>
                         <div class="d-flex flex-wrap gap-2">
                             <a class="btn btn-outline-primary btn-sm" th:href="@{/dashboard/developer/payouts}"><i class="fas fa-plus"></i> Yêu cầu rút</a>
                             <a class="btn btn-outline-secondary btn-sm" th:href="@{/dashboard/developer/payouts/history}"><i class="fas fa-clock"></i> Lịch sử</a>
@@ -293,8 +399,8 @@
             <div class="col-lg-6">
                 <div class="card h-100">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <span class="dev-section-title">API Keys & Integrations</span>
-                        <a class="btn btn-sm btn-outline-dark" th:href="@{/dashboard/developer/api}"><i class="fas fa-key"></i> Quản lý</a>
+                        <span><i class="fas fa-key"></i> API Keys & Integrations</span>
+                        <a class="btn btn-sm btn-light" th:href="@{/dashboard/developer/api}"><i class="fas fa-cog"></i> Quản lý</a>
                     </div>
                     <div class="card-body">
                         <div class="d-flex align-items-center justify-content-between mb-2">
@@ -324,8 +430,8 @@
             <div class="col-lg-6">
                 <div class="card h-100">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <span class="dev-section-title">Hoạt động gần đây</span>
-                        <a class="btn btn-sm btn-outline-secondary" th:href="@{/dashboard/developer/activity}"><i class="fas fa-list"></i> Xem tất cả</a>
+                        <span><i class="fas fa-clock"></i> Hoạt động gần đây</span>
+                        <a class="btn btn-sm btn-light" th:href="@{/dashboard/developer/activity}"><i class="fas fa-list"></i> Xem tất cả</a>
                     </div>
                     <div class="card-body">
                         <ul class="list-unstyled mb-0">
@@ -347,6 +453,8 @@
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <div th:replace="~{layout :: footer}"></div>
 </body>
 </html>

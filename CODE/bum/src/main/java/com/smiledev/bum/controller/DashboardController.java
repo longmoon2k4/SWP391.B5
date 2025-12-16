@@ -205,7 +205,7 @@ public class DashboardController {
             @RequestParam(name = "userPage", defaultValue = "0") int userPage,
             @RequestParam(name = "productPage", defaultValue = "0") int productPage,
             @RequestParam(name = "status", required = false) String status) {
-        
+
         if (authentication != null && authentication.isAuthenticated()) {
             String username = authentication.getName();
             Optional<Users> userOpt = userRepository.findByUsername(username);
@@ -309,7 +309,7 @@ public class DashboardController {
             @PathVariable int productId,
             Authentication authentication,
             RedirectAttributes redirectAttributes) {
-        
+
         try {
             Optional<Users> adminOpt = userRepository.findByUsername(authentication.getName());
             if (adminOpt.isEmpty()) {
@@ -336,7 +336,7 @@ public class DashboardController {
             @RequestParam String rejectionReason,
             Authentication authentication,
             RedirectAttributes redirectAttributes) {
-        
+
         try {
             Optional<Users> adminOpt = userRepository.findByUsername(authentication.getName());
             if (adminOpt.isEmpty()) {
