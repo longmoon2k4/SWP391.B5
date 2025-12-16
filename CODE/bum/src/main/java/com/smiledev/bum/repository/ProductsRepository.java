@@ -57,6 +57,17 @@ public interface ProductsRepository extends JpaRepository<Products, Integer> {
 
     List<Products> findTop5ByDeveloperOrderByUpdatedAtDesc(Users developer);
 
+    // Get all developer products (non-paginated) for stats calculation
+    List<Products> findByDeveloper(Users developer);
+
+    // Get all developer products with eager loaded licenses for stats
+    @Query("SELECT DISTINCT p FROM Products p " +
+           "LEFT JOIN FETCH p.licenses l " +
+           "LEFT JOIN FETCH l.order " +
+           "WHERE p.developer = :developer " +
+           "ORDER BY p.productId")
+    List<Products> findByDeveloperWithLicenses(@Param("developer") Users developer);
+
     // Developer product management queries
     Page<Products> findByDeveloper(Users developer, Pageable pageable);
 

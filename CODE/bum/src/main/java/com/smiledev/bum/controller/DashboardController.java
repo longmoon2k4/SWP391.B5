@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import com.smiledev.bum.entity.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -24,13 +25,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import com.smiledev.bum.entity.ActivityLogs;
-import com.smiledev.bum.entity.Categories;
-import com.smiledev.bum.entity.KeyValidationLogs;
-import com.smiledev.bum.entity.Licenses;
-import com.smiledev.bum.entity.Products;
-import com.smiledev.bum.entity.Transactions;
-import com.smiledev.bum.entity.Users;
 import com.smiledev.bum.repository.ActivityLogRepository;
 import com.smiledev.bum.repository.CategoriesRepository;
 import com.smiledev.bum.repository.KeyValidationLogsRepository;
@@ -84,6 +78,7 @@ public class DashboardController {
 
     @Autowired
     private ProductVersionsRepository productVersionsRepository;
+
 
     // ===== Users Management =====
     @GetMapping("/admin/users")
@@ -478,9 +473,20 @@ public class DashboardController {
                     .doubleValue()
                 : 0.0;
 
-            // Orders (licenses) stats
-            long ordersCount = licensesRepository.countByProductDeveloper(developer);
-            long ordersSuccess = licensesRepository.countByProductDeveloperAndStatus(developer, Licenses.Status.active);
+            // Orders (licenses) stats - Fixed: count through developer's products, not by user (which is buyer)
+            // Use eager loading to avoid LazyInitializationException
+            List<Products> devProducts = productsRepository.findByDeveloperWithLicenses(developer);
+            long ordersCount = devProducts.stream()
+                .flatMap(p -> p.getLicenses().stream())
+                .map(l -> l.getOrder().getOrderId())
+                .distinct()
+                .count();
+            long ordersSuccess = devProducts.stream()
+                .flatMap(p -> p.getLicenses().stream())
+                .filter(l -> l.getOrder().getStatus() == Orders.Status.completed)
+                .map(l -> l.getOrder().getOrderId())
+                .distinct()
+                .count();
             long ordersCompleted = ordersSuccess;
             double ordersCompletionRate = ordersCount > 0 ? (ordersSuccess * 100.0) / ordersCount : 0.0;
 

@@ -15,4 +15,10 @@ public interface OrdersRepository extends JpaRepository<Orders, Integer> {
 
     @Query("SELECT COUNT(DISTINCT o.orderId) FROM Orders o JOIN o.licenses l WHERE l.product.productId = :productId")
     long countByProductId(@Param("productId") Integer productId);
+
+    // Đếm các order có status = 'completed' theo userid
+    long countByUserAndStatus(Users user, Orders.Status status);
+
+    // Đếm các order theo userid
+    long countByUser(Users user);
 }
