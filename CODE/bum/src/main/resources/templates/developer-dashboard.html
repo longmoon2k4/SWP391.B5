@@ -3,39 +3,344 @@
 <head>
     <title>Developer Dashboard</title>
     <link rel="stylesheet" th:href="@{/css/style.css}" type="text/css"/>
+    <style>
+        :root {
+            --bg: #f3f4f7;
+            --card: #ffffff;
+            --muted: #6b7280;
+            --border: #e5e7eb;
+            --primary: #1d4ed8;
+            --success: #16a34a;
+            --warning: #f97316;
+            --slate: #0f172a;
+            --shadow-soft: 0 12px 32px rgba(15, 23, 42, 0.08);
+        }
+
+        body { background: var(--bg); }
+
+        h1, .dev-section-title { color: var(--slate); }
+        .dev-section-title { font-weight: 700; font-size: 1.08rem; letter-spacing: 0.01em; }
+
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 16px;
+        }
+
+        .stat-card {
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            color: #fff;
+            padding: 1.1rem 1.3rem;
+            box-shadow: var(--shadow-soft);
+            height: 100%;
+            transition: transform 0.16s ease, box-shadow 0.16s ease, filter 0.16s ease;
+        }
+
+        .stat-card:hover { transform: translateY(-5px); box-shadow: 0 18px 46px rgba(0,0,0,0.14); filter: brightness(1.03); }
+
+        .stat-icon { font-size: 1.55rem; opacity: 0.92; }
+        .stat-value { font-size: 1.9rem; font-weight: 800; margin: 0.05rem 0; }
+        .text-white-50 { color: rgba(255,255,255,0.8); }
+        .text-white-75 { color: rgba(255,255,255,0.92); }
+
+        .bg-solid-blue { background: var(--primary); }
+        .bg-solid-green { background: var(--success); }
+        .bg-solid-orange { background: var(--warning); }
+        .bg-solid-slate { background: #334155; }
+
+        .card {
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            background: var(--card);
+            box-shadow: 0 10px 28px rgba(15, 23, 42, 0.05);
+        }
+
+        .card-header {
+            background: transparent;
+            border-bottom: 1px solid var(--border);
+            font-weight: 700;
+            padding: 0.9rem 1rem;
+            color: var(--slate);
+        }
+
+        .card-body { padding: 1rem; }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.34rem 0.75rem;
+            border-radius: 999px;
+            background: #eef2ff;
+            color: #4338ca;
+            font-size: 0.86rem;
+            gap: 0.35rem;
+            border: 1px solid #e0e7ff;
+        }
+
+        .progress { height: 8px; border-radius: 999px; background: #e9edf5; }
+
+        table.table thead { background: #f5f6fa; }
+        table.table th { font-weight: 700; border-bottom: 1px solid var(--border) !important; color: var(--slate); }
+        table.table td { vertical-align: middle; color: var(--slate); }
+
+        .badge { padding: 0.45rem 0.65rem; font-weight: 700; border-radius: 10px; letter-spacing: 0.01em; }
+
+        .btn { border-radius: 10px; font-weight: 600; letter-spacing: 0.01em; }
+        .btn-outline-secondary, .btn-outline-primary, .btn-outline-success, .btn-outline-dark { border-width: 1.4px; }
+
+        .section-gap { margin-bottom: 1.5rem; }
+
+        .quick-actions { gap: 0.65rem; }
+
+        .table > :not(caption) > * > * { padding: 0.85rem 1rem; }
+
+        .activity-item {
+            padding: 0.65rem 0.75rem;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+            background: #f9fafb;
+        }
+
+        @media (max-width: 991px) {
+            .stat-card { padding: 1rem; border-radius: 12px; }
+            .stat-value { font-size: 1.55rem; }
+            .dev-section-title { font-size: 1rem; }
+        }
+    </style>
 </head>
 <body>
 <div th:replace="~{layout :: header}"></div>
 <div layout:fragment="content">
-    <div class="container mt-4">
-        <h1>Developer Dashboard</h1>
-        <p>Welcome to the developer dashboard. Here you can manage your products and view sales analytics.</p>
-        <!-- Add developer-specific widgets and links here -->
-        <div class="row">
-            <div class="col-md-4">
+    <div class="container py-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <div>
+                <h1 class="h4 mb-1">Developer Dashboard</h1>
+                <p class="text-muted mb-0">Quản lý sản phẩm, doanh thu và tích hợp API.</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a class="btn btn-primary" th:href="@{/product/create}"><i class="fas fa-plus"></i> Thêm sản phẩm</a>
+                <a class="btn btn-outline-secondary" th:href="@{/dashboard/developer}"><i class="fas fa-rotate"></i> Làm mới</a>
+            </div>
+        </div>
+
+        <!-- Stat cards -->
+        <div class="stat-grid mb-4">
+            <div class="stat-card bg-solid-blue">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="text-white-50">Doanh thu tháng</div>
+                        <div class="stat-value" th:text="${#numbers.formatDecimal(monthRevenue, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</div>
+                        <div class="small text-white-75" th:text="'Tăng ' + ${monthRevenueGrowth} + '%'">+0%</div>
+                    </div>
+                    <i class="fas fa-wallet stat-icon"></i>
+                </div>
+            </div>
+            <div class="stat-card bg-solid-green">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="text-white-50">Đơn hàng</div>
+                        <div class="stat-value" th:text="${ordersCount}">0</div>
+                        <div class="small text-white-75" th:text="'Thành công: ' + ${ordersSuccess}">-</div>
+                    </div>
+                    <i class="fas fa-cart-shopping stat-icon"></i>
+                </div>
+            </div>
+            <div class="stat-card bg-solid-orange">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="text-white-50">Sản phẩm</div>
+                        <div class="stat-value" th:text="${productsCount}">0</div>
+                        <div class="small text-white-75" th:text="'Pending: ' + ${productsPending}">Pending: 0</div>
+                    </div>
+                    <i class="fas fa-box-open stat-icon"></i>
+                </div>
+            </div>
+            <div class="stat-card bg-solid-slate">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <div class="text-white-50">Tỉ lệ duyệt</div>
+                        <div class="stat-value" th:text="${approvalRate} + '%'">0%</div>
+                        <div class="small text-white-75" th:text="'Bị từ chối: ' + ${productsRejected}">-</div>
+                    </div>
+                    <i class="fas fa-clipboard-check stat-icon"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Quick actions -->
+        <div class="row g-3 section-gap">
+            <div class="col-lg-6">
                 <div class="card">
-                    <div class="card-body">
-                        <h5 class="card-title">My Products</h5>
-                        <p class="card-text">View and manage your products.</p>
-                        <a href="#" class="btn btn-primary">Go to My Products</a>
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span class="dev-section-title">Tác vụ nhanh</span>
+                    </div>
+                    <div class="card-body d-flex flex-wrap quick-actions">
+                        <a class="btn btn-outline-primary" th:href="@{/product/create}"><i class="fas fa-plus"></i> Đăng sản phẩm</a>
+                        <a class="btn btn-outline-secondary" th:href="@{/dashboard/developer/products}"><i class="fas fa-pen"></i> Quản lý sản phẩm</a>
+                        <a class="btn btn-outline-success" th:href="@{/dashboard/developer/payouts}"><i class="fas fa-money-check"></i> Yêu cầu rút tiền</a>
+                        <a class="btn btn-outline-dark" th:href="@{/dashboard/developer/api}"><i class="fas fa-key"></i> Quản lý API key</a>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
+            <div class="col-lg-6">
                 <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span class="dev-section-title">Hiệu suất tuần</span>
+                    </div>
                     <div class="card-body">
-                        <h5 class="card-title">Sales Analytics</h5>
-                        <p class="card-text">View sales and download reports.</p>
-                        <a href="#" class="btn btn-primary">View Analytics</a>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>Doanh thu</div>
+                            <div class="fw-semibold" th:text="${#numbers.formatDecimal(weekRevenue, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</div>
+                        </div>
+                        <div class="progress mb-3">
+                            <div class="progress-bar bg-primary" role="progressbar" th:style="'width:' + ${weekRevenueRate} + '%'"></div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <div>Đơn hoàn tất</div>
+                            <div class="fw-semibold" th:text="${ordersCompleted}">0</div>
+                        </div>
+                        <div class="progress">
+                            <div class="progress-bar bg-success" role="progressbar" th:style="'width:' + ${ordersCompletionRate} + '%'"></div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="col-md-4">
-                <div class="card">
+        </div>
+
+        <!-- My products & Sales -->
+        <div class="row g-3 section-gap">
+            <div class="col-lg-8">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span class="dev-section-title">Sản phẩm của tôi</span>
+                        <a class="btn btn-sm btn-outline-primary" th:href="@{/dashboard/developer/products}"><i class="fas fa-box-open"></i> Tất cả</a>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="table-responsive">
+                            <table class="table mb-0 align-middle">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Tên</th>
+                                        <th>Trạng thái</th>
+                                        <th>Doanh thu</th>
+                                        <th>Cập nhật</th>
+                                        <th class="text-end">Thao tác</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr th:each="p : ${developerProducts}">
+                                        <td>
+                                            <div class="fw-semibold" th:text="${p.name}">Tên sản phẩm</div>
+                                            <div class="text-muted small" th:text="${#temporals.format(p.updatedAt, 'dd/MM/yyyy')}">-</div>
+                                        </td>
+                                        <td>
+                                            <span class="badge bg-warning" th:if="${p.status.name() == 'pending'}">Pending</span>
+                                            <span class="badge bg-success" th:if="${p.status.name() == 'approved'}">Approved</span>
+                                            <span class="badge bg-danger" th:if="${p.status.name() == 'rejected'}">Rejected</span>
+                                        </td>
+                                        <td class="fw-semibold" th:text="${#numbers.formatDecimal(p.revenue, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</td>
+                                        <td class="text-muted" th:text="${#temporals.format(p.updatedAt, 'HH:mm dd/MM')}">-</td>
+                                        <td class="text-end">
+                                            <div class="btn-group btn-group-sm" role="group">
+                                                <a class="btn btn-outline-secondary" th:href="@{'/product/' + ${p.productId}}"><i class="fas fa-eye"></i></a>
+                                                <a class="btn btn-outline-primary" th:href="@{'/product/' + ${p.productId} + '/edit'}"><i class="fas fa-pen"></i></a>
+                                                <a class="btn btn-outline-success" th:href="@{'/dashboard/developer/products/' + ${p.productId} + '/stats'}"><i class="fas fa-chart-line"></i></a>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr th:if="${#lists.isEmpty(developerProducts)}">
+                                        <td colspan="5" class="text-center text-muted py-3">Chưa có sản phẩm nào.</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span class="dev-section-title">Doanh thu & Payout</span>
+                        <a class="btn btn-sm btn-outline-success" th:href="@{/dashboard/developer/payouts}"><i class="fas fa-money-bill-wave"></i> Rút tiền</a>
+                    </div>
                     <div class="card-body">
-                        <h5 class="card-title">API Keys</h5>
-                        <p class="card-text">Manage your API keys for product integration.</p>
-                        <a href="#" class="btn btn-primary">Manage API Keys</a>
+                        <div class="d-flex justify-content-between mb-2">
+                            <div class="text-muted">Số dư ví</div>
+                            <div class="fw-semibold" th:text="${#numbers.formatDecimal(walletBalance, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</div>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <div class="text-muted">Đã rút</div>
+                            <div class="fw-semibold" th:text="${#numbers.formatDecimal(totalWithdrawn, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</div>
+                        </div>
+                        <div class="d-flex justify-content-between mb-2">
+                            <div class="text-muted">Đang xử lý</div>
+                            <div class="fw-semibold" th:text="${#numbers.formatDecimal(payoutPending, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</div>
+                        </div>
+                        <hr>
+                        <div class="dev-section-title mb-2">Tác vụ</div>
+                        <div class="d-flex flex-wrap gap-2">
+                            <a class="btn btn-outline-primary btn-sm" th:href="@{/dashboard/developer/payouts}"><i class="fas fa-plus"></i> Yêu cầu rút</a>
+                            <a class="btn btn-outline-secondary btn-sm" th:href="@{/dashboard/developer/payouts/history}"><i class="fas fa-clock"></i> Lịch sử</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Integrations & activity -->
+        <div class="row g-3 section-gap">
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span class="dev-section-title">API Keys & Integrations</span>
+                        <a class="btn btn-sm btn-outline-dark" th:href="@{/dashboard/developer/api}"><i class="fas fa-key"></i> Quản lý</a>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div>
+                                <div class="fw-semibold">Public API Key</div>
+                                <div class="text-muted small" th:text="${publicApiKey}">••••••••</div>
+                            </div>
+                            <span class="chip"><i class="fas fa-copy"></i> Sao chép</span>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div>
+                                <div class="fw-semibold">Webhook</div>
+                                <div class="text-muted small" th:text="${webhookUrl}">https://</div>
+                            </div>
+                            <span class="chip" style="background:#ecfeff; color:#0ea5e9;"><i class="fas fa-link"></i> Cấu hình</span>
+                        </div>
+                        <div class="d-flex align-items-center justify-content-between mb-2">
+                            <div>
+                                <div class="fw-semibold">Secret Key</div>
+                                <div class="text-muted small">Bảo mật</div>
+                            </div>
+                            <span class="chip" style="background:#fef2f2; color:#ef4444;"><i class="fas fa-eye-slash"></i> Ẩn</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="card h-100">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <span class="dev-section-title">Hoạt động gần đây</span>
+                        <a class="btn btn-sm btn-outline-secondary" th:href="@{/dashboard/developer/activity}"><i class="fas fa-list"></i> Xem tất cả</a>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled mb-0">
+                            <li class="d-flex align-items-start mb-3 activity-item" th:each="log : ${recentActivities}">
+                                <div class="me-3" style="width: 32px; height: 32px; border-radius: 10px; background: #eef2ff; display: grid; place-items: center;">
+                                    <i class="fas fa-circle text-primary" style="font-size: 0.5rem;"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-semibold" th:text="${log.actionType}">Tiêu đề</div>
+                                    <div class="text-muted small" th:text="${log.description}">Mô tả</div>
+                                    <div class="text-muted small" th:text="${#temporals.format(log.createdAt, 'HH:mm dd/MM')}">-</div>
+                                </div>
+                            </li>
+                            <li th:if="${#lists.isEmpty(recentActivities)}" class="text-muted">Chưa có hoạt động gần đây.</li>
+                        </ul>
                     </div>
                 </div>
             </div>

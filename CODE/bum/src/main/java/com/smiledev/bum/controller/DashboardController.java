@@ -1,6 +1,9 @@
 package com.smiledev.bum.controller;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
+import com.smiledev.bum.entity.ActivityLogs;
 import com.smiledev.bum.entity.KeyValidationLogs;
 import com.smiledev.bum.entity.Licenses;
 import com.smiledev.bum.entity.Products;
@@ -359,7 +363,79 @@ public class DashboardController {
         if (authentication != null && authentication.isAuthenticated()) {
             String username = authentication.getName();
             Optional<Users> userOpt = userRepository.findByUsername(username);
-            userOpt.ifPresent(user -> model.addAttribute("loggedInUser", user));
+            if (userOpt.isPresent()) {
+            Users developer = userOpt.get();
+            model.addAttribute("loggedInUser", developer);
+
+            // Product stats
+            long productsCount = productsRepository.countByDeveloper(developer);
+            long productsPending = productsRepository.countByDeveloperAndStatus(developer, Products.Status.pending);
+            long productsApproved = productsRepository.countByDeveloperAndStatus(developer, Products.Status.approved);
+            long productsRejected = productsRepository.countByDeveloperAndStatus(developer, Products.Status.rejected);
+            double approvalRate = (productsApproved + productsRejected) > 0
+                ? (productsApproved * 100.0) / (productsApproved + productsRejected)
+                : 100.0;
+
+            // Revenue stats
+            LocalDateTime now = LocalDateTime.now();
+            LocalDateTime startOfMonth = LocalDate.now().withDayOfMonth(1).atStartOfDay();
+            LocalDateTime startOfPrevMonth = LocalDate.now().minusMonths(1).withDayOfMonth(1).atStartOfDay();
+            LocalDateTime endOfPrevMonth = startOfMonth.minusSeconds(1);
+
+            BigDecimal monthRevenue = transactionsRepository.sumByUserTypeAndDateRange(
+                developer, Transactions.Type.sale_revenue, startOfMonth, now);
+            BigDecimal prevMonthRevenue = transactionsRepository.sumByUserTypeAndDateRange(
+                developer, Transactions.Type.sale_revenue, startOfPrevMonth, endOfPrevMonth);
+            int monthRevenueGrowth = calculateGrowth(prevMonthRevenue, monthRevenue);
+
+            LocalDateTime startOfWeek = LocalDate.now().minusDays(7).atStartOfDay();
+            BigDecimal weekRevenue = transactionsRepository.sumByUserTypeAndDateRange(
+                developer, Transactions.Type.sale_revenue, startOfWeek, now);
+            double weekRevenueRate = monthRevenue.compareTo(BigDecimal.ZERO) > 0
+                ? weekRevenue.multiply(BigDecimal.valueOf(100))
+                    .divide(monthRevenue, 2, RoundingMode.HALF_UP)
+                    .doubleValue()
+                : 0.0;
+
+            // Orders (licenses) stats
+            long ordersCount = licensesRepository.countByProductDeveloper(developer);
+            long ordersSuccess = licensesRepository.countByProductDeveloperAndStatus(developer, Licenses.Status.active);
+            long ordersCompleted = ordersSuccess;
+            double ordersCompletionRate = ordersCount > 0 ? (ordersSuccess * 100.0) / ordersCount : 0.0;
+
+            // Wallet & payout
+            BigDecimal walletBalance = developer.getWalletBalance() != null ? developer.getWalletBalance() : BigDecimal.ZERO;
+            BigDecimal totalWithdrawn = transactionsRepository.sumByUserAndType(developer, Transactions.Type.withdrawal);
+            BigDecimal payoutPending = BigDecimal.ZERO;
+
+            // Lists
+            List<Products> developerProducts = productsRepository.findTop5ByDeveloperOrderByUpdatedAtDesc(developer);
+            List<ActivityLogs> recentActivities = activityLogRepository.findTop5ByUserOrderByCreatedAtDesc(developer);
+
+            // API placeholders
+            String publicApiKey = "Chưa thiết lập";
+            String webhookUrl = "Chưa thiết lập";
+
+            model.addAttribute("monthRevenue", monthRevenue);
+            model.addAttribute("monthRevenueGrowth", monthRevenueGrowth);
+            model.addAttribute("ordersCount", ordersCount);
+            model.addAttribute("ordersSuccess", ordersSuccess);
+            model.addAttribute("productsCount", productsCount);
+            model.addAttribute("productsPending", productsPending);
+            model.addAttribute("approvalRate", Math.round(approvalRate));
+            model.addAttribute("productsRejected", productsRejected);
+            model.addAttribute("weekRevenue", weekRevenue);
+            model.addAttribute("weekRevenueRate", weekRevenueRate);
+            model.addAttribute("ordersCompleted", ordersCompleted);
+            model.addAttribute("ordersCompletionRate", ordersCompletionRate);
+            model.addAttribute("developerProducts", developerProducts);
+            model.addAttribute("walletBalance", walletBalance);
+            model.addAttribute("totalWithdrawn", totalWithdrawn);
+            model.addAttribute("payoutPending", payoutPending);
+            model.addAttribute("publicApiKey", publicApiKey);
+            model.addAttribute("webhookUrl", webhookUrl);
+            model.addAttribute("recentActivities", recentActivities);
+            }
         }
         return "developer-dashboard";
     }
@@ -396,5 +472,19 @@ public class DashboardController {
         }
 
         return "redirect:/";
+    }
+
+    private int calculateGrowth(BigDecimal previous, BigDecimal current) {
+        BigDecimal prevSafe = previous != null ? previous : BigDecimal.ZERO;
+        BigDecimal currentSafe = current != null ? current : BigDecimal.ZERO;
+
+        if (prevSafe.compareTo(BigDecimal.ZERO) == 0) {
+            return currentSafe.compareTo(BigDecimal.ZERO) > 0 ? 100 : 0;
+        }
+
+        return currentSafe.subtract(prevSafe)
+                .multiply(BigDecimal.valueOf(100))
+                .divide(prevSafe, 0, RoundingMode.HALF_UP)
+                .intValue();
     }
 }

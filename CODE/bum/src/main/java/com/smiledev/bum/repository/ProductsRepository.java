@@ -11,6 +11,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import com.smiledev.bum.entity.Products;
+import com.smiledev.bum.entity.Users;
 
 
 @Repository
@@ -49,4 +50,10 @@ public interface ProductsRepository extends JpaRepository<Products, Integer> {
            "WHERE p.status = :status " +
            "ORDER BY p.createdAt DESC")
     List<Products> findByStatusWithDetails(@Param("status") Products.Status status, Pageable pageable);
+
+       long countByDeveloper(Users developer);
+
+       long countByDeveloperAndStatus(Users developer, Products.Status status);
+
+       List<Products> findTop5ByDeveloperOrderByUpdatedAtDesc(Users developer);
 }
