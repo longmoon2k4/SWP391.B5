@@ -281,11 +281,21 @@
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <span><i class="fas fa-bolt"></i> Tác vụ nhanh</span>
                     </div>
-                    <div class="card-body d-flex flex-wrap quick-actions">
-                        <a class="btn btn-outline-primary" th:href="@{/product/create}"><i class="fas fa-plus"></i> Đăng sản phẩm</a>
-                        <a class="btn btn-outline-secondary" th:href="@{/dashboard/developer/products}"><i class="fas fa-pen"></i> Quản lý sản phẩm</a>
-                        <a class="btn btn-outline-success" th:href="@{/dashboard/developer/payouts}"><i class="fas fa-money-check"></i> Yêu cầu rút tiền</a>
-                        <a class="btn btn-outline-dark" th:href="@{/dashboard/developer/api}"><i class="fas fa-key"></i> Quản lý API key</a>
+                    <div class="card-body">
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <a class="btn btn-outline-primary w-100" th:href="@{/product/create}"><i class="fas fa-plus"></i> Đăng sản phẩm</a>
+                            </div>
+                            <div class="col-6">
+                                <a class="btn btn-outline-secondary w-100" th:href="@{/dashboard/developer/products}"><i class="fas fa-pen"></i> Quản lý sản phẩm</a>
+                            </div>
+                            <div class="col-6">
+                                <a class="btn btn-outline-success w-100" th:href="@{/dashboard/developer/payouts}"><i class="fas fa-money-check"></i> Yêu cầu rút tiền</a>
+                            </div>
+                            <div class="col-6">
+                                <a class="btn btn-outline-dark w-100" th:href="@{/dashboard/developer/api}"><i class="fas fa-key"></i> Quản lý API key</a>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -294,19 +304,19 @@
                     <div class="card-header d-flex justify-content-between align-items-center">
                         <span><i class="fas fa-chart-line"></i> Hiệu suất tuần</span>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body" style="padding: 0.85rem;">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <div>Doanh thu</div>
-                            <div class="fw-semibold" th:text="${#numbers.formatDecimal(weekRevenue, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</div>
+                            <div class="small">Doanh thu</div>
+                            <div class="fw-semibold small" th:text="${#numbers.formatDecimal(weekRevenue, 0, 'COMMA', 0, 'POINT')} + ' ₫'">0 ₫</div>
                         </div>
-                        <div class="progress mb-3">
+                        <div class="progress mb-2" style="height: 6px;">
                             <div class="progress-bar bg-primary" role="progressbar" th:style="'width:' + ${weekRevenueRate} + '%'"></div>
                         </div>
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <div>Đơn hoàn tất</div>
-                            <div class="fw-semibold" th:text="${ordersCompleted}">0</div>
+                            <div class="small">Đơn hoàn tất</div>
+                            <div class="fw-semibold small" th:text="${ordersCompleted}">0</div>
                         </div>
-                        <div class="progress">
+                        <div class="progress" style="height: 6px;">
                             <div class="progress-bar bg-success" role="progressbar" th:style="'width:' + ${ordersCompletionRate} + '%'"></div>
                         </div>
                     </div>
@@ -319,7 +329,7 @@
             <div class="col-lg-8">
                 <div class="card h-100">
                     <div class="card-header d-flex justify-content-between align-items-center">
-                        <span><i class="fas fa-boxes"></i> Sản phẩm của tôi</span>
+                        <span><i class="fas fa-boxes"></i> Sản phẩm nổi bật </span>
                         <a class="btn btn-sm btn-light" th:href="@{/dashboard/developer/products}"><i class="fas fa-box-open"></i> Tất cả</a>
                     </div>
                     <div class="card-body p-0">
@@ -360,6 +370,37 @@
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                    <div class="card-footer bg-white" th:if="${!#lists.isEmpty(developerProducts) and (productPage != null or productTotalPages != null)}">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="text-muted small">
+                                Trang <span th:text="${(productPage ?: 0) + 1}">1</span> / <span th:text="${productTotalPages ?: 1}">1</span>
+                            </div>
+                            <nav>
+                                <ul class="pagination pagination-sm mb-0">
+                                    <li class="page-item" th:classappend="${(productPage ?: 0) == 0} ? 'disabled'">
+                                        <a class="page-link" th:href="@{/dashboard/developer(productPage=${(productPage ?: 0) - 1})}" th:if="${(productPage ?: 0) > 0}">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                        <span class="page-link" th:if="${(productPage ?: 0) == 0}">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </span>
+                                    </li>
+                                    <li class="page-item" th:each="i : ${#numbers.sequence(0, (productTotalPages ?: 1) - 1)}" 
+                                        th:classappend="${i == (productPage ?: 0)} ? 'active'">
+                                        <a class="page-link" th:href="@{/dashboard/developer(productPage=${i})}" th:text="${i + 1}">1</a>
+                                    </li>
+                                    <li class="page-item" th:classappend="${(productPage ?: 0) >= (productTotalPages ?: 1) - 1} ? 'disabled'">
+                                        <a class="page-link" th:href="@{/dashboard/developer(productPage=${(productPage ?: 0) + 1})}" th:if="${(productPage ?: 0) < (productTotalPages ?: 1) - 1}">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                        <span class="page-link" th:if="${(productPage ?: 0) >= (productTotalPages ?: 1) - 1}">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </span>
+                                    </li>
+                                </ul>
+                            </nav>
                         </div>
                     </div>
                 </div>
@@ -447,6 +488,37 @@
                             </li>
                             <li th:if="${#lists.isEmpty(recentActivities)}" class="text-muted">Chưa có hoạt động gần đây.</li>
                         </ul>
+                    </div>
+                    <div class="card-footer bg-white" th:if="${!#lists.isEmpty(recentActivities) and (activityPage != null or activityTotalPages != null)}">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div class="text-muted small">
+                                Trang <span th:text="${(activityPage ?: 0) + 1}">1</span> / <span th:text="${activityTotalPages ?: 1}">1</span>
+                            </div>
+                            <nav>
+                                <ul class="pagination pagination-sm mb-0">
+                                    <li class="page-item" th:classappend="${(activityPage ?: 0) == 0} ? 'disabled'">
+                                        <a class="page-link" th:href="@{/dashboard/developer(activityPage=${(activityPage ?: 0) - 1})}" th:if="${(activityPage ?: 0) > 0}">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                        <span class="page-link" th:if="${(activityPage ?: 0) == 0}">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </span>
+                                    </li>
+                                    <li class="page-item" th:each="i : ${#numbers.sequence(0, (activityTotalPages ?: 1) - 1)}" 
+                                        th:classappend="${i == (activityPage ?: 0)} ? 'active'">
+                                        <a class="page-link" th:href="@{/dashboard/developer(activityPage=${i})}" th:text="${i + 1}">1</a>
+                                    </li>
+                                    <li class="page-item" th:classappend="${(activityPage ?: 0) >= (activityTotalPages ?: 1) - 1} ? 'disabled'">
+                                        <a class="page-link" th:href="@{/dashboard/developer(activityPage=${activityPage + 1})}" th:if="${(activityPage ?: 0) < (activityTotalPages ?: 1) - 1}">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                        <span class="page-link" th:if="${(activityPage ?: 0) >= (activityTotalPages ?: 1) - 1}">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </span>
+                                    </li>
+                                </ul>
+                            </nav>
+                        </div>
                     </div>
                 </div>
             </div>
