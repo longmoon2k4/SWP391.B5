@@ -37,6 +37,12 @@ public class OrderService {
     @Autowired
     private ActivityLogService activityLogService;
 
+    @Autowired
+    private ProductsRepository productsRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
     @Transactional
     public Orders createOrder(int packageId, Users user) {
         ProductPackages productPackage = productPackagesRepository.findById(packageId)
@@ -44,12 +50,10 @@ public class OrderService {
 
         Orders order = new Orders();
         order.setUser(user);
+        order.setPackageId(packageId); // Store the package ID for later reference
         order.setTotalAmount(productPackage.getPrice());
         order.setStatus(Orders.Status.pending);
         order.setPaymentMethod("VNPAY");
-
-        // Associate the package with the order. This requires a relationship.
-        // For now, we'll retrieve it again in the return handling.
 
         return ordersRepository.save(order);
     }
@@ -84,14 +88,18 @@ public class OrderService {
             order.setStatus(Orders.Status.completed);
 
             // Find the package associated with this order to create a license
-            // This is a simplification. A real app would store order items.
             ProductPackages productPackage = findPackageForOrder(order);
+            Products product = productPackage.getProduct();
 
             // Create License
             createLicenseForOrder(order, productPackage);
 
             // Create Transactions
-            recordTransactions(order, productPackage.getProduct().getDeveloper());
+            recordTransactions(order, product.getDeveloper());
+
+            // Update totalSales count for the product
+            product.setTotalSales(product.getTotalSales() + 1);
+            productsRepository.save(product);
 
             activityLogService.logActivity(order.getUser(), "PURCHASE", "Orders", order.getOrderId(), "Purchased package " + productPackage.getPackageId());
         } else {
@@ -105,10 +113,13 @@ public class OrderService {
     }
 
     private ProductPackages findPackageForOrder(Orders order) {
-        // This is a workaround. Ideally, you'd have an OrderItem entity
-        // linking Order and ProductPackage.
-        // For now, we find the package by assuming the total amount matches the price.
-        // This is NOT robust for real-world scenarios.
+        // Use the packageId stored in the order
+        if (order.getPackageId() != null) {
+            return productPackagesRepository.findById(order.getPackageId())
+                    .orElseThrow(() -> new NoSuchElementException("Package not found with id: " + order.getPackageId()));
+        }
+        
+        // Fallback: find by price (not ideal but for backwards compatibility)
         return productPackagesRepository.findByPrice(order.getTotalAmount()).stream().findFirst()
                 .orElseThrow(() -> new IllegalStateException("Could not determine package for order " + order.getOrderId()));
     }
@@ -151,9 +162,9 @@ public class OrderService {
         revenueTransaction.setDescription("Doanh thu tu don hang #" + order.getOrderId());
         transactionsRepository.save(revenueTransaction);
 
-        // Update developer's wallet balance
+        // 3. Update developer's wallet balance
         developer.setWalletBalance(developer.getWalletBalance().add(revenue));
-        // userRepository.save(developer); // This will be saved by transaction management
+        userRepository.save(developer); // Must save to persist the wallet balance change
     }
 
     private String generateUniqueLicenseKey() {

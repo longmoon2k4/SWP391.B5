@@ -25,6 +25,9 @@ public class Orders {
     @Column(name = "payment_method", length = 50)
     private String paymentMethod;
 
+    @Column(name = "package_id")
+    private Integer packageId;
+
     @Column(name = "created_at", updatable = false, insertable = false)
     private LocalDateTime createdAt;
 
@@ -69,6 +72,14 @@ public class Orders {
 
     public void setPaymentMethod(String paymentMethod) {
         this.paymentMethod = paymentMethod;
+    }
+
+    public Integer getPackageId() {
+        return packageId;
+    }
+
+    public void setPackageId(Integer packageId) {
+        this.packageId = packageId;
     }
 
     public LocalDateTime getCreatedAt() {
