@@ -39,8 +39,10 @@ import com.smiledev.bum.repository.OrdersRepository;
 import com.smiledev.bum.repository.ProductsRepository;
 import com.smiledev.bum.repository.TransactionsRepository;
 import com.smiledev.bum.repository.UserRepository;
+import com.smiledev.bum.repository.ProductVersionsRepository;
 import com.smiledev.bum.service.ActivityLogService;
 import com.smiledev.bum.service.ProductReviewService;
+import com.smiledev.bum.service.VirusScanService;
 
 @Controller
 @RequestMapping("/dashboard")
@@ -76,6 +78,12 @@ public class DashboardController {
 
     @Autowired
     private ProductReviewService productReviewService;
+
+    @Autowired
+    private VirusScanService virusScanService;
+
+    @Autowired
+    private ProductVersionsRepository productVersionsRepository;
 
     // ===== Users Management =====
     @GetMapping("/admin/users")
@@ -353,6 +361,74 @@ public class DashboardController {
             redirectAttributes.addFlashAttribute("successMessage", "Product rejected successfully!");
         } catch (IllegalArgumentException | IllegalStateException e) {
             redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
+
+        return "redirect:/dashboard/admin?tab=review";
+    }
+
+    /**
+     * Admin: Rescan product version for viruses
+     */
+    @PostMapping("/admin/product/version/{versionId}/rescan")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String rescanVersion(@PathVariable Integer versionId,
+                                Authentication authentication,
+                                RedirectAttributes redirectAttributes) {
+        try {
+            Optional<Users> adminOpt = userRepository.findByUsername(authentication.getName());
+            if (!adminOpt.isPresent() || adminOpt.get().getRole() != Users.Role.admin) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Unauthorized access!");
+                return "redirect:/dashboard/admin?tab=review";
+            }
+
+            // Trigger rescan
+            virusScanService.rescanVersion(versionId);
+            
+            // Log activity
+            activityLogService.logActivity(
+                    adminOpt.get(),
+                    "admin_rescan",
+                    "ProductVersions",
+                    versionId,
+                    "Triggered virus rescan for version ID: " + versionId
+            );
+            
+            redirectAttributes.addFlashAttribute("successMessage", "Virus scan initiated! Check back in a few minutes.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error initiating scan: " + e.getMessage());
+        }
+
+        return "redirect:/dashboard/admin?tab=review";
+    }
+
+    /**
+     * Admin: Check scan status now (manual)
+     */
+    @PostMapping("/admin/product/version/{versionId}/check-scan")
+    @PreAuthorize("hasRole('ADMIN')")
+    public String checkScanNow(@PathVariable Integer versionId,
+                               Authentication authentication,
+                               RedirectAttributes redirectAttributes) {
+        try {
+            Optional<Users> adminOpt = userRepository.findByUsername(authentication.getName());
+            if (!adminOpt.isPresent() || adminOpt.get().getRole() != Users.Role.admin) {
+                redirectAttributes.addFlashAttribute("errorMessage", "Unauthorized access!");
+                return "redirect:/dashboard/admin?tab=review";
+            }
+
+            productVersionsRepository.findById(versionId).ifPresent(virusScanService::checkScanResult);
+
+            activityLogService.logActivity(
+                    adminOpt.get(),
+                    "admin_check_scan",
+                    "ProductVersions",
+                    versionId,
+                    "Manually checked scan status for version ID: " + versionId
+            );
+
+            redirectAttributes.addFlashAttribute("successMessage", "Scan status checked. Refresh to see updates.");
+        } catch (Exception e) {
+            redirectAttributes.addFlashAttribute("errorMessage", "Error checking scan: " + e.getMessage());
         }
 
         return "redirect:/dashboard/admin?tab=review";

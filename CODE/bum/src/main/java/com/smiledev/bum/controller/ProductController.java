@@ -39,6 +39,7 @@ import com.smiledev.bum.repository.ProductVersionsRepository;
 import com.smiledev.bum.repository.ProductsRepository;
 import com.smiledev.bum.repository.UserRepository;
 import com.smiledev.bum.service.ProductService;
+import com.smiledev.bum.service.VirusScanService;
 
 @Controller
 @RequestMapping("/product")
@@ -61,6 +62,9 @@ public class ProductController {
 
     @Autowired
     private ProductPackagesRepository productPackagesRepository;
+
+    @Autowired
+    private VirusScanService virusScanService;
 
     @Value("${app.upload.dir}")
     private String uploadDir;
@@ -186,7 +190,10 @@ public class ProductController {
             version.setSourceCodePath(""); // Not required for now
             version.setVirusScanStatus(VirusScanStatus.pending);
             version.setCurrentVersion(true);
-            productVersionsRepository.save(version);
+            ProductVersions savedVersion = productVersionsRepository.save(version);
+
+            // Trigger virus scan asynchronously
+            virusScanService.scanFileAsync(savedVersion, filePath.toString());
 
             // Create ProductPackages if any
             if (packageNames != null && packageNames.length > 0) {

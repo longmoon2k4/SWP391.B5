@@ -26,6 +26,12 @@ public class ProductVersions {
     @Column(name = "virus_scan_status", columnDefinition = "ENUM('pending', 'clean', 'infected')")
     private VirusScanStatus virusScanStatus;
 
+    @Column(name = "virus_scan_analysis_id", length = 100)
+    private String virusScanAnalysisId;
+
+    @Column(name = "virus_scan_details", length = 500)
+    private String virusScanDetails;
+
     @Column(name = "virus_total_report_link", length = 255)
     private String virusTotalReportLink;
 
@@ -81,6 +87,22 @@ public class ProductVersions {
 
     public void setVirusScanStatus(VirusScanStatus virusScanStatus) {
         this.virusScanStatus = virusScanStatus;
+    }
+
+    public String getVirusScanAnalysisId() {
+        return virusScanAnalysisId;
+    }
+
+    public void setVirusScanAnalysisId(String virusScanAnalysisId) {
+        this.virusScanAnalysisId = virusScanAnalysisId;
+    }
+
+    public String getVirusScanDetails() {
+        return virusScanDetails;
+    }
+
+    public void setVirusScanDetails(String virusScanDetails) {
+        this.virusScanDetails = virusScanDetails;
     }
 
     public String getVirusTotalReportLink() {
