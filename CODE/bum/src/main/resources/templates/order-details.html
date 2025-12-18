@@ -49,6 +49,7 @@
                         <th>Sản phẩm</th>
                         <th>Mã key</th>
                         <th>Ngày hết hạn</th>
+                        <th>Hành động</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -56,6 +57,13 @@
                         <td th:text="${license.product.name}"></td>
                         <td th:text="${license.licenseKey}"></td>
                         <td th:text="${license.expireDate != null ? #temporals.format(license.expireDate, 'dd-MM-yyyy') : 'Vĩnh viễn'}"></td>
+                        <td>
+                            <a th:href="@{/download/{productId}(productId=${license.product.productId})}" 
+                               class="btn btn-sm primary"
+                               title="Tải xuống phiên bản hiện tại">
+                                <i class="icon-download"></i> Tải xuống
+                            </a>
+                        </td>
                     </tr>
                 </tbody>
             </table>

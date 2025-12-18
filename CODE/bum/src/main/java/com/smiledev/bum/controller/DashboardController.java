@@ -429,7 +429,7 @@ public class DashboardController {
         return "redirect:/dashboard/admin?tab=review";
     }
 
-
+//-------------------------------------------------------------------------------------------------------------------------------------------------------------//
     /**
      * Developer Dashboard
      */
@@ -493,7 +493,7 @@ public class DashboardController {
             // Wallet & payout
             BigDecimal walletBalance = developer.getWalletBalance() != null ? developer.getWalletBalance() : BigDecimal.ZERO;
             BigDecimal totalWithdrawn = transactionsRepository.sumByUserAndType(developer, Transactions.Type.withdrawal);
-            BigDecimal payoutPending = BigDecimal.ZERO;
+            BigDecimal payoutPending = BigDecimal.ZERO;//Demo
 
             // Lists
             List<Products> developerProducts = productsRepository.findTop5ByDeveloperOrderByUpdatedAtDesc(developer);
