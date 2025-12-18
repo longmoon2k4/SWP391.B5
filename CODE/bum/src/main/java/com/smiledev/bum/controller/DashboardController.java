@@ -34,6 +34,7 @@ import com.smiledev.bum.repository.ProductsRepository;
 import com.smiledev.bum.repository.TransactionsRepository;
 import com.smiledev.bum.repository.UserRepository;
 import com.smiledev.bum.repository.ProductVersionsRepository;
+import com.smiledev.bum.repository.ReviewsRepository;
 import com.smiledev.bum.service.ActivityLogService;
 import com.smiledev.bum.service.ProductReviewService;
 import com.smiledev.bum.service.VirusScanService;
@@ -78,6 +79,9 @@ public class DashboardController {
 
     @Autowired
     private ProductVersionsRepository productVersionsRepository;
+
+    @Autowired
+    private ReviewsRepository reviewsRepository;
 
 
     // ===== Users Management =====
@@ -411,13 +415,16 @@ public class DashboardController {
                 return "redirect:/dashboard/admin?tab=review";
             }
 
-            productVersionsRepository.findById(versionId).ifPresent(virusScanService::checkScanResult);
+            Optional<ProductVersions> versionOpt = productVersionsRepository.findById((int) versionId);
+            if (versionOpt.isPresent()) {
+                virusScanService.checkScanResult(versionOpt.get());
+            }
 
             activityLogService.logActivity(
                     adminOpt.get(),
                     "admin_check_scan",
                     "ProductVersions",
-                    versionId,
+                    (int) versionId,
                     "Manually checked scan status for version ID: " + versionId
             );
 
@@ -650,5 +657,67 @@ public class DashboardController {
                 .multiply(BigDecimal.valueOf(100))
                 .divide(prevSafe, 0, RoundingMode.HALF_UP)
                 .intValue();
+    }
+
+    // ===== Product Stats =====
+    @GetMapping("/developer/products/{productId}/stats")
+    @PreAuthorize("hasRole('DEVELOPER')")
+    public String productStats(
+            @PathVariable("productId") int productId,
+            Authentication authentication,
+            Model model) {
+
+        // Get current user (developer)
+        String username = authentication.getName();
+        Optional<Users> userOpt = userRepository.findByUsername(username);
+        if (!userOpt.isPresent()) {
+            return "redirect:/login";
+        }
+        Users developer = userOpt.get();
+
+        // Get product
+        Optional<Products> productOpt = productsRepository.findById(productId);
+        if (!productOpt.isPresent()) {
+            return "redirect:/dashboard/developer";
+        }
+
+        Products product = productOpt.get();
+
+        // Verify developer owns this product
+        if (product.getDeveloper().getUserId() != developer.getUserId()) {
+            return "redirect:/dashboard/developer";
+        }
+
+        // Add logged in user to model
+        model.addAttribute("loggedInUser", developer);
+        model.addAttribute("product", product);
+
+        // Product stats
+        long totalSales = ordersRepository.countByProductId(productId);
+        long totalViews = product.getViewCount();
+        
+        // Revenue stats - use query to get total revenue for this product
+        BigDecimal totalRevenue = ordersRepository.sumRevenueByProductId(productId);
+        if (totalRevenue == null) {
+            totalRevenue = BigDecimal.ZERO;
+        }
+
+        // Get average rating using ReviewsRepository
+        Double avgRating = reviewsRepository.findAverageRatingByProductId(productId);
+        double averageRating = avgRating != null ? avgRating : 0.0;
+
+        // Get licenses count for this product
+        long totalLicenses = licensesRepository.findAll().stream()
+                .filter(l -> l.getProduct().getProductId() == productId)
+                .count();
+
+        // Add to model
+        model.addAttribute("totalSales", totalSales);
+        model.addAttribute("totalViews", totalViews);
+        model.addAttribute("totalRevenue", totalRevenue);
+        model.addAttribute("averageRating", String.format("%.1f", averageRating));
+        model.addAttribute("totalLicenses", totalLicenses);
+
+        return "product-stats";
     }
 }

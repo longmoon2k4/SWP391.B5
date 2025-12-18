@@ -27,4 +27,7 @@ public interface OrdersRepository extends JpaRepository<Orders, Integer> {
 
     @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Orders o WHERE o.user = :user AND o.status = :status")
     BigDecimal sumTotalAmountByUserAndStatus(@Param("user") Users user, @Param("status") Orders.Status status);
+
+    @Query("SELECT COALESCE(SUM(o.totalAmount), 0) FROM Orders o JOIN o.licenses l WHERE l.product.productId = :productId AND o.status = com.smiledev.bum.entity.Orders$Status.completed")
+    BigDecimal sumRevenueByProductId(@Param("productId") Integer productId);
 }

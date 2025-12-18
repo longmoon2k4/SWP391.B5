@@ -401,9 +401,9 @@
                                         <td class="text-muted" th:text="${#temporals.format(p.updatedAt, 'HH:mm dd/MM')}">-</td>
                                         <td class="text-end">
                                             <div class="btn-group btn-group-sm" role="group">
-                                                <a class="btn btn-outline-secondary" th:href="@{'/product/' + ${p.productId}}"><i class="fas fa-eye"></i></a>
-                                                <a class="btn btn-outline-primary" th:href="@{'/product/' + ${p.productId} + '/edit'}"><i class="fas fa-pen"></i></a>
-                                                <a class="btn btn-outline-success" th:href="@{'/dashboard/developer/products/' + ${p.productId} + '/stats'}"><i class="fas fa-chart-line"></i></a>
+                                                <a class="btn btn-outline-secondary" th:href="@{'/product/' + ${p.productId}}" title="Xem sản phẩm"><i class="fas fa-eye"></i></a>
+                                                <a class="btn btn-outline-primary" th:href="@{'/product/' + ${p.productId} + '/edit'}" title="Chỉnh sửa sản phẩm"><i class="fas fa-pen"></i></a>
+                                                <a class="btn btn-outline-success" th:href="@{'/dashboard/developer/products/' + ${p.productId} + '/stats'}" title="Thống kê"><i class="fas fa-chart-line"></i></a>
                                             </div>
                                         </td>
                                     </tr>

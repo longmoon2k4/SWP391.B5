@@ -30,19 +30,19 @@ import com.smiledev.bum.dto.ProductCardDTO;
 import com.smiledev.bum.entity.Categories;
 import com.smiledev.bum.entity.ProductPackages;
 import com.smiledev.bum.entity.ProductVersions;
-import com.smiledev.bum.entity.Products;
-import com.smiledev.bum.entity.Users;
-import com.smiledev.bum.entity.Products.Status;
 import com.smiledev.bum.entity.ProductVersions.VirusScanStatus;
+import com.smiledev.bum.entity.Products;
+import com.smiledev.bum.entity.Products.Status;
+import com.smiledev.bum.entity.Users;
 import com.smiledev.bum.repository.CategoriesRepository;
+import com.smiledev.bum.repository.OrdersRepository;
 import com.smiledev.bum.repository.ProductPackagesRepository;
 import com.smiledev.bum.repository.ProductVersionsRepository;
 import com.smiledev.bum.repository.ProductsRepository;
 import com.smiledev.bum.repository.UserRepository;
+import com.smiledev.bum.service.ActivityLogService;
 import com.smiledev.bum.service.ProductService;
 import com.smiledev.bum.service.VirusScanService;
-import com.smiledev.bum.service.ActivityLogService;
-import com.smiledev.bum.repository.OrdersRepository;
 
 @Controller
 @RequestMapping("/product")
@@ -284,6 +284,156 @@ public class ProductController {
         model.addAttribute("developer", developer);
 
         return "developer-manage-products";
+    }
+
+    // ===== Edit Product =====
+    @GetMapping("/{productId}/edit")
+    public String editProductForm(
+            @PathVariable("productId") int productId,
+            Authentication authentication,
+            Model model) {
+
+        // Get current user
+        String username = authentication.getName();
+        Optional<Users> userOpt = userRepository.findByUsername(username);
+        if (!userOpt.isPresent()) {
+            return "redirect:/login";
+        }
+        Users developer = userOpt.get();
+
+        // Get product
+        Optional<Products> productOpt = productsRepository.findById(productId);
+        if (!productOpt.isPresent()) {
+            return "redirect:/product/developer/manage";
+        }
+
+        Products product = productOpt.get();
+
+        // Verify developer owns this product
+        if (product.getDeveloper().getUserId() != developer.getUserId()) {
+            return "redirect:/product/developer/manage";
+        }
+
+        // Add logged in user to model
+        model.addAttribute("loggedInUser", developer);
+        model.addAttribute("product", product);
+        model.addAttribute("categories", categoriesRepository.findAll());
+        model.addAttribute("packages", productPackagesRepository.findByProduct(product));
+
+        return "product-edit";
+    }
+
+    @PostMapping("/{productId}/edit")
+    public String updateProduct(
+            @PathVariable("productId") int productId,
+            @RequestParam("name") String name,
+            @RequestParam("categoryId") Integer categoryId,
+            @RequestParam(value = "shortDescription", required = false) String shortDescription,
+            @RequestParam("description") String description,
+            @RequestParam(value = "demoVideoUrl", required = false) String demoVideoUrl,
+            @RequestParam(value = "packageIds", required = false) Integer[] packageIds,
+            @RequestParam(value = "packageNames", required = false) String[] packageNames,
+            @RequestParam(value = "packagePrices", required = false) Double[] packagePrices,
+            @RequestParam(value = "packageDurations", required = false) Integer[] packageDurations,
+            Authentication authentication,
+            RedirectAttributes redirectAttributes) {
+
+        try {
+            // Get current user
+            String username = authentication.getName();
+            Optional<Users> userOpt = userRepository.findByUsername(username);
+            if (!userOpt.isPresent()) {
+                redirectAttributes.addFlashAttribute("error", "Không tìm thấy người dùng");
+                return "redirect:/product/developer/manage";
+            }
+            Users developer = userOpt.get();
+
+            // Get product
+            Optional<Products> productOpt = productsRepository.findById(productId);
+            if (!productOpt.isPresent()) {
+                redirectAttributes.addFlashAttribute("error", "Không tìm thấy sản phẩm");
+                return "redirect:/product/developer/manage";
+            }
+
+            Products product = productOpt.get();
+
+            // Verify developer owns this product
+            if (product.getDeveloper().getUserId() != developer.getUserId()) {
+                redirectAttributes.addFlashAttribute("error", "Bạn không có quyền chỉnh sửa sản phẩm này");
+                return "redirect:/product/developer/manage";
+            }
+
+            // Validate category
+            Optional<Categories> categoryOpt = categoriesRepository.findById(categoryId);
+            if (!categoryOpt.isPresent()) {
+                redirectAttributes.addFlashAttribute("error", "Không tìm thấy danh mục");
+                return "redirect:/product/{productId}/edit";
+            }
+
+            // Update product fields
+            product.setName(name);
+            product.setCategory(categoryOpt.get());
+            product.setShortDescription(shortDescription);
+            product.setDescription(description);
+            product.setDemoVideoUrl(demoVideoUrl);
+            productsRepository.save(product);
+
+            // Delete removed packages
+            var existingPackages = productPackagesRepository.findByProduct(product);
+            for (ProductPackages pkg : existingPackages) {
+                boolean stillExists = false;
+                if (packageIds != null) {
+                    for (Integer pkgId : packageIds) {
+                        if (pkgId != null && pkgId == pkg.getPackageId()) {
+                            stillExists = true;
+                            break;
+                        }
+                    }
+                }
+                if (!stillExists) {
+                    productPackagesRepository.deleteById(pkg.getPackageId());
+                }
+            }
+
+            // Add/update packages
+            if (packageNames != null && packageNames.length > 0) {
+                for (int i = 0; i < packageNames.length; i++) {
+                    if (packageNames[i] != null && !packageNames[i].trim().isEmpty()) {
+                        ProductPackages pkg;
+                        if (packageIds != null && i < packageIds.length && packageIds[i] != null) {
+                            // Update existing package
+                            var pkgOpt = productPackagesRepository.findById(packageIds[i]);
+                            pkg = pkgOpt.isPresent() ? pkgOpt.get() : new ProductPackages();
+                        } else {
+                            // Create new package
+                            pkg = new ProductPackages();
+                            pkg.setProduct(product);
+                        }
+                        pkg.setName(packageNames[i]);
+                        pkg.setPrice(BigDecimal.valueOf(packagePrices[i]));
+                        pkg.setDurationDays(packageDurations[i]);
+                        productPackagesRepository.save(pkg);
+                    }
+                }
+            }
+
+            // Log activity
+            activityLogService.logActivity(
+                    developer,
+                    "EDIT_PRODUCT",
+                    "Products",
+                    productId,
+                    "Chỉnh sửa thông tin sản phẩm: " + name
+            );
+
+            redirectAttributes.addFlashAttribute("success", "Sản phẩm đã được cập nhật thành công");
+            return "redirect:/product/developer/manage";
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            redirectAttributes.addFlashAttribute("error", "Lỗi cập nhật sản phẩm: " + e.getMessage());
+            return "redirect:/product/{productId}/edit";
+        }
     }
 
     // Upgrade to new version
