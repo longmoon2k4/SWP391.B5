@@ -15,10 +15,17 @@
         - Dev Dashboard[Done 18/12/2025]
         - User Dashboard[Done 18/12/2025]
         - Tích hợp quét viruss[Done 18/12/2025]
-        ...
+    3. Kết quả dự án
+        - Total LOC: 1380
+        - Total comit: 99
+        - Total round: 3
+        
 # Thông tin sinh viên 
     1. MSSV: HE186065
     2. Họ và tên: Hà Vũ Long - K18
 
 # Link deploy dự án
     https://swp391-e2-production.up.railway.app/
+
+# Link Google Drive tất cả tài liệu
+    https://drive.google.com/drive/folders/1XWPmJ2svuZyV6DBFkPPmEdEBP4RjDDPF?usp=sharing
