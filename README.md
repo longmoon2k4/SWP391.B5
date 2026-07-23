@@ -1,4 +1,4 @@
-# SWP391 BLOCK5 
+# SWP391 
     1. Tổng quan dự án
         - Đây là dự án bán license key cho các sản phẩm số. Dự án sử dụng công nghệ spring-boot và tích hợp thêm: Thanh toán online bằng VNPay, quét viruss bằng VirusTotal.
     2. Tiến độ dự án
